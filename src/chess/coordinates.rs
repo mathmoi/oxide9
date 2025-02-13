@@ -42,6 +42,7 @@ impl Display for File {
 impl From<u8> for File {
     /// Converts a `u8` value to a `File`.
     fn from(value: u8) -> Self {
+        assert!(value <= File::H.into());
         unsafe { std::mem::transmute(value) }
     }
 }
@@ -55,7 +56,7 @@ impl From<File> for u8 {
 
 /// Represents a rank (row) on a chess board.
 ///
-/// Files are labeled from 1 to 8, going from the bottom to the top when viewing the board from
+/// Ranks are labeled from 1 to 8, going from the bottom to the top when viewing the board from
 /// White's perspective.
 #[repr(u8)]
 #[derive(Copy, Clone, Debug, PartialEq)]
@@ -94,6 +95,7 @@ impl Display for Rank {
 impl From<u8> for Rank {
     /// Converts a `u8` value to a `Rank`.
     fn from(value: u8) -> Self {
+        assert!(value <= Rank::R8.into());
         unsafe { std::mem::transmute(value) }
     }
 }
@@ -111,9 +113,9 @@ impl From<Rank> for u8 {
 /// In other words, the file value is stored in the lower 3 bits and the rank value is stored in the
 /// next 3 bits. The last two bits are unused and always 0.
 #[derive(Copy, Clone, Debug, PartialEq)]
-#[allow(dead_code)]
 pub struct Square(u8);
 
+#[allow(dead_code)]
 impl Square {
     // Constants for all squares on the board
     pub const A1: Square = Square(0);
@@ -236,6 +238,11 @@ mod tests {
             assert_eq!(File::from(0), File::A);
             assert_eq!(File::from(7), File::H);
         }
+
+        #[test]
+        fn test_invalid_conversion_do_panic() {
+            assert!(std::panic::catch_unwind(|| File::from(8)).is_err());
+        }
     }
 
     mod rank_tests {
@@ -253,6 +260,11 @@ mod tests {
             assert_eq!(u8::from(Rank::R8), 7);
             assert_eq!(Rank::from(0), Rank::R1);
             assert_eq!(Rank::from(7), Rank::R8);
+        }
+
+        #[test]
+        fn test_invalid_conversion_do_panic() {
+            assert!(std::panic::catch_unwind(|| Rank::from(8)).is_err());
         }
     }
 

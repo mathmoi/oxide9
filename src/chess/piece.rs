@@ -50,12 +50,12 @@ impl From<u8> for Color {
 #[repr(u8)]
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum PieceType {
-    Pawn = 0,
-    Knight = 1,
-    Bishop = 2,
-    Rook = 3,
-    Queen = 4,
-    King = 5,
+    Knight = 0,
+    Bishop = 1,
+    Rook = 2,
+    Queen = 3,
+    King = 4,
+    Pawn = 5,
 }
 
 impl PieceType {
@@ -86,7 +86,7 @@ impl From<PieceType> for u8 {
 impl From<u8> for PieceType {
     /// Converts a `u8` value to a `PieceType`.
     fn from(value: u8) -> Self {
-        assert!(value <= PieceType::King.into());
+        assert!(value <= PieceType::Pawn.into());
         unsafe { std::mem::transmute(value) }
     }
 }
@@ -144,18 +144,18 @@ pub struct Piece(u8);
 
 #[allow(dead_code)]
 impl Piece {
-    pub const WHITE_PAWN: Piece = Piece(0);
-    pub const WHITE_KNIGHT: Piece = Piece(2);
-    pub const WHITE_BISHOP: Piece = Piece(4);
-    pub const WHITE_ROOK: Piece = Piece(6);
-    pub const WHITE_QUEEN: Piece = Piece(8);
-    pub const WHITE_KING: Piece = Piece(10);
-    pub const BLACK_PAWN: Piece = Piece(1);
-    pub const BLACK_KNIGHT: Piece = Piece(3);
-    pub const BLACK_BISHOP: Piece = Piece(5);
-    pub const BLACK_ROOK: Piece = Piece(7);
-    pub const BLACK_QUEEN: Piece = Piece(9);
-    pub const BLACK_KING: Piece = Piece(11);
+    pub const WHITE_KNIGHT: Piece = Piece(0);
+    pub const WHITE_BISHOP: Piece = Piece(2);
+    pub const WHITE_ROOK: Piece = Piece(4);
+    pub const WHITE_QUEEN: Piece = Piece(6);
+    pub const WHITE_KING: Piece = Piece(8);
+    pub const WHITE_PAWN: Piece = Piece(10);
+    pub const BLACK_KNIGHT: Piece = Piece(1);
+    pub const BLACK_BISHOP: Piece = Piece(3);
+    pub const BLACK_ROOK: Piece = Piece(5);
+    pub const BLACK_QUEEN: Piece = Piece(7);
+    pub const BLACK_KING: Piece = Piece(9);
+    pub const BLACK_PAWN: Piece = Piece(11);
 
     /// Represents all possible chess pieces.
     pub const ALL_PIECES: [Piece; 12] = [
@@ -199,7 +199,7 @@ impl From<Piece> for u8 {
 impl From<u8> for Piece {
     /// Converts a `u8` value to a `Piece`.
     fn from(value: u8) -> Self {
-        assert!(value <= Piece::BLACK_KING.into());
+        assert!(value <= Piece::BLACK_PAWN.into());
         Piece(value)
     }
 }
@@ -268,18 +268,18 @@ mod tests {
 
         #[test]
         fn test_piece_type_conversion() {
-            assert_eq!(u8::from(PieceType::Pawn), 0);
-            assert_eq!(u8::from(PieceType::Knight), 1);
-            assert_eq!(u8::from(PieceType::Bishop), 2);
-            assert_eq!(u8::from(PieceType::Rook), 3);
-            assert_eq!(u8::from(PieceType::Queen), 4);
-            assert_eq!(u8::from(PieceType::King), 5);
-            assert_eq!(PieceType::from(0), PieceType::Pawn);
-            assert_eq!(PieceType::from(1), PieceType::Knight);
-            assert_eq!(PieceType::from(2), PieceType::Bishop);
-            assert_eq!(PieceType::from(3), PieceType::Rook);
-            assert_eq!(PieceType::from(4), PieceType::Queen);
-            assert_eq!(PieceType::from(5), PieceType::King);
+            assert_eq!(u8::from(PieceType::Knight), 0);
+            assert_eq!(u8::from(PieceType::Bishop), 1);
+            assert_eq!(u8::from(PieceType::Rook), 2);
+            assert_eq!(u8::from(PieceType::Queen), 3);
+            assert_eq!(u8::from(PieceType::King), 4);
+            assert_eq!(u8::from(PieceType::Pawn), 5);
+            assert_eq!(PieceType::from(0), PieceType::Knight);
+            assert_eq!(PieceType::from(1), PieceType::Bishop);
+            assert_eq!(PieceType::from(2), PieceType::Rook);
+            assert_eq!(PieceType::from(3), PieceType::Queen);
+            assert_eq!(PieceType::from(4), PieceType::King);
+            assert_eq!(PieceType::from(5), PieceType::Pawn);
         }
 
         #[test]

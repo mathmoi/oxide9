@@ -218,6 +218,21 @@ impl Display for Square {
     }
 }
 
+impl From<Square> for u8 {
+    /// Converts a `Square` to a `u8` value.
+    fn from(square: Square) -> Self {
+        square.0
+    }
+}
+
+impl From<u8> for Square {
+    /// Converts a `u8` value to a `Square`.
+    fn from(value: u8) -> Self {
+        assert!(value < 64);
+        Square(value)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -294,6 +309,13 @@ mod tests {
         fn test_square_display() {
             assert_eq!(format!("{}", Square::A1), "a1");
             assert_eq!(format!("{}", Square::H8), "h8");
+        }
+
+        #[test]
+        fn test_square_to_and_from_u8() {
+            for square in Square::ALL_SQUARES.iter() {
+                assert_eq!(*square, Square::from(u8::from(*square)));
+            }
         }
     }
 }

@@ -1,5 +1,14 @@
 use std::convert::From;
-use std::fmt::Display;
+use std::fmt::{self, Display};
+
+#[derive(Debug, PartialEq)]
+/// Error type for the piece module.
+pub enum PieceError {
+    InvalidCharacter(char),
+}
+
+/// Result type for the piece module.
+pub type PieceResult<T> = Result<T, PieceError>;
 
 /// Represents the color of a chess piece.
 #[repr(u8)]
@@ -10,6 +19,9 @@ pub enum Color {
 }
 
 impl Color {
+    /// The number of colors in chess.
+    pub const COUNT: usize = 2;
+
     /// Represents all colors of chess pieces.
     pub const ALL_COLORS: [Color; 2] = [Color::White, Color::Black];
 
@@ -39,6 +51,13 @@ impl From<Color> for u8 {
     }
 }
 
+impl From<Color> for usize {
+    /// Converts a `Color` to a `usize` value.
+    fn from(color: Color) -> Self {
+        color as usize
+    }
+}
+
 impl From<u8> for Color {
     /// Converts a `u8` value to a `Color`.
     fn from(value: u8) -> Self {
@@ -59,6 +78,9 @@ pub enum PieceType {
 }
 
 impl PieceType {
+    /// The number of piece types in chess.
+    pub const COUNT: usize = 6;
+
     /// Represents all piece types.
     pub const ALL_PIECE_TYPES: [PieceType; 6] = [
         PieceType::Pawn,
@@ -68,12 +90,6 @@ impl PieceType {
         PieceType::Queen,
         PieceType::King,
     ];
-}
-
-#[derive(Debug, PartialEq)]
-/// Represents an error that occurs when converting a character to a `PieceType`.
-pub enum PieceTypeError {
-    InvalidCharacter(char),
 }
 
 impl From<PieceType> for u8 {
@@ -105,9 +121,9 @@ impl From<PieceType> for char {
 }
 
 impl TryFrom<char> for PieceType {
-    type Error = PieceTypeError;
+    type Error = PieceError;
 
-    fn try_from(value: char) -> Result<Self, Self::Error> {
+    fn try_from(value: char) -> PieceResult<Self> {
         match value.to_ascii_lowercase() {
             'p' | 'P' => Ok(PieceType::Pawn),
             'n' | 'N' => Ok(PieceType::Knight),
@@ -115,7 +131,7 @@ impl TryFrom<char> for PieceType {
             'r' | 'R' => Ok(PieceType::Rook),
             'q' | 'Q' => Ok(PieceType::Queen),
             'k' | 'K' => Ok(PieceType::King),
-            _ => Err(PieceTypeError::InvalidCharacter(value)),
+            _ => Err(PieceError::InvalidCharacter(value)),
         }
     }
 }
@@ -139,11 +155,14 @@ impl Display for PieceType {
 /// A `Piece` is a combination of a `Color` and a `PieceType`. It is represented as a single byte,
 /// with the lower bits representing the `Color` and the higher bits representing the `PieceType`.
 /// The values 0 to 11 represent all possible combinations of `Color` and `PieceType`.
-#[derive(Copy, Clone, Debug, PartialEq)]
+#[derive(Copy, Clone, PartialEq)]
 pub struct Piece(u8);
 
 #[allow(dead_code)]
 impl Piece {
+    /// The number of pieces in chess (both side included).
+    pub const COUNT: usize = 12;
+
     pub const WHITE_KNIGHT: Piece = Piece(0);
     pub const WHITE_BISHOP: Piece = Piece(2);
     pub const WHITE_ROOK: Piece = Piece(4);
@@ -196,6 +215,13 @@ impl From<Piece> for u8 {
     }
 }
 
+impl From<Piece> for usize {
+    /// Converts a `Piece` to a `usize` value.
+    fn from(piece: Piece) -> Self {
+        piece.0 as usize
+    }
+}
+
 impl From<u8> for Piece {
     /// Converts a `u8` value to a `Piece`.
     fn from(value: u8) -> Self {
@@ -215,10 +241,10 @@ impl From<Piece> for char {
 }
 
 impl TryFrom<char> for Piece {
-    type Error = PieceTypeError;
+    type Error = PieceError;
 
     /// Converts a single character to a `Piece`.
-    fn try_from(value: char) -> Result<Self, Self::Error> {
+    fn try_from(value: char) -> PieceResult<Self> {
         let color = match char::is_uppercase(value) {
             true => Color::White,
             false => Color::Black,
@@ -229,9 +255,18 @@ impl TryFrom<char> for Piece {
 }
 
 impl Display for Piece {
-    /// Formats the PieceType as a single character.
+    /// Formats the piece as a string.
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{} {}", self.color(), self.piece_type())
+    }
+}
+
+impl fmt::Debug for Piece {
+    /// Formats the piece as a string for debuging
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let color = format!("{}", self.color()).to_uppercase();
+        let piece_type = format!("{}", self.piece_type()).to_uppercase();
+        write!(f, "{}_{}", color, piece_type)
     }
 }
 

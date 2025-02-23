@@ -4,8 +4,8 @@ use super::{Piece, Square};
 #[repr(u8)]
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum Castling {
-    Kingside,
-    Queenside,
+    Kingside = 0,
+    Queenside = 1,
 }
 
 impl From<u8> for Castling {

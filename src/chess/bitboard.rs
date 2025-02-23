@@ -39,6 +39,11 @@ impl Bitboard {
     pub fn popcnt(self) -> u32 {
         self.0.count_ones()
     }
+
+    /// Returns whether the bitboard is empty.
+    pub fn is_empty(self) -> bool {
+        self == Bitboard::EMPTY
+    }
 }
 
 impl From<Square> for Bitboard {
@@ -178,6 +183,7 @@ impl Iterator for BitboardIterator {
     }
 }
 
+#[cfg(test)]
 mod tests {
     use super::*;
 

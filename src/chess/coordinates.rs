@@ -1,5 +1,16 @@
 use std::convert::From;
-use std::fmt::Display;
+use std::fmt::{self, Display};
+
+/// Error type for the coordinates module.
+#[derive(Debug, PartialEq)]
+pub enum CoordinatesError {
+    MoveOffBoard,
+    InvalidCharacter,
+    InvalidString,
+}
+
+/// Result type for the coordinates module
+pub type CoordinatesResult<T> = Result<T, CoordinatesError>;
 
 /// Represents a file (column) on a chess board.
 ///
@@ -30,6 +41,55 @@ impl File {
         File::G,
         File::H,
     ];
+
+    /// Returns a new file that is moved right by the specified number of files without checking for
+    /// bounds.
+    ///
+    /// # Safety
+    ///
+    /// Caller must ensure that moving right by `count` steps will result in a valid file. This method
+    /// will cause undefined behavior if we move off the board.
+    pub unsafe fn right_unchecked(&self, count: i8) -> File {
+        let min_file_value = u8::from(File::A) as i8;
+        let max_file_value = u8::from(File::H) as i8;
+        let new_file_value = u8::from(*self) as i8 + count;
+        debug_assert!(
+            min_file_value <= new_file_value && new_file_value <= max_file_value,
+            "The new file value must be a valid value for a file"
+        );
+        File::from((u8::from(*self) as i8 + count) as u8)
+    }
+
+    /// Moves a file right by the specified number of files.
+    /// Returns Ok(File) with the new file if the move is valid, MoveOffBoard if the move would
+    /// go off the board.
+    pub fn right(&self, count: i8) -> CoordinatesResult<File> {
+        let min_file_value = u8::from(File::A) as i8;
+        let max_file_value = u8::from(File::H) as i8;
+        let new_file_value = u8::from(*self) as i8 + count;
+        if new_file_value < min_file_value || max_file_value < new_file_value {
+            return Err(CoordinatesError::MoveOffBoard);
+        }
+        Ok(unsafe { self.right_unchecked(count) })
+    }
+
+    /// Returns a new file that is moved left by the specified number of files without checking for
+    /// bounds.
+    ///
+    /// # Safety
+    ///
+    /// Caller must ensure that moving left by `count` steps will result in a valid file. This method
+    /// will cause undefined behavior if we move off the board.
+    pub unsafe fn left_unchecked(&self, count: i8) -> File {
+        self.right_unchecked(-count)
+    }
+
+    /// Moves a file left by the specified number of files.
+    /// Returns Ok(File) with the new file if the move is valid, MoveOffBoard if the move would
+    /// go off the board.
+    pub fn left(&self, count: i8) -> CoordinatesResult<File> {
+        self.right(-count)
+    }
 }
 
 impl Display for File {
@@ -51,6 +111,25 @@ impl From<File> for u8 {
     /// Converts a `File` to a `u8` value.
     fn from(file: File) -> Self {
         file as u8
+    }
+}
+
+impl TryFrom<char> for File {
+    type Error = CoordinatesError;
+
+    /// Converts a `char` value to a `File`.
+    fn try_from(value: char) -> Result<Self, Self::Error> {
+        match value {
+            'a' => Ok(File::A),
+            'b' => Ok(File::B),
+            'c' => Ok(File::C),
+            'd' => Ok(File::D),
+            'e' => Ok(File::E),
+            'f' => Ok(File::F),
+            'g' => Ok(File::G),
+            'h' => Ok(File::H),
+            _ => Err(CoordinatesError::InvalidCharacter),
+        }
     }
 }
 
@@ -83,6 +162,55 @@ impl Rank {
         Rank::R7,
         Rank::R8,
     ];
+
+    /// Returns a new rank that is moved up by the specified number of ranks without checking for
+    /// bounds.
+    ///
+    /// # Safety
+    ///
+    /// Caller must ensure that moving up by `count` steps will result in a valid rank. This method
+    /// will cause undefined behavior if we move off the board.
+    pub unsafe fn up_unchecked(&self, count: i8) -> Rank {
+        let min_rank_value = u8::from(Rank::R1) as i8;
+        let max_rank_value = u8::from(Rank::R8) as i8;
+        let new_rank_value = u8::from(*self) as i8 + count;
+        debug_assert!(
+            min_rank_value <= new_rank_value && new_rank_value <= max_rank_value,
+            "The new rank value must be a valid value for a rank"
+        );
+        Rank::from((u8::from(*self) as i8 + count) as u8)
+    }
+
+    /// Moves a rank up by the specified number of ranks.
+    /// Returns Ok(Rank) with the new rank if the move is valid, MoveOffBoard if the move would
+    /// go off the board.
+    pub fn up(&self, count: i8) -> CoordinatesResult<Rank> {
+        let min_rank_value = u8::from(Rank::R1) as i8;
+        let max_rank_value = u8::from(Rank::R8) as i8;
+        let new_rank_value = u8::from(*self) as i8 + count;
+        if new_rank_value < min_rank_value || max_rank_value < new_rank_value {
+            return Err(CoordinatesError::MoveOffBoard);
+        }
+        Ok(unsafe { self.up_unchecked(count) })
+    }
+
+    /// Returns a new rank that is moved down by the specified number of ranks without checking for
+    /// bounds.
+    ///
+    /// # Safety
+    ///
+    /// Caller must ensure that moving down by `count` steps will result in a valid rank. This method
+    /// will cause undefined behavior if we move off the board.
+    pub unsafe fn down_unchecked(&self, count: i8) -> Rank {
+        self.up_unchecked(-count)
+    }
+
+    /// Moves a rank down by the specified number of ranks.
+    /// Returns Ok(Rank) with the new rank if the move is valid, MoveOffBoard if the move would
+    /// go off the board.
+    pub fn down(&self, count: i8) -> CoordinatesResult<Rank> {
+        self.up(-count)
+    }
 }
 
 impl Display for Rank {
@@ -107,16 +235,38 @@ impl From<Rank> for u8 {
     }
 }
 
+impl TryFrom<char> for Rank {
+    type Error = CoordinatesError;
+
+    /// Converts a `char` value to a `Rank`.
+    fn try_from(value: char) -> Result<Self, Self::Error> {
+        match value {
+            '1' => Ok(Rank::R1),
+            '2' => Ok(Rank::R2),
+            '3' => Ok(Rank::R3),
+            '4' => Ok(Rank::R4),
+            '5' => Ok(Rank::R5),
+            '6' => Ok(Rank::R6),
+            '7' => Ok(Rank::R7),
+            '8' => Ok(Rank::R8),
+            _ => Err(CoordinatesError::InvalidCharacter),
+        }
+    }
+}
+
 /// Represents a square on a chess board.
 ///
 /// Squares are indexed from 0 to 63, starting from A1 and ending at H8 with A2 being at index 1.
 /// In other words, the file value is stored in the lower 3 bits and the rank value is stored in the
 /// next 3 bits. The last two bits are unused and always 0.
-#[derive(Copy, Clone, Debug, PartialEq)]
+#[derive(Copy, Clone, PartialEq)]
 pub struct Square(u8);
 
 #[allow(dead_code)]
 impl Square {
+    /// The total number of squares on a chess board.
+    pub const COUNT: usize = 64;
+
     // Constants for all squares on the board
     pub const A1: Square = Square(0);
     pub const B1: Square = Square(1);
@@ -209,10 +359,120 @@ impl Square {
     pub fn file(&self) -> File {
         (self.0 & 0b111).into()
     }
+
+    /// Returns a new square that is moved up by the specified number of ranks without checking for
+    /// bounds.
+    ///
+    /// # Safety
+    ///
+    /// Caller must ensure that moving the rank up by `count` steps will result in a square that is
+    /// still on the chessboard. This method will cause undefined behavior if the resulting square
+    /// would be off
+    /// the board.
+    pub unsafe fn up_unchecked(&self, count: i8) -> Square {
+        let min_rank_value = u8::from(Rank::R1) as i8;
+        let max_rank_value = u8::from(Rank::R8) as i8;
+        let new_rank_value = u8::from(self.rank()) as i8 + count;
+        debug_assert!(
+            min_rank_value <= new_rank_value && new_rank_value <= max_rank_value,
+            "The new rank value must be a valid value for a rank"
+        );
+        Square((self.0 as i8 + count * 8) as u8)
+    }
+
+    /// Moves a square up by the specified number of ranks.
+    /// Returns Ok(Square) with the new square if the move is valid, MoveOffBoard if the move would
+    /// go off the board.
+    pub fn up(&self, count: i8) -> CoordinatesResult<Square> {
+        let min_rank_value = u8::from(Rank::R1) as i8;
+        let max_rank_value = u8::from(Rank::R8) as i8;
+        let new_rank_value = u8::from(self.rank()) as i8 + count;
+        if new_rank_value < min_rank_value || max_rank_value < new_rank_value {
+            return Err(CoordinatesError::MoveOffBoard);
+        }
+        Ok(unsafe { self.up_unchecked(count) })
+    }
+
+    /// Returns a new square that is moved down by the specified number of ranks without checking
+    /// for bounds.
+    ///
+    /// # Safety
+    ///
+    /// Caller must ensure that moving the rank down by `count` step will result in a square that is
+    /// still on the chessboard. This method will cause undefined behavior if we move the square off
+    /// the board.
+    pub unsafe fn down_unchecked(&self, count: i8) -> Square {
+        self.up_unchecked(-count)
+    }
+
+    /// Moves a square down by the specified number of ranks.
+    /// Returns Ok(Square) with the new square if the move is valid, MoveOffBoard if the move would
+    /// go off the board.
+    pub fn down(&self, count: i8) -> CoordinatesResult<Square> {
+        self.up(-count)
+    }
+
+    /// Returns a new square that is moved left by the specified number of files without checking
+    /// for bounds.
+    ///
+    /// # Safety
+    ///
+    /// Caller must ensure that moving the file left by `count` step will result in a square that is
+    /// still on the chessboard. This method will cause undefined behavior if we move the square off
+    /// the board.
+    pub unsafe fn left_unchecked(&self, count: i8) -> Square {
+        let min_file_value = u8::from(File::A) as i8;
+        let max_file_value = u8::from(File::H) as i8;
+        let new_file_value = u8::from(self.file()) as i8 - count;
+        debug_assert!(
+            min_file_value <= new_file_value && new_file_value <= max_file_value,
+            "The new file value must be a valid value for a file"
+        );
+        Square((self.0 as i8 - count) as u8)
+    }
+
+    /// Moves a square left by the specified number of files.
+    /// Returns Ok(Square) with the new square if the move is valid, MoveOffBoard if the move would
+    /// go off the board.
+    pub fn left(&self, count: i8) -> CoordinatesResult<Square> {
+        let min_file_value = u8::from(File::A) as i8;
+        let max_file_value = u8::from(File::H) as i8;
+        let new_file_value = u8::from(self.file()) as i8 - count;
+        if new_file_value < min_file_value || max_file_value < new_file_value {
+            return Err(CoordinatesError::MoveOffBoard);
+        }
+        Ok(unsafe { self.left_unchecked(count) })
+    }
+
+    /// Returns a new square that is moved right by the specified number of files without checking
+    /// for bounds.
+    ///
+    /// # Safety
+    ///
+    /// Caller must ensure that moving the file right by `count` step will result in a square that
+    /// is still on the chessboard. This method will cause undefined behavior if we move the square
+    /// off the board.
+    pub unsafe fn right_unchecked(&self, count: i8) -> Square {
+        self.left_unchecked(-count)
+    }
+
+    /// Moves a square right by the specified number of files.
+    /// Returns Ok(Square) with the new square if the move is valid, MoveOffBoard if the move would
+    /// go off the board.
+    pub fn right(&self, count: i8) -> CoordinatesResult<Square> {
+        self.left(-count)
+    }
 }
 
 impl Display for Square {
     /// Formats the square as a two-character string.
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}{}", self.file(), self.rank())
+    }
+}
+
+impl fmt::Debug for Square {
+    /// Formats the piece as a string for debuging
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}{}", self.file(), self.rank())
     }
@@ -225,11 +485,32 @@ impl From<Square> for u8 {
     }
 }
 
+impl From<Square> for usize {
+    /// Converts a `Square` to a `u8` value.
+    fn from(square: Square) -> Self {
+        square.0 as usize
+    }
+}
+
 impl From<u8> for Square {
     /// Converts a `u8` value to a `Square`.
     fn from(value: u8) -> Self {
         assert!(value < 64);
         Square(value)
+    }
+}
+
+impl TryFrom<&str> for Square {
+    type Error = CoordinatesError;
+
+    /// Converts a `&str` value to a `Square`.
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        if value.len() != 2 {
+            return Err(CoordinatesError::InvalidString);
+        }
+        let file = File::try_from(value.chars().nth(0).expect("The size of value was checked"))?;
+        let rank = Rank::try_from(value.chars().nth(1).expect("The size of value was checked"))?;
+        Ok(Square::new(file, rank))
     }
 }
 
@@ -258,6 +539,79 @@ mod tests {
         fn test_invalid_conversion_do_panic() {
             assert!(std::panic::catch_unwind(|| File::from(8)).is_err());
         }
+
+        #[test]
+        fn test_right_unchecked() {
+            let file1 = File::A;
+            let result1 = unsafe { file1.right_unchecked(3) };
+            assert_eq!(File::D, result1);
+
+            let file2 = File::G;
+            let result2 = unsafe { file2.right_unchecked(-4) };
+            assert_eq!(File::C, result2);
+        }
+
+        #[test]
+        fn test_right() {
+            let file1 = File::C;
+            let result1 = file1.right(2);
+            assert_eq!(Ok(File::E), result1);
+
+            let file2 = File::F;
+            let result2 = file2.right(-3);
+            assert_eq!(Ok(File::C), result2);
+
+            let file3 = File::G;
+            let result3 = file3.right(2);
+            assert_eq!(Err(CoordinatesError::MoveOffBoard), result3);
+
+            let file4 = File::B;
+            let result4 = file4.right(-2);
+            assert_eq!(Err(CoordinatesError::MoveOffBoard), result4);
+        }
+
+        #[test]
+        fn test_left_unchecked() {
+            let file1 = File::H;
+            let result1 = unsafe { file1.left_unchecked(3) };
+            assert_eq!(File::E, result1);
+
+            let file2 = File::C;
+            let result2 = unsafe { file2.left_unchecked(-3) };
+            assert_eq!(File::F, result2);
+        }
+
+        #[test]
+        fn test_left() {
+            let file1 = File::D;
+            let result1 = file1.left(2);
+            assert_eq!(Ok(File::B), result1);
+
+            let file2 = File::C;
+            let result2 = file2.left(-3);
+            assert_eq!(Ok(File::F), result2);
+
+            let file3 = File::B;
+            let result3 = file3.left(3);
+            assert_eq!(Err(CoordinatesError::MoveOffBoard), result3);
+
+            let file4 = File::E;
+            let result4 = file4.left(-4);
+            assert_eq!(Err(CoordinatesError::MoveOffBoard), result4);
+        }
+
+        #[test]
+        fn test_try_from_char() {
+            assert_eq!(File::try_from('a'), Ok(File::A));
+            assert_eq!(File::try_from('b'), Ok(File::B));
+            assert_eq!(File::try_from('c'), Ok(File::C));
+            assert_eq!(File::try_from('d'), Ok(File::D));
+            assert_eq!(File::try_from('e'), Ok(File::E));
+            assert_eq!(File::try_from('f'), Ok(File::F));
+            assert_eq!(File::try_from('g'), Ok(File::G));
+            assert_eq!(File::try_from('h'), Ok(File::H));
+            assert_eq!(File::try_from('i'), Err(CoordinatesError::InvalidCharacter));
+        }
     }
 
     mod rank_tests {
@@ -280,6 +634,79 @@ mod tests {
         #[test]
         fn test_invalid_conversion_do_panic() {
             assert!(std::panic::catch_unwind(|| Rank::from(8)).is_err());
+        }
+
+        #[test]
+        fn test_up_unchecked() {
+            let rank1 = Rank::R4;
+            let result1 = unsafe { rank1.up_unchecked(2) };
+            assert_eq!(Rank::R6, result1);
+
+            let rank2 = Rank::R7;
+            let result2 = unsafe { rank2.up_unchecked(-4) };
+            assert_eq!(Rank::R3, result2);
+        }
+
+        #[test]
+        fn test_up() {
+            let rank1 = Rank::R4;
+            let result1 = rank1.up(2);
+            assert_eq!(Ok(Rank::R6), result1);
+
+            let rank2 = Rank::R7;
+            let result2 = rank2.up(-4);
+            assert_eq!(Ok(Rank::R3), result2);
+
+            let rank3 = Rank::R6;
+            let result3 = rank3.up(3);
+            assert_eq!(Err(CoordinatesError::MoveOffBoard), result3);
+
+            let rank4 = Rank::R2;
+            let result4 = rank4.up(-2);
+            assert_eq!(Err(CoordinatesError::MoveOffBoard), result4);
+        }
+
+        #[test]
+        fn test_down_unchecked() {
+            let rank1 = Rank::R5;
+            let result1 = unsafe { rank1.down_unchecked(2) };
+            assert_eq!(Rank::R3, result1);
+
+            let rank2 = Rank::R2;
+            let result2 = unsafe { rank2.down_unchecked(-4) };
+            assert_eq!(Rank::R6, result2);
+        }
+
+        #[test]
+        fn test_down() {
+            let rank1 = Rank::R5;
+            let result1 = rank1.down(2);
+            assert_eq!(Ok(Rank::R3), result1);
+
+            let rank2 = Rank::R2;
+            let result2 = rank2.down(-4);
+            assert_eq!(Ok(Rank::R6), result2);
+
+            let rank3 = Rank::R2;
+            let result3 = rank3.down(3);
+            assert_eq!(Err(CoordinatesError::MoveOffBoard), result3);
+
+            let rank4 = Rank::R6;
+            let result4 = rank4.down(-3);
+            assert_eq!(Err(CoordinatesError::MoveOffBoard), result4);
+        }
+
+        #[test]
+        fn test_try_from_char() {
+            assert_eq!(Rank::try_from('1'), Ok(Rank::R1));
+            assert_eq!(Rank::try_from('2'), Ok(Rank::R2));
+            assert_eq!(Rank::try_from('3'), Ok(Rank::R3));
+            assert_eq!(Rank::try_from('4'), Ok(Rank::R4));
+            assert_eq!(Rank::try_from('5'), Ok(Rank::R5));
+            assert_eq!(Rank::try_from('6'), Ok(Rank::R6));
+            assert_eq!(Rank::try_from('7'), Ok(Rank::R7));
+            assert_eq!(Rank::try_from('8'), Ok(Rank::R8));
+            assert_eq!(Rank::try_from('9'), Err(CoordinatesError::InvalidCharacter));
         }
     }
 
@@ -316,6 +743,124 @@ mod tests {
             for square in Square::ALL_SQUARES.iter() {
                 assert_eq!(*square, Square::from(u8::from(*square)));
             }
+        }
+
+        #[test]
+        fn test_up_unchecked() {
+            let sq1 = Square::E5;
+            let result1 = unsafe { sq1.up_unchecked(1) };
+            assert_eq!(Square::E6, result1);
+
+            let sq2 = Square::G7;
+            let result2 = unsafe { sq2.up_unchecked(-6) };
+            assert_eq!(Square::G1, result2);
+        }
+
+        #[test]
+        fn test_up() {
+            let sq1 = Square::E5;
+            let result1 = sq1.up(1);
+            assert_eq!(Ok(Square::E6), result1);
+
+            let sq2 = Square::G7;
+            let result2 = sq2.up(-6);
+            assert_eq!(Ok(Square::G1), result2);
+
+            let sq3 = Square::B3;
+            let result3 = sq3.up(6);
+            assert_eq!(Err(CoordinatesError::MoveOffBoard), result3);
+        }
+
+        #[test]
+        fn test_down_unchecked() {
+            let sq1 = Square::E5;
+            let result1 = unsafe { sq1.down_unchecked(1) };
+            assert_eq!(Square::E4, result1);
+
+            let sq2 = Square::G1;
+            let result2 = unsafe { sq2.down_unchecked(-6) };
+            assert_eq!(Square::G7, result2);
+        }
+
+        #[test]
+        fn test_down() {
+            let sq1 = Square::E5;
+            let result1 = sq1.down(1);
+            assert_eq!(Ok(Square::E4), result1);
+
+            let sq2 = Square::G1;
+            let result2 = sq2.down(-6);
+            assert_eq!(Ok(Square::G7), result2);
+
+            let sq3 = Square::B3;
+            let result3 = sq3.down(4);
+            assert_eq!(Err(CoordinatesError::MoveOffBoard), result3);
+        }
+
+        #[test]
+        fn test_left_unchecked() {
+            let sq1 = Square::E5;
+            let result1 = unsafe { sq1.left_unchecked(1) };
+            assert_eq!(Square::D5, result1);
+
+            let sq2 = Square::D1;
+            let result2 = unsafe { sq2.left_unchecked(-2) };
+            assert_eq!(Square::F1, result2);
+        }
+
+        #[test]
+        fn test_left() {
+            let sq1 = Square::E5;
+            let result1 = sq1.left(1);
+            assert_eq!(Ok(Square::D5), result1);
+
+            let sq2 = Square::G1;
+            let result2 = sq2.left(-1);
+            assert_eq!(Ok(Square::H1), result2);
+
+            let sq3 = Square::A3;
+            let result3 = sq3.left(1);
+            assert_eq!(Err(CoordinatesError::MoveOffBoard), result3);
+        }
+
+        #[test]
+        fn test_right_unchecked() {
+            let sq1 = Square::E5;
+            let result1 = unsafe { sq1.right_unchecked(1) };
+            assert_eq!(Square::F5, result1);
+
+            let sq2 = Square::B1;
+            let result2 = unsafe { sq2.right_unchecked(-1) };
+            assert_eq!(Square::A1, result2);
+        }
+
+        #[test]
+        fn test_right() {
+            let sq1 = Square::E5;
+            let result1 = sq1.right(1);
+            assert_eq!(Ok(Square::F5), result1);
+
+            let sq2 = Square::B1;
+            let result2 = sq2.right(-1);
+            assert_eq!(Ok(Square::A1), result2);
+
+            let sq3 = Square::H3;
+            let result3 = sq3.right(1);
+            assert_eq!(Err(CoordinatesError::MoveOffBoard), result3);
+        }
+
+        #[test]
+        fn test_try_from_str() {
+            assert_eq!(Square::try_from("a1"), Ok(Square::A1));
+            assert_eq!(Square::try_from("b2"), Ok(Square::B2));
+            assert_eq!(Square::try_from("c3"), Ok(Square::C3));
+            assert_eq!(Square::try_from("d4"), Ok(Square::D4));
+            assert_eq!(Square::try_from("e5"), Ok(Square::E5));
+            assert_eq!(Square::try_from("f6"), Ok(Square::F6));
+            assert_eq!(Square::try_from("g7"), Ok(Square::G7));
+            assert_eq!(Square::try_from("h8"), Ok(Square::H8));
+            assert_eq!(Square::try_from("i9"), Err(CoordinatesError::InvalidCharacter));
+            assert_eq!(Square::try_from("x"), Err(CoordinatesError::InvalidString));
         }
     }
 }

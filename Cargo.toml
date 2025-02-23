@@ -1,6 +1,20 @@
 [package]
 name = "oxide9"
 version = "0.1.0"
+authors = ["Mathieu Pagé"]
 edition = "2021"
 
 [dependencies]
+bitflags = "2.8.0"
+
+[profile.release]
+opt-level = 3            # Maximum optimization
+lto = true               # Enable link-time optimization
+codegen-units = 1        # Maximize optimizations, slower compilation
+panic = "abort"          # Remove panic unwinding overhead
+strip = true             # Remove debug symbols
+debug = false            # No debug symbols in release for smaller binary
+rpath = false            # Don't embed library search paths
+debug-assertions = false # Disable debug assertions for performance
+incremental = false      # Disable incremental compilation
+overflow-checks = false  # Disable overflow checks for performance

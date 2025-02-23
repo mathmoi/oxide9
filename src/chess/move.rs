@@ -1,21 +1,22 @@
 use super::{Piece, Square};
+use bitflags::bitflags;
 
-// This is an enum that represents both types of castling: kingside and queenside.
-#[repr(u8)]
-#[derive(Debug, PartialEq, Clone, Copy)]
-pub enum Castling {
-    Kingside = 0,
-    Queenside = 1,
-}
+// This is a bitflags struct that represents the different types of castling moves that can be made.
+bitflags! {
+    #[derive(Debug, Clone, PartialEq, Copy)]
+    pub struct Castling: u8 {
+        const WHITE_KINGSIDE = 0b0001;
+        const WHITE_QUEENSIDE = 0b0010;
+        const BLACK_KINGSIDE = 0b0100;
+        const BLACK_QUEENSIDE = 0b1000;
 
-impl From<u8> for Castling {
-    fn from(value: u8) -> Self {
-        assert!(value <= 1);
-        match value {
-            0 => Castling::Kingside,
-            1 => Castling::Queenside,
-            _ => unreachable!(),
-        }
+        const KINGSIDE = Self::WHITE_KINGSIDE.bits() | Self::BLACK_KINGSIDE.bits();
+        const QUEENSIDE = Self::WHITE_QUEENSIDE.bits() | Self::BLACK_QUEENSIDE.bits();
+
+        const WHITE = Self::WHITE_KINGSIDE.bits() | Self::WHITE_QUEENSIDE.bits();
+        const BLACK = Self::BLACK_KINGSIDE.bits() | Self::BLACK_QUEENSIDE.bits();
+
+        const ALL = Self::WHITE.bits() | Self::BLACK.bits();
     }
 }
 
@@ -190,7 +191,7 @@ impl From<Move> for u32 {
             MoveType::CapturePromotion { capture, promotion } => {
                 u8::from(capture) as u32 | (u8::from(promotion) as u32) << 4
             }
-            MoveType::Castling(castling) => castling as u32,
+            MoveType::Castling(castling) => castling.bits() as u32,
             _ => 0,
         };
 
@@ -217,7 +218,7 @@ impl From<u32> for Move {
             },
             4 => MoveType::TwoSquarePawnPush,
             5 => MoveType::EnPassant,
-            6 => MoveType::Castling(Castling::from((value >> 20) as u8)),
+            6 => MoveType::Castling(Castling::from_bits_truncate((value >> 20) as u8)),
             _ => unreachable!(),
         };
 
@@ -251,7 +252,7 @@ mod tests {
             );
             assert_eq!(u8::from(MoveType::TwoSquarePawnPush), 4);
             assert_eq!(u8::from(MoveType::EnPassant), 5);
-            assert_eq!(u8::from(MoveType::Castling(Castling::Kingside)), 6);
+            assert_eq!(u8::from(MoveType::Castling(Castling::WHITE_KINGSIDE)), 6);
         }
     }
 
@@ -353,7 +354,7 @@ mod tests {
             let from = Square::E1;
             let to = Square::G1;
             let piece = Piece::WHITE_KING;
-            let castling = Castling::Kingside;
+            let castling = Castling::WHITE_KINGSIDE;
             let castling_move = Move::new_castling(from, to, piece, castling);
             assert_eq!(castling_move.from_square(), from);
             assert_eq!(castling_move.to_square(), to);
@@ -411,13 +412,13 @@ mod tests {
                 Square::E1,
                 Square::G1,
                 Piece::WHITE_KING,
-                Castling::Kingside,
+                Castling::WHITE_KINGSIDE,
             );
             let queenside_castling = Move::new_castling(
                 Square::E1,
                 Square::C1,
                 Piece::WHITE_KING,
-                Castling::Queenside,
+                Castling::WHITE_QUEENSIDE,
             );
 
             assert_eq!(basic, Move::from(u32::from(basic)));

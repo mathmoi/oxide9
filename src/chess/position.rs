@@ -1,7 +1,6 @@
-use bitflags::bitflags;
 use std::ops::Index;
 
-use super::{Bitboard, Castling, Color, File, Piece, Rank, Square};
+use super::{r#move::Castling, Bitboard, Color, File, Piece, Rank, Square};
 
 /// Error type for parsing a FEN (Forsyth-Edwards Notation) string.
 #[derive(Debug)]
@@ -15,34 +14,12 @@ pub enum FenError {
     MissingField,
 }
 
-bitflags! {
-    #[derive(Debug, Clone, PartialEq, Copy)]
-    pub struct CastlingAvailability: u8 {
-        const WHITE_KINGSIDE = 0b0001;
-        const WHITE_QUEENSIDE = 0b0010;
-        const BLACK_KINGSIDE = 0b0100;
-        const BLACK_QUEENSIDE = 0b1000;
-    }
-}
-
-impl CastlingAvailability {
-    /// Creates a new CastlingRights instance from a color and a castling type.
-    pub fn new(color: Color, castling: Castling) -> Self {
-        match (color, castling) {
-            (Color::White, Castling::Kingside) => CastlingAvailability::WHITE_KINGSIDE,
-            (Color::White, Castling::Queenside) => CastlingAvailability::WHITE_QUEENSIDE,
-            (Color::Black, Castling::Kingside) => CastlingAvailability::BLACK_KINGSIDE,
-            (Color::Black, Castling::Queenside) => CastlingAvailability::BLACK_QUEENSIDE,
-        }
-    }
-}
-
 pub struct Position {
     side_to_move: Color,
     board: [Option<Piece>; Square::COUNT],
     bb_color: [Bitboard; Color::COUNT],
     bb_piece: [Bitboard; Piece::COUNT],
-    castling_availability: CastlingAvailability,
+    castling_availability: Castling,
     en_passant_square: Option<Square>,
     halfmove_clock: u16,
     fullmove_number: u16,
@@ -86,10 +63,10 @@ impl Position {
     fn read_castling(&mut self, castling_availability: &str) -> Result<(), FenError> {
         for c in castling_availability.chars() {
             match c {
-                'K' => self.castling_availability |= CastlingAvailability::WHITE_KINGSIDE,
-                'Q' => self.castling_availability |= CastlingAvailability::WHITE_QUEENSIDE,
-                'k' => self.castling_availability |= CastlingAvailability::BLACK_KINGSIDE,
-                'q' => self.castling_availability |= CastlingAvailability::BLACK_QUEENSIDE,
+                'K' => self.castling_availability |= Castling::WHITE_KINGSIDE,
+                'Q' => self.castling_availability |= Castling::WHITE_QUEENSIDE,
+                'k' => self.castling_availability |= Castling::BLACK_KINGSIDE,
+                'q' => self.castling_availability |= Castling::BLACK_QUEENSIDE,
                 '-' => break,
                 _ => return Err(FenError::InvalidCastlingAvailability),
             }
@@ -200,7 +177,7 @@ impl Position {
     }
 
     /// Returns the castling availability of the position.
-    pub fn castling_availability(&self) -> CastlingAvailability {
+    pub fn castling_availability(&self) -> Castling {
         self.castling_availability
     }
 
@@ -246,7 +223,7 @@ impl Default for Position {
             board: [None; Square::COUNT],
             bb_color: [Bitboard::EMPTY; Color::COUNT],
             bb_piece: [Bitboard::EMPTY; Piece::COUNT],
-            castling_availability: CastlingAvailability::empty(),
+            castling_availability: Castling::empty(),
             en_passant_square: None,
             halfmove_clock: 0,
             fullmove_number: 1,
@@ -311,10 +288,7 @@ mod tests {
 
         assert_eq!(Color::White, position.side_to_move());
 
-        assert_eq!(
-            position.castling_availability(),
-            CastlingAvailability::all()
-        );
+        assert_eq!(position.castling_availability(), Castling::all());
 
         assert_eq!(position.en_passant_square(), None);
 
@@ -337,10 +311,7 @@ mod tests {
             Position::new_from_fen("1nbqkbn1/rppppppr/p6p/8/8/P6P/RPPPPPPR/1NBQKBN1 w - - 4 5")
                 .unwrap();
 
-        assert_eq!(
-            position.castling_availability(),
-            CastlingAvailability::empty()
-        );
+        assert_eq!(position.castling_availability(), Castling::empty());
     }
 
     #[test]
@@ -351,7 +322,7 @@ mod tests {
 
         assert_eq!(
             position.castling_availability(),
-            CastlingAvailability::BLACK_KINGSIDE | CastlingAvailability::WHITE_QUEENSIDE
+            Castling::BLACK_KINGSIDE | Castling::WHITE_QUEENSIDE
         );
     }
 

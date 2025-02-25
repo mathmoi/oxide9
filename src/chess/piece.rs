@@ -198,12 +198,12 @@ impl Piece {
     }
 
     /// Returns the Color of the piece.
-    pub fn color(&self) -> Color {
+    pub fn color(self) -> Color {
         Color::from(self.0 & 1)
     }
 
     /// Returns the PieceType of the piece.
-    pub fn piece_type(&self) -> PieceType {
+    pub fn piece_type(self) -> PieceType {
         PieceType::from(self.0 >> 1)
     }
 }

@@ -184,22 +184,22 @@ impl Move {
     }
 
     /// Returns the source square of the move.
-    pub fn from_square(&self) -> Square {
+    pub fn from_square(self) -> Square {
         self.from_square
     }
 
     /// Returns the destination square of the move.
-    pub fn to_square(&self) -> Square {
+    pub fn to_square(self) -> Square {
         self.to_square
     }
 
     /// Returns the piece that is moving.
-    pub fn piece(&self) -> Piece {
+    pub fn piece(self) -> Piece {
         self.piece
     }
 
     /// Returns the type of move.
-    pub fn move_type(&self) -> MoveType {
+    pub fn move_type(self) -> MoveType {
         self.move_type
     }
 }

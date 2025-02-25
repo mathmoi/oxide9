@@ -14,6 +14,7 @@ pub enum FenError {
     MissingField,
 }
 
+/// A chess position.
 pub struct Position {
     side_to_move: Color,
     board: [Option<Piece>; Square::COUNT],

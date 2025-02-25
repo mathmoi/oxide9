@@ -3,8 +3,6 @@ use std::fmt::{self, Display};
 
 use super::Color;
 
-// TODO : All small types in this module and other should be passed by value instead of reference.
-
 /// Error type for the coordinates module.
 #[derive(Debug, PartialEq)]
 pub enum CoordinatesError {
@@ -53,24 +51,24 @@ impl File {
     ///
     /// Caller must ensure that moving right by `count` steps will result in a valid file. This method
     /// will cause undefined behavior if we move off the board.
-    pub unsafe fn right_unchecked(&self, count: i8) -> File {
+    pub unsafe fn right_unchecked(self, count: i8) -> File {
         let min_file_value = u8::from(File::A) as i8;
         let max_file_value = u8::from(File::H) as i8;
-        let new_file_value = u8::from(*self) as i8 + count;
+        let new_file_value = u8::from(self) as i8 + count;
         debug_assert!(
             min_file_value <= new_file_value && new_file_value <= max_file_value,
             "The new file value must be a valid value for a file"
         );
-        File::from((u8::from(*self) as i8 + count) as u8)
+        File::from((u8::from(self) as i8 + count) as u8)
     }
 
     /// Moves a file right by the specified number of files.
     /// Returns Ok(File) with the new file if the move is valid, MoveOffBoard if the move would
     /// go off the board.
-    pub fn right(&self, count: i8) -> CoordinatesResult<File> {
+    pub fn right(self, count: i8) -> CoordinatesResult<File> {
         let min_file_value = u8::from(File::A) as i8;
         let max_file_value = u8::from(File::H) as i8;
-        let new_file_value = u8::from(*self) as i8 + count;
+        let new_file_value = u8::from(self) as i8 + count;
         if new_file_value < min_file_value || max_file_value < new_file_value {
             return Err(CoordinatesError::MoveOffBoard);
         }
@@ -84,14 +82,14 @@ impl File {
     ///
     /// Caller must ensure that moving left by `count` steps will result in a valid file. This method
     /// will cause undefined behavior if we move off the board.
-    pub unsafe fn left_unchecked(&self, count: i8) -> File {
+    pub unsafe fn left_unchecked(self, count: i8) -> File {
         self.right_unchecked(-count)
     }
 
     /// Moves a file left by the specified number of files.
     /// Returns Ok(File) with the new file if the move is valid, MoveOffBoard if the move would
     /// go off the board.
-    pub fn left(&self, count: i8) -> CoordinatesResult<File> {
+    pub fn left(self, count: i8) -> CoordinatesResult<File> {
         self.right(-count)
     }
 }
@@ -191,24 +189,24 @@ impl Rank {
     ///
     /// Caller must ensure that moving up by `count` steps will result in a valid rank. This method
     /// will cause undefined behavior if we move off the board.
-    pub unsafe fn up_unchecked(&self, count: i8) -> Rank {
+    pub unsafe fn up_unchecked(self, count: i8) -> Rank {
         let min_rank_value = u8::from(Rank::R1) as i8;
         let max_rank_value = u8::from(Rank::R8) as i8;
-        let new_rank_value = u8::from(*self) as i8 + count;
+        let new_rank_value = u8::from(self) as i8 + count;
         debug_assert!(
             min_rank_value <= new_rank_value && new_rank_value <= max_rank_value,
             "The new rank value must be a valid value for a rank"
         );
-        Rank::from((u8::from(*self) as i8 + count) as u8)
+        Rank::from((u8::from(self) as i8 + count) as u8)
     }
 
     /// Moves a rank up by the specified number of ranks.
     /// Returns Ok(Rank) with the new rank if the move is valid, MoveOffBoard if the move would
     /// go off the board.
-    pub fn up(&self, count: i8) -> CoordinatesResult<Rank> {
+    pub fn up(self, count: i8) -> CoordinatesResult<Rank> {
         let min_rank_value = u8::from(Rank::R1) as i8;
         let max_rank_value = u8::from(Rank::R8) as i8;
-        let new_rank_value = u8::from(*self) as i8 + count;
+        let new_rank_value = u8::from(self) as i8 + count;
         if new_rank_value < min_rank_value || max_rank_value < new_rank_value {
             return Err(CoordinatesError::MoveOffBoard);
         }
@@ -222,14 +220,14 @@ impl Rank {
     ///
     /// Caller must ensure that moving down by `count` steps will result in a valid rank. This method
     /// will cause undefined behavior if we move off the board.
-    pub unsafe fn down_unchecked(&self, count: i8) -> Rank {
+    pub unsafe fn down_unchecked(self, count: i8) -> Rank {
         self.up_unchecked(-count)
     }
 
     /// Moves a rank down by the specified number of ranks.
     /// Returns Ok(Rank) with the new rank if the move is valid, MoveOffBoard if the move would
     /// go off the board.
-    pub fn down(&self, count: i8) -> CoordinatesResult<Rank> {
+    pub fn down(self, count: i8) -> CoordinatesResult<Rank> {
         self.up(-count)
     }
 }
@@ -372,12 +370,12 @@ impl Square {
     }
 
     /// Returns the rank of the square.
-    pub fn rank(&self) -> Rank {
+    pub fn rank(self) -> Rank {
         (self.0 >> 3).into()
     }
 
     /// Returns the file of the square.
-    pub fn file(&self) -> File {
+    pub fn file(self) -> File {
         (self.0 & 0b111).into()
     }
 
@@ -390,7 +388,7 @@ impl Square {
     /// still on the chessboard. This method will cause undefined behavior if the resulting square
     /// would be off
     /// the board.
-    pub unsafe fn up_unchecked(&self, count: i8) -> Square {
+    pub unsafe fn up_unchecked(self, count: i8) -> Square {
         let min_rank_value = u8::from(Rank::R1) as i8;
         let max_rank_value = u8::from(Rank::R8) as i8;
         let new_rank_value = u8::from(self.rank()) as i8 + count;
@@ -404,7 +402,7 @@ impl Square {
     /// Moves a square up by the specified number of ranks.
     /// Returns Ok(Square) with the new square if the move is valid, MoveOffBoard if the move would
     /// go off the board.
-    pub fn up(&self, count: i8) -> CoordinatesResult<Square> {
+    pub fn up(self, count: i8) -> CoordinatesResult<Square> {
         let min_rank_value = u8::from(Rank::R1) as i8;
         let max_rank_value = u8::from(Rank::R8) as i8;
         let new_rank_value = u8::from(self.rank()) as i8 + count;
@@ -422,14 +420,14 @@ impl Square {
     /// Caller must ensure that moving the rank down by `count` step will result in a square that is
     /// still on the chessboard. This method will cause undefined behavior if we move the square off
     /// the board.
-    pub unsafe fn down_unchecked(&self, count: i8) -> Square {
+    pub unsafe fn down_unchecked(self, count: i8) -> Square {
         self.up_unchecked(-count)
     }
 
     /// Moves a square down by the specified number of ranks.
     /// Returns Ok(Square) with the new square if the move is valid, MoveOffBoard if the move would
     /// go off the board.
-    pub fn down(&self, count: i8) -> CoordinatesResult<Square> {
+    pub fn down(self, count: i8) -> CoordinatesResult<Square> {
         self.up(-count)
     }
 
@@ -441,7 +439,7 @@ impl Square {
     /// Caller must ensure that moving the file left by `count` step will result in a square that is
     /// still on the chessboard. This method will cause undefined behavior if we move the square off
     /// the board.
-    pub unsafe fn left_unchecked(&self, count: i8) -> Square {
+    pub unsafe fn left_unchecked(self, count: i8) -> Square {
         let min_file_value = u8::from(File::A) as i8;
         let max_file_value = u8::from(File::H) as i8;
         let new_file_value = u8::from(self.file()) as i8 - count;
@@ -455,7 +453,7 @@ impl Square {
     /// Moves a square left by the specified number of files.
     /// Returns Ok(Square) with the new square if the move is valid, MoveOffBoard if the move would
     /// go off the board.
-    pub fn left(&self, count: i8) -> CoordinatesResult<Square> {
+    pub fn left(self, count: i8) -> CoordinatesResult<Square> {
         let min_file_value = u8::from(File::A) as i8;
         let max_file_value = u8::from(File::H) as i8;
         let new_file_value = u8::from(self.file()) as i8 - count;
@@ -473,14 +471,14 @@ impl Square {
     /// Caller must ensure that moving the file right by `count` step will result in a square that
     /// is still on the chessboard. This method will cause undefined behavior if we move the square
     /// off the board.
-    pub unsafe fn right_unchecked(&self, count: i8) -> Square {
+    pub unsafe fn right_unchecked(self, count: i8) -> Square {
         self.left_unchecked(-count)
     }
 
     /// Moves a square right by the specified number of files.
     /// Returns Ok(Square) with the new square if the move is valid, MoveOffBoard if the move would
     /// go off the board.
-    pub fn right(&self, count: i8) -> CoordinatesResult<Square> {
+    pub fn right(self, count: i8) -> CoordinatesResult<Square> {
         self.left(-count)
     }
 }

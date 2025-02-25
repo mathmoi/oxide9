@@ -8,4 +8,4 @@ pub use bitboard::Bitboard;
 pub use coordinates::{File, Rank, Square};
 pub use piece::{Color, Piece, PieceType};
 pub use position::Position;
-pub use r#move::{Castling, Move, MoveType};
+pub use r#move::{CastlingRight, CastlingSide, Move, MoveType};

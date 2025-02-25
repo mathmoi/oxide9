@@ -1,6 +1,10 @@
 use std::convert::From;
 use std::fmt::{self, Display};
 
+use super::Color;
+
+// TODO : All small types in this module and other should be passed by value instead of reference.
+
 /// Error type for the coordinates module.
 #[derive(Debug, PartialEq)]
 pub enum CoordinatesError {
@@ -17,7 +21,7 @@ pub type CoordinatesResult<T> = Result<T, CoordinatesError>;
 /// Files are labeled from A to H, going from left to right when viewing the board from White's
 /// perspective.
 #[repr(u8)]
-#[derive(Copy, Clone, Debug, PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq, PartialOrd)]
 pub enum File {
     A = 0,
     B = 1,
@@ -128,6 +132,14 @@ impl TryFrom<char> for File {
             'f' => Ok(File::F),
             'g' => Ok(File::G),
             'h' => Ok(File::H),
+            'A' => Ok(File::A),
+            'B' => Ok(File::B),
+            'C' => Ok(File::C),
+            'D' => Ok(File::D),
+            'E' => Ok(File::E),
+            'F' => Ok(File::F),
+            'G' => Ok(File::G),
+            'H' => Ok(File::H),
             _ => Err(CoordinatesError::InvalidCharacter),
         }
     }
@@ -162,6 +174,15 @@ impl Rank {
         Rank::R7,
         Rank::R8,
     ];
+
+    /// Returns the rank relative to the specified color. If the color is white, the rank is
+    /// returned, if the color is black, the rank is flipped.
+    pub fn relative_to_color(self, color: Color) -> Rank {
+        match color {
+            Color::White => self,
+            Color::Black => unsafe { Rank::R8.down_unchecked(u8::from(self) as i8) },
+        }
+    }
 
     /// Returns a new rank that is moved up by the specified number of ranks without checking for
     /// bounds.
@@ -708,6 +729,29 @@ mod tests {
             assert_eq!(Rank::try_from('8'), Ok(Rank::R8));
             assert_eq!(Rank::try_from('9'), Err(CoordinatesError::InvalidCharacter));
         }
+
+        #[test]
+        fn test_relative_to_color() {
+            // Check white relative ranks
+            assert_eq!(Rank::R1.relative_to_color(Color::White), Rank::R1);
+            assert_eq!(Rank::R2.relative_to_color(Color::White), Rank::R2);
+            assert_eq!(Rank::R3.relative_to_color(Color::White), Rank::R3);
+            assert_eq!(Rank::R4.relative_to_color(Color::White), Rank::R4);
+            assert_eq!(Rank::R5.relative_to_color(Color::White), Rank::R5);
+            assert_eq!(Rank::R6.relative_to_color(Color::White), Rank::R6);
+            assert_eq!(Rank::R7.relative_to_color(Color::White), Rank::R7);
+            assert_eq!(Rank::R8.relative_to_color(Color::White), Rank::R8);
+
+            // Check black relative ranks (should be flipped)
+            assert_eq!(Rank::R1.relative_to_color(Color::Black), Rank::R8);
+            assert_eq!(Rank::R2.relative_to_color(Color::Black), Rank::R7);
+            assert_eq!(Rank::R3.relative_to_color(Color::Black), Rank::R6);
+            assert_eq!(Rank::R4.relative_to_color(Color::Black), Rank::R5);
+            assert_eq!(Rank::R5.relative_to_color(Color::Black), Rank::R4);
+            assert_eq!(Rank::R6.relative_to_color(Color::Black), Rank::R3);
+            assert_eq!(Rank::R7.relative_to_color(Color::Black), Rank::R2);
+            assert_eq!(Rank::R8.relative_to_color(Color::Black), Rank::R1);
+        }
     }
 
     mod square_tests {
@@ -859,7 +903,10 @@ mod tests {
             assert_eq!(Square::try_from("f6"), Ok(Square::F6));
             assert_eq!(Square::try_from("g7"), Ok(Square::G7));
             assert_eq!(Square::try_from("h8"), Ok(Square::H8));
-            assert_eq!(Square::try_from("i9"), Err(CoordinatesError::InvalidCharacter));
+            assert_eq!(
+                Square::try_from("i9"),
+                Err(CoordinatesError::InvalidCharacter)
+            );
             assert_eq!(Square::try_from("x"), Err(CoordinatesError::InvalidString));
         }
     }

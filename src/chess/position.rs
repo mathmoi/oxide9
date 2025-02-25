@@ -1,6 +1,6 @@
 use std::ops::Index;
 
-use super::{r#move::Castling, Bitboard, Color, File, Piece, Rank, Square};
+use super::{Bitboard, CastlingRight, CastlingSide, Color, File, Piece, PieceType, Rank, Square};
 
 /// Error type for parsing a FEN (Forsyth-Edwards Notation) string.
 #[derive(Debug)]
@@ -19,7 +19,9 @@ pub struct Position {
     board: [Option<Piece>; Square::COUNT],
     bb_color: [Bitboard; Color::COUNT],
     bb_piece: [Bitboard; Piece::COUNT],
-    castling_availability: Castling,
+    castling_rights: CastlingRight,
+    castling_rook_file: [File; CastlingSide::COUNT],
+    castling_path: [Bitboard; CastlingSide::COUNT],
     en_passant_square: Option<Square>,
     halfmove_clock: u16,
     fullmove_number: u16,
@@ -61,16 +63,86 @@ impl Position {
     }
 
     fn read_castling(&mut self, castling_availability: &str) -> Result<(), FenError> {
+        let mut file_set: [Option<File>; CastlingSide::COUNT] = [None; CastlingSide::COUNT];
+
         for c in castling_availability.chars() {
+            let color;
+            let king_file;
+            let king_to_file;
+            let rook_to_file;
+            let castling_side;
+            let castling_file;
+
             match c {
-                'K' => self.castling_availability |= Castling::WHITE_KINGSIDE,
-                'Q' => self.castling_availability |= Castling::WHITE_QUEENSIDE,
-                'k' => self.castling_availability |= Castling::BLACK_KINGSIDE,
-                'q' => self.castling_availability |= Castling::BLACK_QUEENSIDE,
+                'K' | 'Q' | 'k' | 'q' | 'A'..='H' | 'a'..='h' => {
+                    color = if c.is_uppercase() {
+                        Color::White
+                    } else {
+                        Color::Black
+                    };
+                    king_file = self
+                        .bb_piece(Piece::new(color, PieceType::King))
+                        .lsb()
+                        .ok_or(FenError::InvalidCastlingAvailability)?
+                        .file();
+                }
                 '-' => break,
                 _ => return Err(FenError::InvalidCastlingAvailability),
             }
+
+            castling_file = match c {
+                'K' | 'k' => (self.bb_piece(Piece::new(color, PieceType::Rook))
+                    & Rank::R1.relative_to_color(color).into())
+                .msb()
+                .ok_or(FenError::InvalidCastlingAvailability)?
+                .file(),
+                'Q' | 'q' => (self.bb_piece(Piece::new(color, PieceType::Rook))
+                    & Rank::R1.relative_to_color(color).into())
+                .lsb()
+                .ok_or(FenError::InvalidCastlingAvailability)?
+                .file(),
+                'A'..='H' | 'a'..='h' => {
+                    File::try_from(c).map_err(|_| FenError::InvalidCastlingAvailability)?
+                }
+                _ => unreachable!(),
+            };
+
+            if castling_file < king_file {
+                castling_side = CastlingSide::Queenside;
+                king_to_file = File::C;
+                rook_to_file = File::D;
+            } else {
+                castling_side = CastlingSide::Kingside;
+                king_to_file = File::G;
+                rook_to_file = File::F;
+            };
+
+            // Checked if the file was already set and is different.
+            if let Some(file) = file_set[usize::from(castling_side)] {
+                if file != castling_file {
+                    return Err(FenError::InvalidCastlingAvailability);
+                }
+            }
+
+            self.castling_rights |= CastlingRight::new(color, castling_side);
+            self.castling_rook_file[usize::from(castling_side)] = castling_file;
+
+            // Compute the mask of the path of the king and rook involved in castling.
+            let king_from = Square::new(king_file, Rank::R1);
+            let king_to = Square::new(king_to_file, Rank::R1);
+            let rook_from = Square::new(castling_file, Rank::R1);
+            let rook_to = Square::new(rook_to_file, Rank::R1);
+            let mut mask = Bitboard::between(king_from, king_to)
+                | Bitboard::between(rook_from, rook_to)
+                | king_to
+                | rook_to;
+            mask &= !(king_from | rook_from);
+            mask |= mask << 56;
+            self.castling_path[usize::from(castling_side)] = mask;
+
+            file_set[usize::from(castling_side)] = Some(castling_file);
         }
+
         Ok(())
     }
 
@@ -177,13 +249,23 @@ impl Position {
     }
 
     /// Returns the castling availability of the position.
-    pub fn castling_availability(&self) -> Castling {
-        self.castling_availability
+    pub fn castling_availability(&self) -> CastlingRight {
+        self.castling_rights
     }
 
     /// Returns the en passant square of the position.
     pub fn en_passant_square(&self) -> Option<Square> {
         self.en_passant_square
+    }
+
+    /// Returns the file of the rook involved in castling on a specific side.
+    pub fn castling_file(&self, side: CastlingSide) -> File {
+        self.castling_rook_file[usize::from(side)]
+    }
+
+    /// Returns the path of the king and rook involved in castling on a specific side.
+    pub fn castling_path(&self, side: CastlingSide) -> Bitboard {
+        self.castling_path[usize::from(side)]
     }
 
     /// Puts a piece on a specific square.
@@ -223,7 +305,12 @@ impl Default for Position {
             board: [None; Square::COUNT],
             bb_color: [Bitboard::EMPTY; Color::COUNT],
             bb_piece: [Bitboard::EMPTY; Piece::COUNT],
-            castling_availability: Castling::empty(),
+            castling_rights: CastlingRight::empty(),
+            castling_rook_file: [File::A, File::H],
+            castling_path: [
+                Square::E1 | Square::E8,
+                Square::C1 | Square::D1 | Square::C8 | Square::D8,
+            ],
             en_passant_square: None,
             halfmove_clock: 0,
             fullmove_number: 1,
@@ -288,7 +375,19 @@ mod tests {
 
         assert_eq!(Color::White, position.side_to_move());
 
-        assert_eq!(position.castling_availability(), Castling::all());
+        assert_eq!(position.castling_availability(), CastlingRight::all());
+
+        assert_eq!(File::H, position.castling_file(CastlingSide::Kingside));
+        assert_eq!(File::A, position.castling_file(CastlingSide::Queenside));
+
+        assert_eq!(
+            Bitboard::between(Square::E1, Square::H1) | Bitboard::between(Square::E8, Square::H8),
+            position.castling_path(CastlingSide::Kingside)
+        );
+        assert_eq!(
+            Bitboard::between(Square::E1, Square::A1) | Bitboard::between(Square::E8, Square::A8),
+            position.castling_path(CastlingSide::Queenside)
+        );
 
         assert_eq!(position.en_passant_square(), None);
 
@@ -311,7 +410,7 @@ mod tests {
             Position::new_from_fen("1nbqkbn1/rppppppr/p6p/8/8/P6P/RPPPPPPR/1NBQKBN1 w - - 4 5")
                 .unwrap();
 
-        assert_eq!(position.castling_availability(), Castling::empty());
+        assert_eq!(position.castling_availability(), CastlingRight::empty());
     }
 
     #[test]
@@ -322,7 +421,44 @@ mod tests {
 
         assert_eq!(
             position.castling_availability(),
-            Castling::BLACK_KINGSIDE | Castling::WHITE_QUEENSIDE
+            CastlingRight::BLACK_KINGSIDE | CastlingRight::WHITE_QUEENSIDE
+        );
+    }
+
+    #[test]
+    fn test_new_from_fen_chess960_castling_rights() {
+        let position = Position::new_from_fen("1rk3r1/8/8/8/8/8/8/1RK3R1 w KQkq - 0 1").unwrap();
+
+        assert_eq!(CastlingRight::all(), position.castling_availability());
+        assert_eq!(File::B, position.castling_file(CastlingSide::Queenside));
+        assert_eq!(File::G, position.castling_file(CastlingSide::Kingside));
+    }
+
+    #[test]
+    fn test_new_from_fen_chess960_castling_outer_rooks() {
+        let position = Position::new_from_fen("1rrkrr2/8/8/8/8/8/8/1RRKRR2 w KQkq - 0 1").unwrap();
+
+        assert_eq!(CastlingRight::all(), position.castling_availability());
+        assert_eq!(File::B, position.castling_file(CastlingSide::Queenside));
+        assert_eq!(File::F, position.castling_file(CastlingSide::Kingside));
+    }
+
+    #[test]
+    fn test_new_from_fen_chess960_castling_inner_rooks() {
+        let position = Position::new_from_fen("1rrkrr2/8/8/8/8/8/8/1RRKRR2 w CEce - 0 1").unwrap();
+
+        assert_eq!(CastlingRight::all(), position.castling_availability());
+        assert_eq!(File::C, position.castling_file(CastlingSide::Queenside));
+        assert_eq!(File::E, position.castling_file(CastlingSide::Kingside));
+    }
+
+    #[test]
+    fn test_new_from_fen_chess960_castling_path_outside_king_rook() {
+        let position = Position::new_from_fen("6k1/8/8/8/8/8/8/1R4KR w K - 0 1").unwrap();
+
+        assert_eq!(
+            Square::F1 | Square::F8,
+            position.castling_path(CastlingSide::Kingside)
         );
     }
 

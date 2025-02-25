@@ -55,7 +55,7 @@ impl Bitboard {
         ];
 
         let mut between = [Bitboard::EMPTY; Square::COUNT * Square::COUNT];
-        for from in Square::ALL_SQUARES {
+        for from in Square::ALL {
             for direction in directions.iter() {
                 let mut bb = Bitboard::EMPTY;
                 let mut next = direction(from);
@@ -244,7 +244,7 @@ mod tests {
     #[test]
     fn test_bitboard_get() {
         let bb_e2 = Bitboard::from(Square::E2);
-        for square in Square::ALL_SQUARES {
+        for square in Square::ALL {
             assert!(Bitboard::ALL.get(square));
             assert!(!Bitboard::EMPTY.get(square));
             assert_eq!(bb_e2.get(square), square == Square::E2);
@@ -340,6 +340,7 @@ mod tests {
         );
         assert_eq!(
             Bitboard::between(Square::F7, Square::A2),
-            Square::E6 | Square::D5 | Square::C4 | Square::B3);
+            Square::E6 | Square::D5 | Square::C4 | Square::B3
+        );
     }
 }

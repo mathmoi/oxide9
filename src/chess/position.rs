@@ -234,6 +234,92 @@ impl Position {
         Self::new_from_fen(INITIAL_POSITION).expect("This can not fail because the INITIAL_POSITION fen will always be successfully parsed.")
     }
 
+    /// Returns the FEN (Forsyth-Edwards Notation) representation of the position.
+    fn write_piece_placement(&self) -> String {
+        let mut result = String::with_capacity(70);
+        for rank in Rank::ALL.iter().rev() {
+            let mut empty_count = 0;
+            for file in File::ALL {
+                let square = Square::new(file, *rank);
+                if let Some(piece) = self[square] {
+                    if empty_count > 0 {
+                        result.push_str(&empty_count.to_string());
+                        empty_count = 0;
+                    }
+                    result.push(piece.into());
+                } else {
+                    empty_count += 1;
+                }
+            }
+            if empty_count > 0 {
+                result.push_str(&empty_count.to_string());
+            }
+            if rank != &Rank::R1 {
+                result.push('/');
+            }
+        }
+        result
+    }
+
+    fn write_castling(&self) -> String {
+        if self.castling_availability().is_empty() {
+            return String::from("-");
+        }
+
+        let mut result = String::with_capacity(4);
+        for color in Color::ALL {
+            for side in CastlingSide::ALL {
+                let right = CastlingRight::new(color, side);
+                if !self.castling_availability().contains(right) {
+                    continue;
+                }
+
+                let candidate_rooks = self.bb_piece(Piece::new(color, PieceType::Rook))
+                    & Rank::R1.relative_to_color(color).into();
+                let outter_most_rook = if side == CastlingSide::Queenside {
+                    candidate_rooks.lsb()
+                } else {
+                    candidate_rooks.msb()
+                }
+                .expect("There should be a candidate rook for castling.");
+
+                let castling_char = if self.castling_file(side) == outter_most_rook.file() {
+                    match side {
+                        CastlingSide::Queenside => 'q',
+                        CastlingSide::Kingside => 'k',
+                    }
+                } else {
+                    self.castling_file(side).into()
+                };
+
+                result.push(if color == Color::White {
+                    castling_char.to_ascii_uppercase()
+                } else {
+                    castling_char
+                });
+            }
+        }
+        result
+    }
+
+    fn write_en_passant(&self) -> String {
+        self.en_passant_square()
+            .map_or(String::from("-"), |square| format!("{}", square))
+    }
+
+    /// Returns the FEN (Forsyth-Edwards Notation) representation of the position.
+    pub fn to_fen(&self) -> String {
+        format!(
+            "{} {} {} {} {} {}",
+            self.write_piece_placement(),
+            char::from(self.side_to_move()),
+            self.write_castling(),
+            self.write_en_passant(),
+            self.halfmove_clock,
+            self.fullmove_number
+        )
+    }
+
     /// Returns the bitboard representing the positions of all pieces of a specific color.
     pub fn bb_color(&self, color: Color) -> Bitboard {
         self.bb_color[usize::from(color)]
@@ -331,6 +417,15 @@ mod tests {
     use super::*;
 
     #[test]
+    fn test_position_default() {
+        let position = Position::default();
+        assert_eq!(position.side_to_move, Color::White);
+        assert!(position.board.iter().all(|square| square.is_none()));
+        assert!(position.bb_color.iter().all(|bb| bb.is_empty()));
+        assert!(position.bb_piece.iter().all(|bb| bb.is_empty()));
+    }
+
+    #[test]
     fn test_new_initial_position() {
         let position = Position::new();
 
@@ -345,20 +440,20 @@ mod tests {
         assert_eq!(position[Square::G1], Some(Piece::WHITE_KNIGHT));
         assert_eq!(position[Square::H1], Some(Piece::WHITE_ROOK));
 
-        for file in File::ALL_FILES {
+        for file in File::ALL {
             assert_eq!(
                 position[Square::new(file, Rank::R2)],
                 Some(Piece::WHITE_PAWN)
             );
         }
 
-        for rank in Rank::ALL_RANKS[2..6].iter() {
-            for file in File::ALL_FILES {
+        for rank in Rank::ALL[2..6].iter() {
+            for file in File::ALL {
                 assert_eq!(position[Square::new(file, *rank)], None);
             }
         }
 
-        for file in File::ALL_FILES {
+        for file in File::ALL {
             assert_eq!(
                 position[Square::new(file, Rank::R7)],
                 Some(Piece::BLACK_PAWN)
@@ -473,12 +568,20 @@ mod tests {
     }
 
     #[test]
-    fn test_position_default() {
-        let position = Position::default();
-        assert_eq!(position.side_to_move, Color::White);
-        assert!(position.board.iter().all(|square| square.is_none()));
-        assert!(position.bb_color.iter().all(|bb| bb.is_empty()));
-        assert!(position.bb_piece.iter().all(|bb| bb.is_empty()));
+    fn test_to_fen() {
+        let fens = [
+            "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+            "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1",
+            "rnbqkbnr/ppp1p1pp/8/3pPp2/8/8/PPPP1PPP/RNBQKBNR w KQkq f6 0 3",
+            "r3k2r/pppbqppp/2n1bn2/3pp3/3PP3/2N1BN2/PPPBQPPP/R3K2R w - - 0 7",
+            "1rrkrr2/8/8/8/8/8/8/1RRKRR2 w KQkq - 0 1",
+            "1rrkrr2/8/8/8/8/8/8/1RRKRR2 w ECec - 0 1",
+        ];
+
+        for fen in fens.iter() {
+            let position = Position::new_from_fen(fen).unwrap();
+            assert_eq!(fen, &position.to_fen());
+        }
     }
 
     #[test]

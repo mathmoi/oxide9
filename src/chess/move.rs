@@ -13,6 +13,9 @@ pub enum CastlingSide {
 impl CastlingSide {
     /// The number of castling sides.
     pub const COUNT: usize = 2;
+
+    /// An array of all the castling sides.
+    pub const ALL: [CastlingSide; Self::COUNT] = [CastlingSide::Kingside, CastlingSide::Queenside];
 }
 
 impl From<CastlingSide> for usize {

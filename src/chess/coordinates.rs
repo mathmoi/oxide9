@@ -33,7 +33,7 @@ pub enum File {
 
 impl File {
     /// Represents all files on a chess board.
-    pub const ALL_FILES: [File; 8] = [
+    pub const ALL: [File; 8] = [
         File::A,
         File::B,
         File::C,
@@ -116,6 +116,13 @@ impl From<File> for u8 {
     }
 }
 
+impl From<File> for char {
+    /// Converts a `File` to a `char` value.
+    fn from(file: File) -> Self {
+        (u8::from(file) + ('a' as u8)) as char
+    }
+}
+
 impl TryFrom<char> for File {
     type Error = CoordinatesError;
 
@@ -162,7 +169,7 @@ pub enum Rank {
 
 impl Rank {
     /// Represents all ranks on a chess board.
-    pub const ALL_RANKS: [Rank; 8] = [
+    pub const ALL: [Rank; 8] = [
         Rank::R1,
         Rank::R2,
         Rank::R3,
@@ -353,7 +360,7 @@ impl Square {
     pub const H8: Square = Square(63);
 
     #[rustfmt::skip]
-    pub const ALL_SQUARES: [Square; 64] = [
+    pub const ALL: [Square; 64] = [
         Square::A1,Square::B1,Square::C1,Square::D1,Square::E1,Square::F1,Square::G1,Square::H1,
         Square::A2,Square::B2,Square::C2,Square::D2,Square::E2,Square::F2,Square::G2,Square::H2,
         Square::A3,Square::B3,Square::C3,Square::D3,Square::E3,Square::F3,Square::G3,Square::H3,
@@ -552,6 +559,18 @@ mod tests {
             assert_eq!(u8::from(File::H), 7);
             assert_eq!(File::from(0), File::A);
             assert_eq!(File::from(7), File::H);
+        }
+
+        #[test]
+        fn test_file_conversion_to_char() {
+            assert_eq!(char::from(File::A), 'a');
+            assert_eq!(char::from(File::B), 'b');
+            assert_eq!(char::from(File::C), 'c');
+            assert_eq!(char::from(File::D), 'd');
+            assert_eq!(char::from(File::E), 'e');
+            assert_eq!(char::from(File::F), 'f');
+            assert_eq!(char::from(File::G), 'g');
+            assert_eq!(char::from(File::H), 'h');
         }
 
         #[test]
@@ -782,7 +801,7 @@ mod tests {
 
         #[test]
         fn test_square_to_and_from_u8() {
-            for square in Square::ALL_SQUARES.iter() {
+            for square in Square::ALL.iter() {
                 assert_eq!(*square, Square::from(u8::from(*square)));
             }
         }

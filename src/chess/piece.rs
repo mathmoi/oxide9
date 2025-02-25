@@ -23,7 +23,7 @@ impl Color {
     pub const COUNT: usize = 2;
 
     /// Represents all colors of chess pieces.
-    pub const ALL_COLORS: [Color; 2] = [Color::White, Color::Black];
+    pub const ALL: [Color; 2] = [Color::White, Color::Black];
 
     /// Returns the opposite color.
     pub fn opposite(&self) -> Color {
@@ -48,6 +48,16 @@ impl From<Color> for u8 {
     /// Converts a `Color` to a `u8` value.
     fn from(color: Color) -> Self {
         color as u8
+    }
+}
+
+impl From<Color> for char {
+    /// Converts a `Color` to a single character.
+    fn from(color: Color) -> Self {
+        match color {
+            Color::White => 'w',
+            Color::Black => 'b',
+        }
     }
 }
 
@@ -82,7 +92,7 @@ impl PieceType {
     pub const COUNT: usize = 6;
 
     /// Represents all piece types.
-    pub const ALL_PIECE_TYPES: [PieceType; 6] = [
+    pub const ALL: [PieceType; 6] = [
         PieceType::Pawn,
         PieceType::Knight,
         PieceType::Bishop,
@@ -177,7 +187,7 @@ impl Piece {
     pub const BLACK_PAWN: Piece = Piece(11);
 
     /// Represents all possible chess pieces.
-    pub const ALL_PIECES: [Piece; 12] = [
+    pub const ALL: [Piece; 12] = [
         Piece::WHITE_PAWN,
         Piece::WHITE_KNIGHT,
         Piece::WHITE_BISHOP,
@@ -292,6 +302,12 @@ mod tests {
         }
 
         #[test]
+        fn test_color_conversion_to_char() {
+            assert_eq!(char::from(Color::White), 'w');
+            assert_eq!(char::from(Color::Black), 'b');
+        }
+
+        #[test]
         fn test_opposite() {
             assert_eq!(Color::White.opposite(), Color::Black);
             assert_eq!(Color::Black.opposite(), Color::White);
@@ -367,8 +383,8 @@ mod tests {
 
         #[test]
         fn test_piece_creation() {
-            for color in Color::ALL_COLORS.iter() {
-                for piece_type in PieceType::ALL_PIECE_TYPES.iter() {
+            for color in Color::ALL.iter() {
+                for piece_type in PieceType::ALL.iter() {
                     test_single_piece_creation(*color, *piece_type);
                 }
             }
@@ -426,7 +442,7 @@ mod tests {
 
         #[test]
         fn test_conversion_to_and_from_u8() {
-            for piece in Piece::ALL_PIECES.iter() {
+            for piece in Piece::ALL.iter() {
                 let value = u8::from(*piece);
                 assert_eq!(Piece::from(value), *piece);
             }

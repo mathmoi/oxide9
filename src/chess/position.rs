@@ -40,10 +40,7 @@ impl Position {
                 self.put_piece(piece, square);
                 file = file_value.right(1).ok();
             } else if let Some(number) = c.to_digit(10) {
-                file = file
-                    .ok_or(FenError::InvalidPiecePlacement)?
-                    .right(number as i8)
-                    .ok();
+                file = file.ok_or(FenError::InvalidPiecePlacement)?.right(number as i8).ok();
             } else if c == '/' {
                 rank = rank.ok_or(FenError::InvalidPiecePlacement)?.down(1).ok();
                 file = Some(File::A);
@@ -76,11 +73,7 @@ impl Position {
 
             match c {
                 'K' | 'Q' | 'k' | 'q' | 'A'..='H' | 'a'..='h' => {
-                    color = if c.is_uppercase() {
-                        Color::White
-                    } else {
-                        Color::Black
-                    };
+                    color = if c.is_uppercase() { Color::White } else { Color::Black };
                     king_file = self
                         .bb_piece(Piece::new(color, PieceType::King))
                         .lsb()
@@ -102,9 +95,7 @@ impl Position {
                 .lsb()
                 .ok_or(FenError::InvalidCastlingAvailability)?
                 .file(),
-                'A'..='H' | 'a'..='h' => {
-                    File::try_from(c).map_err(|_| FenError::InvalidCastlingAvailability)?
-                }
+                'A'..='H' | 'a'..='h' => File::try_from(c).map_err(|_| FenError::InvalidCastlingAvailability)?,
                 _ => unreachable!(),
             };
 
@@ -133,10 +124,8 @@ impl Position {
             let king_to = Square::new(king_to_file, Rank::R1);
             let rook_from = Square::new(castling_file, Rank::R1);
             let rook_to = Square::new(rook_to_file, Rank::R1);
-            let mut mask = Bitboard::between(king_from, king_to)
-                | Bitboard::between(rook_from, rook_to)
-                | king_to
-                | rook_to;
+            let mut mask =
+                Bitboard::between(king_from, king_to) | Bitboard::between(rook_from, rook_to) | king_to | rook_to;
             mask &= !(king_from | rook_from);
             mask |= mask << 56;
             self.castling_path[usize::from(castling_side)] = mask;
@@ -150,10 +139,7 @@ impl Position {
     fn read_en_passant_square(&mut self, en_passant_square: &str) -> Result<(), FenError> {
         self.en_passant_square = match en_passant_square {
             "-" => None,
-            _ => Some(
-                Square::try_from(en_passant_square)
-                    .map_err(|_| FenError::InvalidEnPassantSquare)?,
-            ),
+            _ => Some(Square::try_from(en_passant_square).map_err(|_| FenError::InvalidEnPassantSquare)?),
         };
         Ok(())
     }
@@ -206,17 +192,11 @@ impl Position {
         position.read_castling(fields.next().ok_or(FenError::MissingField)?)?;
         position.read_en_passant_square(fields.next().ok_or(FenError::MissingField)?)?;
 
-        position.halfmove_clock = fields
-            .next()
-            .ok_or(FenError::MissingField)?
-            .parse()
-            .map_err(|_| FenError::InvalidHalfmoveClock)?;
+        position.halfmove_clock =
+            fields.next().ok_or(FenError::MissingField)?.parse().map_err(|_| FenError::InvalidHalfmoveClock)?;
 
-        position.fullmove_number = fields
-            .next()
-            .ok_or(FenError::MissingField)?
-            .parse()
-            .map_err(|_| FenError::InvalidFullmoveNumber)?;
+        position.fullmove_number =
+            fields.next().ok_or(FenError::MissingField)?.parse().map_err(|_| FenError::InvalidFullmoveNumber)?;
 
         Ok(position)
     }
@@ -231,7 +211,8 @@ impl Position {
     /// ```
     pub fn new() -> Self {
         const INITIAL_POSITION: &str = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-        Self::new_from_fen(INITIAL_POSITION).expect("This can not fail because the INITIAL_POSITION fen will always be successfully parsed.")
+        Self::new_from_fen(INITIAL_POSITION)
+            .expect("This can not fail because the INITIAL_POSITION fen will always be successfully parsed.")
     }
 
     /// Returns the FEN (Forsyth-Edwards Notation) representation of the position.
@@ -274,14 +255,11 @@ impl Position {
                     continue;
                 }
 
-                let candidate_rooks = self.bb_piece(Piece::new(color, PieceType::Rook))
-                    & Rank::R1.relative_to_color(color).into();
-                let outter_most_rook = if side == CastlingSide::Queenside {
-                    candidate_rooks.lsb()
-                } else {
-                    candidate_rooks.msb()
-                }
-                .expect("There should be a candidate rook for castling.");
+                let candidate_rooks =
+                    self.bb_piece(Piece::new(color, PieceType::Rook)) & Rank::R1.relative_to_color(color).into();
+                let outter_most_rook =
+                    if side == CastlingSide::Queenside { candidate_rooks.lsb() } else { candidate_rooks.msb() }
+                        .expect("There should be a candidate rook for castling.");
 
                 let castling_char = if self.castling_file(side) == outter_most_rook.file() {
                     match side {
@@ -292,19 +270,14 @@ impl Position {
                     self.castling_file(side).into()
                 };
 
-                result.push(if color == Color::White {
-                    castling_char.to_ascii_uppercase()
-                } else {
-                    castling_char
-                });
+                result.push(if color == Color::White { castling_char.to_ascii_uppercase() } else { castling_char });
             }
         }
         result
     }
 
     fn write_en_passant(&self) -> String {
-        self.en_passant_square()
-            .map_or(String::from("-"), |square| format!("{}", square))
+        self.en_passant_square().map_or(String::from("-"), |square| format!("{}", square))
     }
 
     /// Returns the FEN (Forsyth-Edwards Notation) representation of the position.
@@ -364,8 +337,8 @@ impl Position {
 
     /// Removes a piece from a specific square.
     pub fn remove_piece(&mut self, square: Square) {
-        let piece = self.board[usize::from(square)]
-            .expect("It is not possible to remove a piece from an empty square.");
+        let piece =
+            self.board[usize::from(square)].expect("It is not possible to remove a piece from an empty square.");
         self.board[usize::from(square)] = None;
         self.bb_color[usize::from(piece.color())] ^= Bitboard::from(square);
         self.bb_piece[usize::from(piece)] ^= Bitboard::from(square);
@@ -394,10 +367,7 @@ impl Default for Position {
             bb_piece: [Bitboard::EMPTY; Piece::COUNT],
             castling_rights: CastlingRight::empty(),
             castling_rook_file: [File::A, File::H],
-            castling_path: [
-                Square::E1 | Square::E8,
-                Square::C1 | Square::D1 | Square::C8 | Square::D8,
-            ],
+            castling_path: [Square::E1 | Square::E8, Square::C1 | Square::D1 | Square::C8 | Square::D8],
             en_passant_square: None,
             halfmove_clock: 0,
             fullmove_number: 1,
@@ -441,10 +411,7 @@ mod tests {
         assert_eq!(position[Square::H1], Some(Piece::WHITE_ROOK));
 
         for file in File::ALL {
-            assert_eq!(
-                position[Square::new(file, Rank::R2)],
-                Some(Piece::WHITE_PAWN)
-            );
+            assert_eq!(position[Square::new(file, Rank::R2)], Some(Piece::WHITE_PAWN));
         }
 
         for rank in Rank::ALL[2..6].iter() {
@@ -454,10 +421,7 @@ mod tests {
         }
 
         for file in File::ALL {
-            assert_eq!(
-                position[Square::new(file, Rank::R7)],
-                Some(Piece::BLACK_PAWN)
-            );
+            assert_eq!(position[Square::new(file, Rank::R7)], Some(Piece::BLACK_PAWN));
         }
 
         assert_eq!(position[Square::A8], Some(Piece::BLACK_ROOK));
@@ -493,32 +457,23 @@ mod tests {
 
     #[test]
     fn test_new_from_fen_black_to_play() {
-        let position =
-            Position::new_from_fen("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1")
-                .unwrap();
+        let position = Position::new_from_fen("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1").unwrap();
 
         assert_eq!(position.side_to_move, Color::Black);
     }
 
     #[test]
     fn test_new_from_fen_no_castling_rights() {
-        let position =
-            Position::new_from_fen("1nbqkbn1/rppppppr/p6p/8/8/P6P/RPPPPPPR/1NBQKBN1 w - - 4 5")
-                .unwrap();
+        let position = Position::new_from_fen("1nbqkbn1/rppppppr/p6p/8/8/P6P/RPPPPPPR/1NBQKBN1 w - - 4 5").unwrap();
 
         assert_eq!(position.castling_availability(), CastlingRight::empty());
     }
 
     #[test]
     fn test_new_from_fen_partial_castling_rights() {
-        let position =
-            Position::new_from_fen("1nbqkbnr/rppppppp/p7/8/8/7P/PPPPPPPR/RNBQKBN1 w Qk - 2 3")
-                .unwrap();
+        let position = Position::new_from_fen("1nbqkbnr/rppppppp/p7/8/8/7P/PPPPPPPR/RNBQKBN1 w Qk - 2 3").unwrap();
 
-        assert_eq!(
-            position.castling_availability(),
-            CastlingRight::BLACK_KINGSIDE | CastlingRight::WHITE_QUEENSIDE
-        );
+        assert_eq!(position.castling_availability(), CastlingRight::BLACK_KINGSIDE | CastlingRight::WHITE_QUEENSIDE);
     }
 
     #[test]
@@ -552,17 +507,12 @@ mod tests {
     fn test_new_from_fen_chess960_castling_path_outside_king_rook() {
         let position = Position::new_from_fen("6k1/8/8/8/8/8/8/1R4KR w K - 0 1").unwrap();
 
-        assert_eq!(
-            Square::F1 | Square::F8,
-            position.castling_path(CastlingSide::Kingside)
-        );
+        assert_eq!(Square::F1 | Square::F8, position.castling_path(CastlingSide::Kingside));
     }
 
     #[test]
     fn test_new_from_fen_en_passant_square() {
-        let position =
-            Position::new_from_fen("rnbqkbnr/1pp1pppp/p7/3pP3/8/8/PPPP1PPP/RNBQKBNR w KQkq d6 0 3")
-                .unwrap();
+        let position = Position::new_from_fen("rnbqkbnr/1pp1pppp/p7/3pP3/8/8/PPPP1PPP/RNBQKBNR w KQkq d6 0 3").unwrap();
 
         assert_eq!(position.en_passant_square(), Some(Square::D6));
     }

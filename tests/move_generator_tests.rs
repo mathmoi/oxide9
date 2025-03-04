@@ -10,10 +10,7 @@ const CARGO_MANIFEST_DIR_ENV_VARIABLE: &str = "CARGO_MANIFEST_DIR";
 /// Errors that are related to the test harness.
 #[derive(Error, Debug)]
 enum TestHarnessError {
-    #[error(
-        "The {} environment variable cannot be red",
-        CARGO_MANIFEST_DIR_ENV_VARIABLE
-    )]
+    #[error("The {} environment variable cannot be red", CARGO_MANIFEST_DIR_ENV_VARIABLE)]
     ManifestDirNotFound,
 
     #[error("Resource path not found: {:?}", .0)]
@@ -65,10 +62,7 @@ enum MoveGeneratorTestError {
     TestDataParsingError(#[from] TestDataError),
 
     #[error("---- {} ----\n{}", .test_name, .test_failure_error)]
-    TestFailed {
-        test_name: String,
-        test_failure_error: TestFailureError,
-    },
+    TestFailed { test_name: String, test_failure_error: TestFailureError },
 }
 
 /// A test case for the move generator.
@@ -113,8 +107,8 @@ struct TestMoveDetails {
 
 /// Get the path to a resource file.
 fn get_resource_path(relative_path: &str) -> Result<PathBuf, TestHarnessError> {
-    let manifest_dir = std::env::var(CARGO_MANIFEST_DIR_ENV_VARIABLE)
-        .map_err(|_| TestHarnessError::ManifestDirNotFound)?;
+    let manifest_dir =
+        std::env::var(CARGO_MANIFEST_DIR_ENV_VARIABLE).map_err(|_| TestHarnessError::ManifestDirNotFound)?;
     let mut path = PathBuf::from(manifest_dir);
     path.push(relative_path);
 
@@ -138,13 +132,9 @@ fn compare_moves_set(expected: &[Move], actual: &[Move]) -> (HashSet<Move>, Hash
 
 /// Run a single test case.
 fn run_test(test: Test) -> Result<(), MoveGeneratorTestError> {
-    let position =
-        Position::new_from_fen(&test.fen).or(Err(TestDataError::UnableToParseFen(test.fen)))?;
-    let expected_moves: Result<Vec<Move>, MoveGeneratorTestError> = test
-        .moves
-        .iter()
-        .map(|m| Move::try_from(&m.details))
-        .collect();
+    let position = Position::new_from_fen(&test.fen).or(Err(TestDataError::UnableToParseFen(test.fen)))?;
+    let expected_moves: Result<Vec<Move>, MoveGeneratorTestError> =
+        test.moves.iter().map(|m| Move::try_from(&m.details)).collect();
     let expected_moves = expected_moves?;
 
     let actual_moves = generate_moves(&position);
@@ -177,9 +167,7 @@ fn parse_piece(value: char) -> Result<Piece, TestDataError> {
 }
 
 fn parse_optional_piece(value: Option<char>) -> Result<Option<Piece>, TestDataError> {
-    value
-        .map(|c| Piece::try_from(c).map_err(|_| TestDataError::CannotParsePiece(c.to_string())))
-        .transpose()
+    value.map(|c| Piece::try_from(c).map_err(|_| TestDataError::CannotParsePiece(c.to_string()))).transpose()
 }
 
 /// Convert a `TestMoveDetails`, which is a move in the test data, to a `Move`.
@@ -195,12 +183,9 @@ impl TryFrom<&TestMoveDetails> for Move {
 
         Ok(match value.move_type {
             MoveType::Basic => Move::new(from_square, to_square, piece),
-            MoveType::Capture => Move::new_capture(
-                from_square,
-                to_square,
-                piece,
-                capture.ok_or(TestDataError::MissingCapturedPiece)?,
-            ),
+            MoveType::Capture => {
+                Move::new_capture(from_square, to_square, piece, capture.ok_or(TestDataError::MissingCapturedPiece)?)
+            }
             MoveType::KingSideCastle => Move::new_castling(
                 from_square,
                 to_square,
@@ -227,9 +212,7 @@ impl TryFrom<&TestMoveDetails> for Move {
                 capture.ok_or(TestDataError::MissingCapturedPiece)?,
                 promotion.ok_or(TestDataError::MissingPromotionPiece)?,
             ),
-            MoveType::TwoSquarePawnPush => {
-                Move::new_two_square_pawn_push(from_square, to_square, piece)
-            }
+            MoveType::TwoSquarePawnPush => Move::new_two_square_pawn_push(from_square, to_square, piece),
         })
     }
 }
@@ -237,11 +220,9 @@ impl TryFrom<&TestMoveDetails> for Move {
 /// Read the tests data from the file.
 fn read_tests_data() -> Result<Vec<Test>, MoveGeneratorTestError> {
     let tests_file_path = get_resource_path("assets/tests/move_generator_tests.json")?;
-    let file = File::open(&tests_file_path)
-        .map_err(|_| TestHarnessError::CannotReadTestDataFile(tests_file_path))?;
+    let file = File::open(&tests_file_path).map_err(|_| TestHarnessError::CannotReadTestDataFile(tests_file_path))?;
     let reader = BufReader::new(file);
-    let tests: Vec<Test> = serde_json::from_reader(reader)
-        .map_err(|e| TestHarnessError::CannotParseTestDataFile(e))?;
+    let tests: Vec<Test> = serde_json::from_reader(reader).map_err(|e| TestHarnessError::CannotParseTestDataFile(e))?;
     Ok(tests)
 }
 
@@ -263,15 +244,9 @@ fn run_all_tests() -> Result<(), MoveGeneratorTestError> {
                 "ok".green()
             }
 
-            Err(MoveGeneratorTestError::TestFailed {
-                test_name,
-                test_failure_error,
-            }) => {
+            Err(MoveGeneratorTestError::TestFailed { test_name, test_failure_error }) => {
                 failed += 1;
-                failures.push(MoveGeneratorTestError::TestFailed {
-                    test_name,
-                    test_failure_error,
-                });
+                failures.push(MoveGeneratorTestError::TestFailed { test_name, test_failure_error });
                 "FAILED".red()
             }
 
@@ -290,11 +265,7 @@ fn run_all_tests() -> Result<(), MoveGeneratorTestError> {
 
     println!(
         "\ntest result: {}. {} passed; {} failed; finished in {:.2}s\n",
-        if failed == 0 {
-            "ok".green()
-        } else {
-            "FAILED".red()
-        },
+        if failed == 0 { "ok".green() } else { "FAILED".red() },
         passed,
         failed,
         seconds

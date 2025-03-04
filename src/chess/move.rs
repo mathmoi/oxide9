@@ -97,42 +97,17 @@ pub struct Move {
 impl Move {
     /// This is a constructor for a new move that is basic (i.e., not a capture, promotion, etc.).
     pub fn new(from_square: Square, to_square: Square, piece: Piece) -> Self {
-        Self {
-            from_square,
-            to_square,
-            piece,
-            move_type: MoveType::Basic,
-        }
+        Self { from_square, to_square, piece, move_type: MoveType::Basic }
     }
 
     /// This is a constructor for a new move that is a capture.
-    pub fn new_capture(
-        from_square: Square,
-        to_square: Square,
-        piece: Piece,
-        capture: Piece,
-    ) -> Self {
-        Self {
-            from_square,
-            to_square,
-            piece,
-            move_type: MoveType::Capture(capture),
-        }
+    pub fn new_capture(from_square: Square, to_square: Square, piece: Piece, capture: Piece) -> Self {
+        Self { from_square, to_square, piece, move_type: MoveType::Capture(capture) }
     }
 
     /// Creates a new move that is a promotion.
-    pub fn new_promotion(
-        from_square: Square,
-        to_square: Square,
-        piece: Piece,
-        promotion: Piece,
-    ) -> Self {
-        Self {
-            from_square,
-            to_square,
-            piece,
-            move_type: MoveType::Promotion(promotion),
-        }
+    pub fn new_promotion(from_square: Square, to_square: Square, piece: Piece, promotion: Piece) -> Self {
+        Self { from_square, to_square, piece, move_type: MoveType::Promotion(promotion) }
     }
 
     /// Creates a new move that is both a capture and a promotion.
@@ -143,47 +118,22 @@ impl Move {
         capture: Piece,
         promotion: Piece,
     ) -> Self {
-        Self {
-            from_square,
-            to_square,
-            piece,
-            move_type: MoveType::CapturePromotion { capture, promotion },
-        }
+        Self { from_square, to_square, piece, move_type: MoveType::CapturePromotion { capture, promotion } }
     }
 
     /// Creates a new move that is a two-square pawn push.
     pub fn new_two_square_pawn_push(from_square: Square, to_square: Square, piece: Piece) -> Self {
-        Self {
-            from_square,
-            to_square,
-            piece,
-            move_type: MoveType::TwoSquarePawnPush,
-        }
+        Self { from_square, to_square, piece, move_type: MoveType::TwoSquarePawnPush }
     }
 
     /// Creates a new move that is a capture of a pawn en passant.
     pub fn new_en_passant(from_square: Square, to_square: Square, piece: Piece) -> Self {
-        Self {
-            from_square,
-            to_square,
-            piece,
-            move_type: MoveType::EnPassant,
-        }
+        Self { from_square, to_square, piece, move_type: MoveType::EnPassant }
     }
 
     /// Creates a new move that is a castling move.
-    pub fn new_castling(
-        from_square: Square,
-        to_square: Square,
-        piece: Piece,
-        castling: CastlingRight,
-    ) -> Self {
-        Self {
-            from_square,
-            to_square,
-            piece,
-            move_type: MoveType::Castling(castling),
-        }
+    pub fn new_castling(from_square: Square, to_square: Square, piece: Piece, castling: CastlingRight) -> Self {
+        Self { from_square, to_square, piece, move_type: MoveType::Castling(castling) }
     }
 
     /// Returns the source square of the move.
@@ -260,12 +210,7 @@ impl From<u32> for Move {
             _ => unreachable!(),
         };
 
-        Self {
-            from_square: from,
-            to_square: to,
-            piece,
-            move_type,
-        }
+        Self { from_square: from, to_square: to, piece, move_type }
     }
 }
 
@@ -282,18 +227,12 @@ mod tests {
             assert_eq!(u8::from(MoveType::Capture(Piece::WHITE_PAWN)), 1);
             assert_eq!(u8::from(MoveType::Promotion(Piece::WHITE_QUEEN)), 2);
             assert_eq!(
-                u8::from(MoveType::CapturePromotion {
-                    capture: Piece::BLACK_KNIGHT,
-                    promotion: Piece::WHITE_QUEEN
-                }),
+                u8::from(MoveType::CapturePromotion { capture: Piece::BLACK_KNIGHT, promotion: Piece::WHITE_QUEEN }),
                 3
             );
             assert_eq!(u8::from(MoveType::TwoSquarePawnPush), 4);
             assert_eq!(u8::from(MoveType::EnPassant), 5);
-            assert_eq!(
-                u8::from(MoveType::Castling(CastlingRight::WHITE_KINGSIDE)),
-                6
-            );
+            assert_eq!(u8::from(MoveType::Castling(CastlingRight::WHITE_KINGSIDE)), 6);
         }
     }
 
@@ -352,15 +291,11 @@ mod tests {
             let piece = Piece::WHITE_PAWN;
             let capture = Piece::BLACK_KNIGHT;
             let promotion = Piece::WHITE_QUEEN;
-            let capture_promotion_move =
-                Move::new_capture_promotion(from, to, piece, capture, promotion);
+            let capture_promotion_move = Move::new_capture_promotion(from, to, piece, capture, promotion);
             assert_eq!(capture_promotion_move.from_square(), from);
             assert_eq!(capture_promotion_move.to_square(), to);
             assert_eq!(capture_promotion_move.piece(), piece);
-            assert_eq!(
-                capture_promotion_move.move_type(),
-                MoveType::CapturePromotion { capture, promotion }
-            );
+            assert_eq!(capture_promotion_move.move_type(), MoveType::CapturePromotion { capture, promotion });
         }
 
         #[test]
@@ -372,10 +307,7 @@ mod tests {
             assert_eq!(two_square_pawn_push_move.from_square(), from);
             assert_eq!(two_square_pawn_push_move.to_square(), to);
             assert_eq!(two_square_pawn_push_move.piece(), piece);
-            assert_eq!(
-                two_square_pawn_push_move.move_type(),
-                MoveType::TwoSquarePawnPush
-            );
+            assert_eq!(two_square_pawn_push_move.move_type(), MoveType::TwoSquarePawnPush);
         }
 
         #[test]
@@ -411,12 +343,7 @@ mod tests {
             let capture = Piece::BLACK_PAWN;
             let move_type = MoveType::Capture(capture);
 
-            let chess_move = Move {
-                from_square: from,
-                to_square: to,
-                piece,
-                move_type,
-            };
+            let chess_move = Move { from_square: from, to_square: to, piece, move_type };
 
             assert_eq!(chess_move.from_square(), from);
             assert_eq!(chess_move.to_square(), to);
@@ -427,18 +354,8 @@ mod tests {
         #[test]
         fn test_move_into_and_from_u32() {
             let basic = Move::new(Square::A1, Square::A2, Piece::WHITE_ROOK);
-            let capture = Move::new_capture(
-                Square::A1,
-                Square::B2,
-                Piece::WHITE_QUEEN,
-                Piece::BLACK_KNIGHT,
-            );
-            let promotion = Move::new_promotion(
-                Square::A7,
-                Square::A8,
-                Piece::WHITE_PAWN,
-                Piece::WHITE_QUEEN,
-            );
+            let capture = Move::new_capture(Square::A1, Square::B2, Piece::WHITE_QUEEN, Piece::BLACK_KNIGHT);
+            let promotion = Move::new_promotion(Square::A7, Square::A8, Piece::WHITE_PAWN, Piece::WHITE_QUEEN);
             let capture_promotion = Move::new_capture_promotion(
                 Square::H7,
                 Square::G8,
@@ -446,36 +363,21 @@ mod tests {
                 Piece::BLACK_KNIGHT,
                 Piece::WHITE_QUEEN,
             );
-            let two_square_pawn_push =
-                Move::new_two_square_pawn_push(Square::E2, Square::E4, Piece::WHITE_PAWN);
+            let two_square_pawn_push = Move::new_two_square_pawn_push(Square::E2, Square::E4, Piece::WHITE_PAWN);
             let en_passant = Move::new_en_passant(Square::D5, Square::E6, Piece::WHITE_PAWN);
-            let kingside_castling = Move::new_castling(
-                Square::E1,
-                Square::G1,
-                Piece::WHITE_KING,
-                CastlingRight::WHITE_KINGSIDE,
-            );
-            let queenside_castling = Move::new_castling(
-                Square::E1,
-                Square::C1,
-                Piece::WHITE_KING,
-                CastlingRight::WHITE_QUEENSIDE,
-            );
+            let kingside_castling =
+                Move::new_castling(Square::E1, Square::G1, Piece::WHITE_KING, CastlingRight::WHITE_KINGSIDE);
+            let queenside_castling =
+                Move::new_castling(Square::E1, Square::C1, Piece::WHITE_KING, CastlingRight::WHITE_QUEENSIDE);
 
             assert_eq!(basic, Move::from(u32::from(basic)));
             assert_eq!(capture, Move::from(u32::from(capture)));
             assert_eq!(promotion, Move::from(u32::from(promotion)));
             assert_eq!(capture_promotion, Move::from(u32::from(capture_promotion)));
-            assert_eq!(
-                two_square_pawn_push,
-                Move::from(u32::from(two_square_pawn_push))
-            );
+            assert_eq!(two_square_pawn_push, Move::from(u32::from(two_square_pawn_push)));
             assert_eq!(en_passant, Move::from(u32::from(en_passant)));
             assert_eq!(kingside_castling, Move::from(u32::from(kingside_castling)));
-            assert_eq!(
-                queenside_castling,
-                Move::from(u32::from(queenside_castling))
-            );
+            assert_eq!(queenside_castling, Move::from(u32::from(queenside_castling)));
         }
     }
 }

@@ -33,16 +33,7 @@ pub enum File {
 
 impl File {
     /// Represents all files on a chess board.
-    pub const ALL: [File; 8] = [
-        File::A,
-        File::B,
-        File::C,
-        File::D,
-        File::E,
-        File::F,
-        File::G,
-        File::H,
-    ];
+    pub const ALL: [File; 8] = [File::A, File::B, File::C, File::D, File::E, File::F, File::G, File::H];
 
     /// Returns a new file that is moved right by the specified number of files without checking for
     /// bounds.
@@ -169,16 +160,7 @@ pub enum Rank {
 
 impl Rank {
     /// Represents all ranks on a chess board.
-    pub const ALL: [Rank; 8] = [
-        Rank::R1,
-        Rank::R2,
-        Rank::R3,
-        Rank::R4,
-        Rank::R5,
-        Rank::R6,
-        Rank::R7,
-        Rank::R8,
-    ];
+    pub const ALL: [Rank; 8] = [Rank::R1, Rank::R2, Rank::R3, Rank::R4, Rank::R5, Rank::R6, Rank::R7, Rank::R8];
 
     /// Returns the rank relative to the specified color. If the color is white, the rank is
     /// returned, if the color is black, the rank is flipped.
@@ -920,10 +902,7 @@ mod tests {
             assert_eq!(Square::try_from("f6"), Ok(Square::F6));
             assert_eq!(Square::try_from("g7"), Ok(Square::G7));
             assert_eq!(Square::try_from("h8"), Ok(Square::H8));
-            assert_eq!(
-                Square::try_from("i9"),
-                Err(CoordinatesError::InvalidCharacter)
-            );
+            assert_eq!(Square::try_from("i9"), Err(CoordinatesError::InvalidCharacter));
             assert_eq!(Square::try_from("x"), Err(CoordinatesError::InvalidString));
         }
     }

@@ -92,14 +92,8 @@ impl PieceType {
     pub const COUNT: usize = 6;
 
     /// Represents all piece types.
-    pub const ALL: [PieceType; 6] = [
-        PieceType::Pawn,
-        PieceType::Knight,
-        PieceType::Bishop,
-        PieceType::Rook,
-        PieceType::Queen,
-        PieceType::King,
-    ];
+    pub const ALL: [PieceType; 6] =
+        [PieceType::Pawn, PieceType::Knight, PieceType::Bishop, PieceType::Rook, PieceType::Queen, PieceType::King];
 }
 
 impl From<PieceType> for u8 {
@@ -393,34 +387,16 @@ mod tests {
         #[test]
         fn test_constant_pieces() {
             assert_eq!(Piece::WHITE_PAWN, Piece::new(Color::White, PieceType::Pawn));
-            assert_eq!(
-                Piece::WHITE_KNIGHT,
-                Piece::new(Color::White, PieceType::Knight)
-            );
-            assert_eq!(
-                Piece::WHITE_BISHOP,
-                Piece::new(Color::White, PieceType::Bishop)
-            );
+            assert_eq!(Piece::WHITE_KNIGHT, Piece::new(Color::White, PieceType::Knight));
+            assert_eq!(Piece::WHITE_BISHOP, Piece::new(Color::White, PieceType::Bishop));
             assert_eq!(Piece::WHITE_ROOK, Piece::new(Color::White, PieceType::Rook));
-            assert_eq!(
-                Piece::WHITE_QUEEN,
-                Piece::new(Color::White, PieceType::Queen)
-            );
+            assert_eq!(Piece::WHITE_QUEEN, Piece::new(Color::White, PieceType::Queen));
             assert_eq!(Piece::WHITE_KING, Piece::new(Color::White, PieceType::King));
             assert_eq!(Piece::BLACK_PAWN, Piece::new(Color::Black, PieceType::Pawn));
-            assert_eq!(
-                Piece::BLACK_KNIGHT,
-                Piece::new(Color::Black, PieceType::Knight)
-            );
-            assert_eq!(
-                Piece::BLACK_BISHOP,
-                Piece::new(Color::Black, PieceType::Bishop)
-            );
+            assert_eq!(Piece::BLACK_KNIGHT, Piece::new(Color::Black, PieceType::Knight));
+            assert_eq!(Piece::BLACK_BISHOP, Piece::new(Color::Black, PieceType::Bishop));
             assert_eq!(Piece::BLACK_ROOK, Piece::new(Color::Black, PieceType::Rook));
-            assert_eq!(
-                Piece::BLACK_QUEEN,
-                Piece::new(Color::Black, PieceType::Queen)
-            );
+            assert_eq!(Piece::BLACK_QUEEN, Piece::new(Color::Black, PieceType::Queen));
             assert_eq!(Piece::BLACK_KING, Piece::new(Color::Black, PieceType::King));
         }
 

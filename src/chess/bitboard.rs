@@ -281,10 +281,7 @@ mod tests {
     fn test_bitboard_iterator() {
         let bb = Bitboard(0x8100000000000081);
         let squares: Vec<Square> = bb.into_iter().collect();
-        assert_eq!(
-            squares,
-            vec![Square::A1, Square::H1, Square::A8, Square::H8]
-        );
+        assert_eq!(squares, vec![Square::A1, Square::H1, Square::A8, Square::H8]);
     }
 
     #[test]
@@ -318,29 +315,17 @@ mod tests {
     fn test_between() {
         assert_eq!(Bitboard::between(Square::A1, Square::A1), Bitboard::EMPTY);
         assert_eq!(Bitboard::between(Square::A1, Square::A2), Bitboard::EMPTY);
-        assert_eq!(
-            Bitboard::between(Square::A1, Square::C1),
-            Bitboard::from(Square::B1)
-        );
+        assert_eq!(Bitboard::between(Square::A1, Square::C1), Bitboard::from(Square::B1));
         assert_eq!(
             Bitboard::between(Square::H7, Square::B7),
             Square::C7 | Square::D7 | Square::E7 | Square::F7 | Square::G7
         );
-        assert_eq!(
-            Bitboard::between(Square::D5, Square::D2),
-            Square::D3 | Square::D4
-        );
-        assert_eq!(
-            Bitboard::between(Square::D5, Square::H1),
-            Square::E4 | Square::F3 | Square::G2
-        );
+        assert_eq!(Bitboard::between(Square::D5, Square::D2), Square::D3 | Square::D4);
+        assert_eq!(Bitboard::between(Square::D5, Square::H1), Square::E4 | Square::F3 | Square::G2);
         assert_eq!(
             Bitboard::between(Square::A1, Square::H8),
             Square::B2 | Square::C3 | Square::D4 | Square::E5 | Square::F6 | Square::G7
         );
-        assert_eq!(
-            Bitboard::between(Square::F7, Square::A2),
-            Square::E6 | Square::D5 | Square::C4 | Square::B3
-        );
+        assert_eq!(Bitboard::between(Square::F7, Square::A2), Square::E6 | Square::D5 | Square::C4 | Square::B3);
     }
 }

@@ -165,7 +165,7 @@ impl Display for PieceType {
 /// A `Piece` is a combination of a `Color` and a `PieceType`. It is represented as a single byte,
 /// with the lower bits representing the `Color` and the higher bits representing the `PieceType`.
 /// The values 0 to 11 represent all possible combinations of `Color` and `PieceType`.
-#[derive(Copy, Clone, PartialEq)]
+#[derive(Copy, Clone, PartialEq, Eq, Hash)]
 pub struct Piece(u8);
 
 #[allow(dead_code)]

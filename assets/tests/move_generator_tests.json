@@ -1,0 +1,272 @@
+[
+    {
+        "fen": "4k3/8/8/8/8/8/8/4K3 w - - 0 1",
+        "description": "White king on starting square",
+        "moves": [
+            {
+                "move": {
+                    "from": "e1",
+                    "to": "f2",
+                    "piece": "K",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "e1f2",
+                "san": "Kf2",
+                "lan": "Ke1-f2",
+                "fen": "4k3/8/8/8/8/8/5K2/8 b - - 1 1"
+            },
+            {
+                "move": {
+                    "from": "e1",
+                    "to": "e2",
+                    "piece": "K",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "e1e2",
+                "san": "Ke2",
+                "lan": "Ke1-e2",
+                "fen": "4k3/8/8/8/8/8/4K3/8 b - - 1 1"
+            },
+            {
+                "move": {
+                    "from": "e1",
+                    "to": "d2",
+                    "piece": "K",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "e1d2",
+                "san": "Kd2",
+                "lan": "Ke1-d2",
+                "fen": "4k3/8/8/8/8/8/3K4/8 b - - 1 1"
+            },
+            {
+                "move": {
+                    "from": "e1",
+                    "to": "f1",
+                    "piece": "K",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "e1f1",
+                "san": "Kf1",
+                "lan": "Ke1-f1",
+                "fen": "4k3/8/8/8/8/8/8/5K2 b - - 1 1"
+            },
+            {
+                "move": {
+                    "from": "e1",
+                    "to": "d1",
+                    "piece": "K",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "e1d1",
+                "san": "Kd1",
+                "lan": "Ke1-d1",
+                "fen": "4k3/8/8/8/8/8/8/3K4 b - - 1 1"
+            }
+        ]
+    },
+    {
+        "fen": "4k3/8/8/8/8/8/8/4K3 b - - 0 1",
+        "description": "Black king on starting square",
+        "moves": [
+            {
+                "move": {
+                    "from": "e8",
+                    "to": "f8",
+                    "piece": "k",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "e8f8",
+                "san": "Kf8",
+                "lan": "Ke8-f8",
+                "fen": "5k2/8/8/8/8/8/8/4K3 w - - 1 2"
+            },
+            {
+                "move": {
+                    "from": "e8",
+                    "to": "d8",
+                    "piece": "k",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "e8d8",
+                "san": "Kd8",
+                "lan": "Ke8-d8",
+                "fen": "3k4/8/8/8/8/8/8/4K3 w - - 1 2"
+            },
+            {
+                "move": {
+                    "from": "e8",
+                    "to": "f7",
+                    "piece": "k",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "e8f7",
+                "san": "Kf7",
+                "lan": "Ke8-f7",
+                "fen": "8/5k2/8/8/8/8/8/4K3 w - - 1 2"
+            },
+            {
+                "move": {
+                    "from": "e8",
+                    "to": "e7",
+                    "piece": "k",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "e8e7",
+                "san": "Ke7",
+                "lan": "Ke8-e7",
+                "fen": "8/4k3/8/8/8/8/8/4K3 w - - 1 2"
+            },
+            {
+                "move": {
+                    "from": "e8",
+                    "to": "d7",
+                    "piece": "k",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "e8d7",
+                "san": "Kd7",
+                "lan": "Ke8-d7",
+                "fen": "8/3k4/8/8/8/8/8/4K3 w - - 1 2"
+            }
+        ]
+    },
+    {
+        "fen": "4k3/8/8/8/4K3/8/8/8 w - - 0 1",
+        "description": "White king on a middle square",
+        "moves": [
+            {
+                "move": {
+                    "from": "e4",
+                    "to": "f5",
+                    "piece": "K",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "e4f5",
+                "san": "Kf5",
+                "lan": "Ke4-f5",
+                "fen": "4k3/8/8/5K2/8/8/8/8 b - - 1 1"
+            },
+            {
+                "move": {
+                    "from": "e4",
+                    "to": "e5",
+                    "piece": "K",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "e4e5",
+                "san": "Ke5",
+                "lan": "Ke4-e5",
+                "fen": "4k3/8/8/4K3/8/8/8/8 b - - 1 1"
+            },
+            {
+                "move": {
+                    "from": "e4",
+                    "to": "d5",
+                    "piece": "K",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "e4d5",
+                "san": "Kd5",
+                "lan": "Ke4-d5",
+                "fen": "4k3/8/8/3K4/8/8/8/8 b - - 1 1"
+            },
+            {
+                "move": {
+                    "from": "e4",
+                    "to": "f4",
+                    "piece": "K",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "e4f4",
+                "san": "Kf4",
+                "lan": "Ke4-f4",
+                "fen": "4k3/8/8/8/5K2/8/8/8 b - - 1 1"
+            },
+            {
+                "move": {
+                    "from": "e4",
+                    "to": "d4",
+                    "piece": "K",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "e4d4",
+                "san": "Kd4",
+                "lan": "Ke4-d4",
+                "fen": "4k3/8/8/8/3K4/8/8/8 b - - 1 1"
+            },
+            {
+                "move": {
+                    "from": "e4",
+                    "to": "f3",
+                    "piece": "K",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "e4f3",
+                "san": "Kf3",
+                "lan": "Ke4-f3",
+                "fen": "4k3/8/8/8/8/5K2/8/8 b - - 1 1"
+            },
+            {
+                "move": {
+                    "from": "e4",
+                    "to": "e3",
+                    "piece": "K",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "e4e3",
+                "san": "Ke3",
+                "lan": "Ke4-e3",
+                "fen": "4k3/8/8/8/8/4K3/8/8 b - - 1 1"
+            },
+            {
+                "move": {
+                    "from": "e4",
+                    "to": "d3",
+                    "piece": "K",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "e4d3",
+                "san": "Kd3",
+                "lan": "Ke4-d3",
+                "fen": "4k3/8/8/8/8/3K4/8/8 b - - 1 1"
+            }
+        ]
+    }
+]

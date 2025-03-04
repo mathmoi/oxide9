@@ -29,7 +29,7 @@ impl From<CastlingSide> for usize {
 
 // This is a bitflags struct that represents the different types of castling moves that can be made.
 bitflags! {
-    #[derive(Debug, Clone, PartialEq, Copy)]
+    #[derive(Debug, Clone, PartialEq, Eq, Copy, Hash)]
     pub struct CastlingRight: u8 {
         const WHITE_KINGSIDE = 0b0001;
         const WHITE_QUEENSIDE = 0b0010;
@@ -60,7 +60,7 @@ impl CastlingRight {
 
 // This is an enum that represents the different types of moves that a piece can make.
 #[repr(u8)]
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy, Hash)]
 pub enum MoveType {
     Basic,
     Capture(Piece),
@@ -86,7 +86,7 @@ impl From<MoveType> for u8 {
 }
 
 // This is a struct that represents a move in a chess game.
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy, Hash)]
 pub struct Move {
     from_square: Square,
     to_square: Square,

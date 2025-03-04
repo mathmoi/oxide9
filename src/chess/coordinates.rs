@@ -285,7 +285,7 @@ impl TryFrom<char> for Rank {
 /// Squares are indexed from 0 to 63, starting from A1 and ending at H8 with A2 being at index 1.
 /// In other words, the file value is stored in the lower 3 bits and the rank value is stored in the
 /// next 3 bits. The last two bits are unused and always 0.
-#[derive(Copy, Clone, PartialEq)]
+#[derive(Copy, Clone, PartialEq, Eq, Hash)]
 pub struct Square(u8);
 
 #[allow(dead_code)]

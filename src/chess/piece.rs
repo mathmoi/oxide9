@@ -25,6 +25,9 @@ impl Color {
     /// Represents all colors of chess pieces.
     pub const ALL: [Color; 2] = [Color::White, Color::Black];
 
+    pub const WHITE_VALUE: u8 = 0;
+    pub const BLACK_VALUE: u8 = 1;
+
     /// Returns the opposite color.
     pub fn opposite(&self) -> Color {
         match self {
@@ -94,6 +97,13 @@ impl PieceType {
     /// Represents all piece types.
     pub const ALL: [PieceType; 6] =
         [PieceType::Pawn, PieceType::Knight, PieceType::Bishop, PieceType::Rook, PieceType::Queen, PieceType::King];
+
+    pub const KNIGHT_VALUE: u8 = 0;
+    pub const BISHOP_VALUE: u8 = 1;
+    pub const ROOK_VALUE: u8 = 2;
+    pub const QUEEN_VALUE: u8 = 3;
+    pub const KING_VALUE: u8 = 4;
+    pub const PAWN_VALUE: u8 = 5;
 }
 
 impl From<PieceType> for u8 {
@@ -198,7 +208,7 @@ impl Piece {
 
     /// Creates a new `Piece` with the given `Color` and `PieceType`.
     pub fn new(color: Color, piece_type: PieceType) -> Self {
-        Piece(u8::from(piece_type) << 1 | u8::from(color))
+        Piece((u8::from(piece_type) << 1) | u8::from(color))
     }
 
     /// Returns the Color of the piece.

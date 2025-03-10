@@ -16,6 +16,9 @@ impl CastlingSide {
 
     /// An array of all the castling sides.
     pub const ALL: [CastlingSide; Self::COUNT] = [CastlingSide::Kingside, CastlingSide::Queenside];
+
+    pub const KINGSIDE_VALUE: u8 = 0;
+    pub const QUEENSIDE_VALUE: u8 = 1;
 }
 
 impl From<CastlingSide> for usize {
@@ -177,7 +180,7 @@ impl From<Move> for u32 {
             MoveType::Capture(capture) => u8::from(capture) as u32,
             MoveType::Promotion(promotion) => u8::from(promotion) as u32,
             MoveType::CapturePromotion { capture, promotion } => {
-                u8::from(capture) as u32 | (u8::from(promotion) as u32) << 4
+                u8::from(capture) as u32 | ((u8::from(promotion) as u32) << 4)
             }
             MoveType::Castling(castling) => castling.bits() as u32,
             _ => 0,

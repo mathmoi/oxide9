@@ -1,5 +1,4 @@
-use super::{Move, Position};
+mod attacks;
+mod generation;
 
-pub fn generate_moves(position: &Position) -> Vec<Move> {
-    vec![]
-}
+pub use generation::{generate_moves, MoveGenerationType};

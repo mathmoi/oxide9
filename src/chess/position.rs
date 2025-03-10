@@ -69,7 +69,6 @@ impl Position {
             let king_to_file;
             let rook_to_file;
             let castling_side;
-            let castling_file;
 
             match c {
                 'K' | 'Q' | 'k' | 'q' | 'A'..='H' | 'a'..='h' => {
@@ -84,14 +83,14 @@ impl Position {
                 _ => return Err(FenError::InvalidCastlingAvailability),
             }
 
-            castling_file = match c {
+            let castling_file = match c {
                 'K' | 'k' => (self.bb_piece(Piece::new(color, PieceType::Rook))
-                    & Rank::R1.relative_to_color(color).into())
+                    & Bitboard::from(Rank::R1.relative_to_color(color)))
                 .msb()
                 .ok_or(FenError::InvalidCastlingAvailability)?
                 .file(),
                 'Q' | 'q' => (self.bb_piece(Piece::new(color, PieceType::Rook))
-                    & Rank::R1.relative_to_color(color).into())
+                    & Bitboard::from(Rank::R1.relative_to_color(color)))
                 .lsb()
                 .ok_or(FenError::InvalidCastlingAvailability)?
                 .file(),
@@ -255,8 +254,8 @@ impl Position {
                     continue;
                 }
 
-                let candidate_rooks =
-                    self.bb_piece(Piece::new(color, PieceType::Rook)) & Rank::R1.relative_to_color(color).into();
+                let candidate_rooks = self.bb_piece(Piece::new(color, PieceType::Rook))
+                    & Bitboard::from(Rank::R1.relative_to_color(color));
                 let outter_most_rook =
                     if side == CastlingSide::Queenside { candidate_rooks.lsb() } else { candidate_rooks.msb() }
                         .expect("There should be a candidate rook for castling.");
@@ -301,6 +300,11 @@ impl Position {
     /// Returns the bitboard representing the positions of all pieces of a specific type.
     pub fn bb_piece(&self, piece: Piece) -> Bitboard {
         self.bb_piece[usize::from(piece)]
+    }
+
+    /// Returns the bitboard representing the positions of all pieces.
+    pub fn bb_occupied(&self) -> Bitboard {
+        self.bb_color(Color::White) | self.bb_color(Color::Black)
     }
 
     /// Returns the color of the side to move.

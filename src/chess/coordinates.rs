@@ -14,6 +14,10 @@ pub enum CoordinatesError {
 /// Result type for the coordinates module
 pub type CoordinatesResult<T> = Result<T, CoordinatesError>;
 
+//======================================================================================================================
+// File (as in a file on a chess board)
+//======================================================================================================================
+
 /// Represents a file (column) on a chess board.
 ///
 /// Files are labeled from A to H, going from left to right when viewing the board from White's
@@ -88,7 +92,7 @@ impl File {
 impl Display for File {
     /// Formats the file as a single character.
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", (u8::from(*self) + ('a' as u8)) as char)
+        write!(f, "{}", (u8::from(*self) + b'a') as char)
     }
 }
 
@@ -110,7 +114,7 @@ impl From<File> for u8 {
 impl From<File> for char {
     /// Converts a `File` to a `char` value.
     fn from(file: File) -> Self {
-        (u8::from(file) + ('a' as u8)) as char
+        (u8::from(file) + b'a') as char
     }
 }
 
@@ -140,6 +144,10 @@ impl TryFrom<char> for File {
         }
     }
 }
+
+//======================================================================================================================
+// Rank (as in a rank on a chess board)
+//======================================================================================================================
 
 /// Represents a rank (row) on a chess board.
 ///
@@ -224,7 +232,7 @@ impl Rank {
 impl Display for Rank {
     /// Formats the rank as a single character.
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", (u8::from(*self) + ('1' as u8)) as char)
+        write!(f, "{}", (u8::from(*self) + b'1') as char)
     }
 }
 
@@ -261,6 +269,94 @@ impl TryFrom<char> for Rank {
         }
     }
 }
+
+//======================================================================================================================
+// Diagonals & Antidiagonals
+//======================================================================================================================
+
+/// Represents a diagonal on a chess board.
+///
+/// # Chess Board Diagonals
+///
+/// Diagonals run from the bottom left to the top right (positive diagonals, e.g. A1 to H8) on a standard 8x8 chess
+/// board. There are a total of 15 positive diagonals:
+///
+/// - The main diagonal runs from A1 to H8 and contains 8 squares
+/// - The diagonals parallel to the main diagonal contain fewer squares:
+///   - The diagonal from A2 to G8 (or B1 to H7) contains 7 squares
+///   - The diagonal from A3 to F8 (or C1 to H6) contains 6 squares
+///   - ...and so on
+/// - The shortest diagonals at the corners contain only 1 square (A8 and H1)
+///
+/// Diagonals are numbered 0-14, where:
+/// - Diagonal 0 is the single square A8
+/// - Diagonal 7 is the main diagonal from A1 to H8
+/// - Diagonal 14 is the single square H1
+#[derive(Copy, Clone, Debug, PartialEq)]
+pub struct Diagonal(u8);
+
+impl Diagonal {
+    /// Returns the total number of diagonals on a chess board.
+    pub const COUNT: usize = 15;
+}
+
+impl From<Diagonal> for u8 {
+    /// Converts a `Diagonal` to a `u8` value.
+    fn from(diagonal: Diagonal) -> Self {
+        diagonal.0
+    }
+}
+
+impl From<Diagonal> for usize {
+    /// Converts a `Diagonal` to a `usize` value.
+    fn from(diagonal: Diagonal) -> Self {
+        diagonal.0 as usize
+    }
+}
+
+/// Represents an antidiagonal on a chess board.
+///
+/// # Chess Board Antidiagonals
+///
+/// Antidiagonals run from the top left to bottom right (negative diagonals, e.g. A8 to H1) on a standard 8x8 chess
+/// board. There are a total of 15 antidiagonals:
+///
+/// - The main antidiagonal runs from A8 to H1 and contains 8 squares
+/// - The antidiagonals parallel to the main antidiagonal contain fewer squares:
+///   - The antidiagonal from A7 to G1 (or B8 to H2) contains 7 squares
+///   - The antidiagonal from A6 to F1 (or C8 to H3) contains 6 squares
+///   - ...and so on
+/// - The shortest antidiagonals at the corners contain only 1 square (A1 and H8)
+///
+/// Antidiagonals are numbered 0-14, where:
+/// - Antidiagonal 0 is the single square A1
+/// - Antidiagonal 7 is the main antidiagonal from A8 to H1
+/// - Antidiagonal 14 is the single square H8
+#[derive(Copy, Clone, Debug, PartialEq)]
+pub struct Antidiagonal(u8);
+
+impl Antidiagonal {
+    /// Returns the total number of diagonals on a chess board.
+    pub const COUNT: usize = 15;
+}
+
+impl From<Antidiagonal> for u8 {
+    /// Converts an `Antidiagonal` to a `u8` value.
+    fn from(antidiagonal: Antidiagonal) -> Self {
+        antidiagonal.0
+    }
+}
+
+impl From<Antidiagonal> for usize {
+    /// Converts an `Antidiagonal` to a `usize` value.
+    fn from(antidiagonal: Antidiagonal) -> Self {
+        antidiagonal.0 as usize
+    }
+}
+
+//======================================================================================================================
+// Square (as in a square on a chess board)
+//======================================================================================================================
 
 /// Represents a square on a chess board.
 ///
@@ -355,7 +451,7 @@ impl Square {
 
     /// Creates a new square from a file and a rank.
     pub fn new(file: File, rank: Rank) -> Square {
-        Square(u8::from(rank) << 3 | u8::from(file))
+        Square((u8::from(rank) << 3) | u8::from(file))
     }
 
     /// Returns the rank of the square.
@@ -366,6 +462,16 @@ impl Square {
     /// Returns the file of the square.
     pub fn file(self) -> File {
         (self.0 & 0b111).into()
+    }
+
+    /// Returns the diagonal of the square.
+    pub fn diagonal(self) -> Diagonal {
+        Diagonal(7u8 + u8::from(self.file()) - u8::from(self.rank()))
+    }
+
+    /// Returns the antidiagonal of the square.
+    pub fn antidiagonal(self) -> Antidiagonal {
+        Antidiagonal(u8::from(self.file()) + u8::from(self.rank()))
     }
 
     /// Returns a new square that is moved up by the specified number of ranks without checking for
@@ -766,6 +872,22 @@ mod tests {
             assert_eq!(Rank::R8, Square::A8.rank());
             assert_eq!(File::H, Square::H8.file());
             assert_eq!(Rank::R8, Square::H8.rank());
+        }
+
+        #[test]
+        fn test_square_diagonals() {
+            assert_eq!(Diagonal(0), Square::A8.diagonal());
+            assert_eq!(Diagonal(7), Square::A1.diagonal());
+            assert_eq!(Diagonal(7), Square::H8.diagonal());
+            assert_eq!(Diagonal(14), Square::H1.diagonal());
+        }
+
+        #[test]
+        fn test_square_antidiagonals() {
+            assert_eq!(Antidiagonal(0), Square::A1.antidiagonal());
+            assert_eq!(Antidiagonal(7), Square::A8.antidiagonal());
+            assert_eq!(Antidiagonal(7), Square::H1.antidiagonal());
+            assert_eq!(Antidiagonal(14), Square::H8.antidiagonal());
         }
 
         #[test]

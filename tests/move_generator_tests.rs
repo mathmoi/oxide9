@@ -1,5 +1,7 @@
 use colored::*;
-use oxide9::chess::{generate_moves, CastlingRight, CastlingSide, Move, Piece, Position, Square};
+use oxide9::chess::{
+    generate_moves, CastlingRight, CastlingSide, Move, MoveGenerationType, Piece, PieceType, Position, Rank, Square,
+};
 use serde::Deserialize;
 use std::{collections::HashSet, fs::File, io::BufReader, path::PathBuf, time::Instant};
 use thiserror::Error;
@@ -107,9 +109,7 @@ struct TestMoveDetails {
 
 /// Get the path to a resource file.
 fn get_resource_path(relative_path: &str) -> Result<PathBuf, TestHarnessError> {
-    let manifest_dir =
-        std::env::var(CARGO_MANIFEST_DIR_ENV_VARIABLE).map_err(|_| TestHarnessError::ManifestDirNotFound)?;
-    let mut path = PathBuf::from(manifest_dir);
+    let mut path = std::env::current_dir().map_err(|_| TestHarnessError::ManifestDirNotFound)?;
     path.push(relative_path);
 
     if !path.exists() {
@@ -137,7 +137,8 @@ fn run_test(test: Test) -> Result<(), MoveGeneratorTestError> {
         test.moves.iter().map(|m| Move::try_from(&m.details)).collect();
     let expected_moves = expected_moves?;
 
-    let actual_moves = generate_moves(&position);
+    let mut actual_moves: Vec<Move> = vec![];
+    generate_moves::<{ MoveGenerationType::ALL_VALUE }>(&position, &mut actual_moves);
 
     let (missing, extra) = compare_moves_set(&expected_moves, &actual_moves);
 
@@ -182,7 +183,17 @@ impl TryFrom<&TestMoveDetails> for Move {
         let promotion = parse_optional_piece(value.promotion)?;
 
         Ok(match value.move_type {
-            MoveType::Basic => Move::new(from_square, to_square, piece),
+            MoveType::Basic => {
+                let color = piece.color();
+                if piece.piece_type() == PieceType::Pawn
+                    && from_square.rank() == Rank::R2.relative_to_color(color)
+                    && to_square.rank() == Rank::R4.relative_to_color(color)
+                {
+                    Move::new_two_square_pawn_push(from_square, to_square, piece)
+                } else {
+                    Move::new(from_square, to_square, piece)
+                }
+            }
             MoveType::Capture => {
                 Move::new_capture(from_square, to_square, piece, capture.ok_or(TestDataError::MissingCapturedPiece)?)
             }

@@ -296,7 +296,6 @@ mod pext_sliders {
     }
 }
 
-// TODO : Check if making this a const has any performance benefits
 /// Lookup table for all squares attacked by a king on a given square.
 static KING_ATTACKS: OnceLock<[Bitboard; Square::COUNT]> = OnceLock::new();
 

@@ -27,14 +27,6 @@ impl Color {
 
     pub const WHITE_VALUE: u8 = 0;
     pub const BLACK_VALUE: u8 = 1;
-
-    /// Returns the opposite color.
-    pub fn opposite(&self) -> Color {
-        match self {
-            Color::White => Color::Black,
-            Color::Black => Color::White,
-        }
-    }
 }
 
 impl Display for Color {
@@ -76,6 +68,18 @@ impl From<u8> for Color {
     fn from(value: u8) -> Self {
         assert!(value <= Color::Black.into());
         unsafe { std::mem::transmute(value) }
+    }
+}
+
+impl std::ops::Not for Color {
+    type Output = Color;
+
+    /// Returns the opposite color.
+    fn not(self) -> Self::Output {
+        match self {
+            Color::White => Color::Black,
+            Color::Black => Color::White,
+        }
     }
 }
 
@@ -313,8 +317,8 @@ mod tests {
 
         #[test]
         fn test_opposite() {
-            assert_eq!(Color::White.opposite(), Color::Black);
-            assert_eq!(Color::Black.opposite(), Color::White);
+            assert_eq!(!Color::White, Color::Black);
+            assert_eq!(!Color::Black, Color::White);
         }
     }
 

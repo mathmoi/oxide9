@@ -183,51 +183,46 @@ impl Bitboard {
         unsafe { std::arch::x86_64::_pext_u64(self.0, mask.0) }
     }
 
-    /// Returns whether the bitboard is empty.
-    pub fn is_empty(self) -> bool {
-        self == Bitboard::EMPTY
-    }
-
-    /// Returns a bitboard with all squares between two squares.
-    ///
-    /// This function accesses a pre-computed lookup table to efficiently retrieve a bitboard containing all squares on
-    /// the path between `from` and `to` (excluding the endpoints themselves). The function works for orthogonal
-    /// (rank/file) and diagonal paths.
-    ///
-    /// # Arguments
-    ///
-    /// * `from` - The starting `Square`
-    /// * `to` - The ending `Square`
+    /// Checks if the bitboard has no bits set (is completely empty).
     ///
     /// # Returns
+    /// `true` if the bitboard has no bits set, `false` otherwise.
+    pub fn is_empty(self) -> bool {
+        self.0 == 0
+    }
+
+    /// Determines if the bitboard has more than one bit set to 1.
     ///
-    /// A `Bitboard` with set bits representing all squares between `from` and `to`, not including the endpoints.
-    /// Returns an empty bitboard if the squares are not on the same rank, file, or diagonal.
+    /// This function efficiently checks whether a bitboard contains at least two set bits, without needing to count all
+    /// bits.
     ///
-    /// # Examples
+    /// # Returns
+    /// `true` if the bitboard has two or more bits set to 1, `false` if it has zero or one bit set.
     ///
-    /// ```
-    /// use oxide9::chess::{Bitboard, Square};
+    /// # Note
+    /// Uses a bit manipulation trick: for any number n, (n & (n-1)) clears the least significant set bit. If the result
+    /// is non-zero, there must be at least one more set bit.
+    pub fn has_more_than_one(self) -> bool {
+        (self.0 & (self.0 - 1)) != 0
+    }
+
+    /// Returns a bitboard with all squares between two squares, including the to square.
     ///
-    /// // Get squares between e1 and e8 (vertical line)
-    /// let path = Bitboard::between(Square::E1, Square::E8);
-    /// // Result has bits set for e2, e3, e4, e5, e6, e7
-    ///
-    /// // Get squares between a1 and h8 (diagonal)
-    /// let diag = Bitboard::between(Square::A1, Square::H8);
-    /// // Result has bits set for b2, c3, d4, e5, f6, g7
-    ///
-    /// // Squares not on the same line
-    /// let empty = Bitboard::between(Square::A1, Square::B8);
-    /// // Result is an empty bitboard
-    /// ```
+    /// This function accesses a pre-computed lookup table to efficiently retrieve a bitboard containing all squares on
+    /// the path between `from` and `to` (excluding from and including to). The function works for orthogonal
+    /// (rank/file) and diagonal paths. If the squares are not on the same rank, file, or diagonal, the function returns
+    /// a bitboard with only the to square set.
     pub fn between(from: Square, to: Square) -> Bitboard {
         let lookup = BITBOARD_BETWEEN.get_or_init(|| {
-            let directions: [Box<dyn Fn(Square) -> CoordinatesResult<Square>>; 4] = [
+            let directions: [Box<dyn Fn(Square) -> CoordinatesResult<Square>>; 8] = [
                 Box::new(|square| square.right(1)),
+                Box::new(|square| square.left(1)),
                 Box::new(|square| square.up(1)),
+                Box::new(|square| square.down(1)),
                 Box::new(|square| square.right(1).and_then(|square| square.up(1))),
                 Box::new(|square| square.right(1).and_then(|square| square.down(1))),
+                Box::new(|square| square.left(1).and_then(|square| square.up(1))),
+                Box::new(|square| square.left(1).and_then(|square| square.down(1))),
             ];
 
             let mut between = [Bitboard::EMPTY; Square::COUNT * Square::COUNT];
@@ -236,9 +231,8 @@ impl Bitboard {
                     let mut bb = Bitboard::EMPTY;
                     let mut next = direction(from);
                     while let Ok(to) = next {
-                        between[usize::from(from) * Square::COUNT + usize::from(to)] = bb;
-                        between[usize::from(to) * Square::COUNT + usize::from(from)] = bb;
                         bb |= to;
+                        between[usize::from(from) * Square::COUNT + usize::from(to)] = bb;
                         next = direction(to);
                     }
                 }
@@ -743,19 +737,22 @@ mod tests {
     #[test]
     fn test_between() {
         assert_eq!(Bitboard::between(Square::A1, Square::A1), Bitboard::EMPTY);
-        assert_eq!(Bitboard::between(Square::A1, Square::A2), Bitboard::EMPTY);
-        assert_eq!(Bitboard::between(Square::A1, Square::C1), Bitboard::from(Square::B1));
+        assert_eq!(Bitboard::between(Square::A1, Square::A2), Bitboard::from(Square::A2));
+        assert_eq!(Bitboard::between(Square::A1, Square::C1), Square::B1 | Square::C1);
         assert_eq!(
             Bitboard::between(Square::H7, Square::B7),
-            Square::C7 | Square::D7 | Square::E7 | Square::F7 | Square::G7
+            Square::B7 | Square::C7 | Square::D7 | Square::E7 | Square::F7 | Square::G7
         );
-        assert_eq!(Bitboard::between(Square::D5, Square::D2), Square::D3 | Square::D4);
-        assert_eq!(Bitboard::between(Square::D5, Square::H1), Square::E4 | Square::F3 | Square::G2);
+        assert_eq!(Bitboard::between(Square::D5, Square::D2), Square::D2 | Square::D3 | Square::D4);
+        assert_eq!(Bitboard::between(Square::D5, Square::H1), Square::E4 | Square::F3 | Square::G2 | Square::H1);
         assert_eq!(
             Bitboard::between(Square::A1, Square::H8),
-            Square::B2 | Square::C3 | Square::D4 | Square::E5 | Square::F6 | Square::G7
+            Square::B2 | Square::C3 | Square::D4 | Square::E5 | Square::F6 | Square::G7 | Square::H8
         );
-        assert_eq!(Bitboard::between(Square::F7, Square::A2), Square::E6 | Square::D5 | Square::C4 | Square::B3);
+        assert_eq!(
+            Bitboard::between(Square::F7, Square::A2),
+            Square::E6 | Square::D5 | Square::C4 | Square::B3 | Square::A2
+        );
     }
 
     #[test]

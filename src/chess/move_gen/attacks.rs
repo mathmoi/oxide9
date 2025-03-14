@@ -1,6 +1,6 @@
 use std::sync::OnceLock;
 
-use crate::chess::{Bitboard, Color, File, Piece, PieceType, Position, Square};
+use crate::chess::{Bitboard, Color, File, PieceType, Square};
 
 mod naive_sliders {
     use crate::chess::{Bitboard, Square};
@@ -393,41 +393,60 @@ fn attacks_from_knight(square: Square) -> Bitboard {
     lookup[usize::from(square)]
 }
 
-/// Returns a bitboard with all squares attacked by a piece on a given square.
-pub fn attacks_from<const PIECE_TYPE_VALUE: u8>(occupied: Bitboard, from_sq: Square) -> Bitboard {
-    match PIECE_TYPE_VALUE {
-        PieceType::KING_VALUE => attacks_from_kings(from_sq),
-        PieceType::KNIGHT_VALUE => attacks_from_knight(from_sq),
-        PieceType::ROOK_VALUE => pext_sliders::attacks_from_rook(occupied, from_sq),
-        PieceType::BISHOP_VALUE => pext_sliders::attacks_from_bishop(occupied, from_sq),
-        PieceType::QUEEN_VALUE => {
-            pext_sliders::attacks_from_rook(occupied, from_sq) | pext_sliders::attacks_from_bishop(occupied, from_sq)
-        }
-        _ => unimplemented!("Piece type not implemented"),
-    }
-}
-
-pub fn attacks_to<const COLOR_VALUE: u8>(position: &Position, sq: Square) -> Bitboard {
-    let color = Color::from(COLOR_VALUE);
-    let queens = position.bb_piece(Piece::new(color, PieceType::Queen));
-    let rooks = position.bb_piece(Piece::new(color, PieceType::Rook));
-    let bishops = position.bb_piece(Piece::new(color, PieceType::Bishop));
-    let knights = position.bb_piece(Piece::new(color, PieceType::Knight));
-    let kings = position.bb_piece(Piece::new(color, PieceType::King));
-    let pawns = position.bb_piece(Piece::new(color, PieceType::Pawn));
-    let occupied = position.bb_occupied();
-
-    let mut attacks = attacks_from::<{ PieceType::ROOK_VALUE }>(occupied, sq) & (queens | rooks);
-    attacks |= attacks_from::<{ PieceType::BISHOP_VALUE }>(occupied, sq) & (queens | bishops);
-    attacks |= attacks_from::<{ PieceType::KNIGHT_VALUE }>(occupied, sq) & knights;
-    attacks |= attacks_from::<{ PieceType::KING_VALUE }>(occupied, sq) & kings;
-
+/// Calculates the squares attacked by a pawn of the given color from the specified square.
+///
+/// This function determines which squares would be attacked if a pawn of the given color were placed on the specified
+/// square. For white pawns, attacks are diagonal captures going northeast and northwest. For black pawns, attacks are
+/// diagonal captures going southeast and southwest.
+///
+/// # Parameters
+/// * `color` - The color of the pawn (White or Black)
+/// * `sq` - The square from which to calculate attacks
+///
+/// # Returns
+/// A bitboard representing all squares that would be attacked by a pawn of the specified color if it were on the given
+/// square.
+pub fn attacks_from_pawns(color: Color, sq: Square) -> Bitboard {
     let sq_bb = Bitboard::from(sq);
-    attacks |= if color == Color::White {
+    if color == Color::White {
         ((sq_bb & !Bitboard::from(File::A)) >> 9) | ((sq_bb & !Bitboard::from(File::H)) >> 7)
     } else {
         ((sq_bb & !Bitboard::from(File::A)) << 7) | ((sq_bb & !Bitboard::from(File::H)) << 9)
-    } & pawns;
+    }
+}
 
-    attacks
+/// Returns a bitboard with all squares attacked by a specific piece type from a given square.
+///
+/// This function calculates all squares that would be attacked by a piece of the specified type if it were placed on
+/// the given square, considering the current board occupation.
+///
+/// # Type Parameters
+/// * `PIECE_TYPE_VALUE` - A compile-time constant representing the piece type (must be one of the values defined in
+///   PieceType: KING_VALUE, KNIGHT_VALUE, ROOK_VALUE, BISHOP_VALUE, or QUEEN_VALUE)
+///
+/// # Parameters
+/// * `occupied` - A bitboard representing all occupied squares on the board
+/// * `sq` - The square from which to calculate attacks
+///
+/// # Returns
+/// A bitboard representing all squares that are attacked by the specified piece type from the given square, taking into
+/// account the current board occupation.
+///
+/// # Panics
+/// Panics if an unsupported piece type value is provided (such as pawns, which have special attack patterns that depend
+/// on color).
+///
+/// # Note
+/// For sliding pieces (rook, bishop, queen), the occupied squares are considered to block the attack rays.
+pub fn attacks_from<const PIECE_TYPE_VALUE: u8>(occupied: Bitboard, sq: Square) -> Bitboard {
+    match PIECE_TYPE_VALUE {
+        PieceType::KING_VALUE => attacks_from_kings(sq),
+        PieceType::KNIGHT_VALUE => attacks_from_knight(sq),
+        PieceType::ROOK_VALUE => pext_sliders::attacks_from_rook(occupied, sq),
+        PieceType::BISHOP_VALUE => pext_sliders::attacks_from_bishop(occupied, sq),
+        PieceType::QUEEN_VALUE => {
+            pext_sliders::attacks_from_rook(occupied, sq) | pext_sliders::attacks_from_bishop(occupied, sq)
+        }
+        _ => unimplemented!("Piece type not implemented"),
+    }
 }

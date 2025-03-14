@@ -137,10 +137,16 @@ fn run_test(test: Test) -> Result<(), MoveGeneratorTestError> {
         test.moves.iter().map(|m| Move::try_from(&m.details)).collect();
     let expected_moves = expected_moves?;
 
-    let mut actual_moves: Vec<Move> = vec![];
-    generate_moves::<{ MoveGenerationType::ALL_VALUE }>(&position, &mut actual_moves);
+    let mut pseudo_legal_moves: Vec<Move> = vec![];
+    if position.is_check() {
+        generate_moves::<{ MoveGenerationType::EVASIONS_VALUE }>(&position, &mut pseudo_legal_moves);
+    } else {
+        generate_moves::<{ MoveGenerationType::ALL_VALUE }>(&position, &mut pseudo_legal_moves);
+    }
 
-    let (missing, extra) = compare_moves_set(&expected_moves, &actual_moves);
+    let legal_moves: Vec<Move> = pseudo_legal_moves.iter().filter(|m| position.is_legal(**m)).copied().collect();
+
+    let (missing, extra) = compare_moves_set(&expected_moves, &legal_moves);
 
     if !missing.is_empty() {
         return Err(MoveGeneratorTestError::TestFailed {

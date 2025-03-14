@@ -1,7 +1,7 @@
 mod bitboard;
 mod coordinates;
 mod r#move;
-mod move_gen;
+pub mod move_gen;
 mod piece;
 mod position;
 

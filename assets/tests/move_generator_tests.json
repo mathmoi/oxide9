@@ -5914,5 +5914,351 @@
                 "fen": "r3k2r/8/8/8/8/8/8/1RB1KB1R b Kkq - 1 1"
             }
         ]
+    },
+    {
+        "fen": "4k3/8/8/8/8/7B/8/4K3 b - - 0 1",
+        "description": "Black king should not move into check",
+        "moves": [
+            {
+                "move": {
+                    "from": "e8",
+                    "to": "f8",
+                    "piece": "k",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "e8f8",
+                "san": "Kf8",
+                "lan": "Ke8-f8",
+                "fen": "5k2/8/8/8/8/7B/8/4K3 w - - 1 2"
+            },
+            {
+                "move": {
+                    "from": "e8",
+                    "to": "d8",
+                    "piece": "k",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "e8d8",
+                "san": "Kd8",
+                "lan": "Ke8-d8",
+                "fen": "3k4/8/8/8/8/7B/8/4K3 w - - 1 2"
+            },
+            {
+                "move": {
+                    "from": "e8",
+                    "to": "f7",
+                    "piece": "k",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "e8f7",
+                "san": "Kf7",
+                "lan": "Ke8-f7",
+                "fen": "8/5k2/8/8/8/7B/8/4K3 w - - 1 2"
+            },
+            {
+                "move": {
+                    "from": "e8",
+                    "to": "e7",
+                    "piece": "k",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "e8e7",
+                "san": "Ke7",
+                "lan": "Ke8-e7",
+                "fen": "8/4k3/8/8/8/7B/8/4K3 w - - 1 2"
+            }
+        ]
+    },
+    {
+        "fen": "4k3/p7/8/8/4R3/8/8/4K3 b - - 0 1",
+        "description": "Black should not remains in check",
+        "moves": [
+            {
+                "move": {
+                    "from": "e8",
+                    "to": "f8",
+                    "piece": "k",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "e8f8",
+                "san": "Kf8",
+                "lan": "Ke8-f8",
+                "fen": "5k2/p7/8/8/4R3/8/8/4K3 w - - 1 2"
+            },
+            {
+                "move": {
+                    "from": "e8",
+                    "to": "d8",
+                    "piece": "k",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "e8d8",
+                "san": "Kd8",
+                "lan": "Ke8-d8",
+                "fen": "3k4/p7/8/8/4R3/8/8/4K3 w - - 1 2"
+            },
+            {
+                "move": {
+                    "from": "e8",
+                    "to": "f7",
+                    "piece": "k",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "e8f7",
+                "san": "Kf7",
+                "lan": "Ke8-f7",
+                "fen": "8/p4k2/8/8/4R3/8/8/4K3 w - - 1 2"
+            },
+            {
+                "move": {
+                    "from": "e8",
+                    "to": "d7",
+                    "piece": "k",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "e8d7",
+                "san": "Kd7",
+                "lan": "Ke8-d7",
+                "fen": "8/p2k4/8/8/4R3/8/8/4K3 w - - 1 2"
+            }
+        ]
+    },
+    {
+        "fen": "1r2k3/8/p7/qB6/b7/n7/8/4K3 w - - 0 1",
+        "description": "Black should not remains in check, lots of options to capture",
+        "moves": [
+            {
+                "move": {
+                    "from": "e1",
+                    "to": "f2",
+                    "piece": "K",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "e1f2",
+                "san": "Kf2+",
+                "lan": "Ke1-f2+",
+                "fen": "1r2k3/8/p7/qB6/b7/n7/5K2/8 b - - 1 1"
+            },
+            {
+                "move": {
+                    "from": "e1",
+                    "to": "e2",
+                    "piece": "K",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "e1e2",
+                "san": "Ke2+",
+                "lan": "Ke1-e2+",
+                "fen": "1r2k3/8/p7/qB6/b7/n7/4K3/8 b - - 1 1"
+            },
+            {
+                "move": {
+                    "from": "e1",
+                    "to": "f1",
+                    "piece": "K",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "e1f1",
+                "san": "Kf1+",
+                "lan": "Ke1-f1+",
+                "fen": "1r2k3/8/p7/qB6/b7/n7/8/5K2 b - - 1 1"
+            }
+        ]
+    },
+    {
+        "fen": "7k/2R5/8/1q2NB2/6Q1/8/2PP4/5K2 w - - 0 1",
+        "description": "White should not remains in check, lots of options to block",
+        "moves": [
+            {
+                "move": {
+                    "from": "f1",
+                    "to": "g2",
+                    "piece": "K",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "f1g2",
+                "san": "Kg2",
+                "lan": "Kf1-g2",
+                "fen": "7k/2R5/8/1q2NB2/6Q1/8/2PP2K1/8 b - - 1 1"
+            },
+            {
+                "move": {
+                    "from": "f1",
+                    "to": "f2",
+                    "piece": "K",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "f1f2",
+                "san": "Kf2",
+                "lan": "Kf1-f2",
+                "fen": "7k/2R5/8/1q2NB2/6Q1/8/2PP1K2/8 b - - 1 1"
+            },
+            {
+                "move": {
+                    "from": "f1",
+                    "to": "g1",
+                    "piece": "K",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "f1g1",
+                "san": "Kg1",
+                "lan": "Kf1-g1",
+                "fen": "7k/2R5/8/1q2NB2/6Q1/8/2PP4/6K1 b - - 1 1"
+            },
+            {
+                "move": {
+                    "from": "f1",
+                    "to": "e1",
+                    "piece": "K",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "f1e1",
+                "san": "Ke1",
+                "lan": "Kf1-e1",
+                "fen": "7k/2R5/8/1q2NB2/6Q1/8/2PP4/4K3 b - - 1 1"
+            },
+            {
+                "move": {
+                    "from": "c7",
+                    "to": "c4",
+                    "piece": "R",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "c7c4",
+                "san": "Rc4",
+                "lan": "Rc7-c4",
+                "fen": "7k/8/8/1q2NB2/2R3Q1/8/2PP4/5K2 b - - 1 1"
+            },
+            {
+                "move": {
+                    "from": "f5",
+                    "to": "d3",
+                    "piece": "B",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "f5d3",
+                "san": "Bd3",
+                "lan": "Bf5-d3",
+                "fen": "7k/2R5/8/1q2N3/6Q1/3B4/2PP4/5K2 b - - 1 1"
+            },
+            {
+                "move": {
+                    "from": "e5",
+                    "to": "c4",
+                    "piece": "N",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "e5c4",
+                "san": "Nc4",
+                "lan": "Ne5-c4",
+                "fen": "7k/2R5/8/1q3B2/2N3Q1/8/2PP4/5K2 b - - 1 1"
+            },
+            {
+                "move": {
+                    "from": "e5",
+                    "to": "d3",
+                    "piece": "N",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "e5d3",
+                "san": "Nd3",
+                "lan": "Ne5-d3",
+                "fen": "7k/2R5/8/1q3B2/6Q1/3N4/2PP4/5K2 b - - 1 1"
+            },
+            {
+                "move": {
+                    "from": "g4",
+                    "to": "c4",
+                    "piece": "Q",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "g4c4",
+                "san": "Qc4",
+                "lan": "Qg4-c4",
+                "fen": "7k/2R5/8/1q2NB2/2Q5/8/2PP4/5K2 b - - 1 1"
+            },
+            {
+                "move": {
+                    "from": "g4",
+                    "to": "e2",
+                    "piece": "Q",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "g4e2",
+                "san": "Qe2",
+                "lan": "Qg4-e2",
+                "fen": "7k/2R5/8/1q2NB2/8/8/2PPQ3/5K2 b - - 1 1"
+            },
+            {
+                "move": {
+                    "from": "d2",
+                    "to": "d3",
+                    "piece": "P",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "d2d3",
+                "san": "d3",
+                "lan": "d2-d3",
+                "fen": "7k/2R5/8/1q2NB2/6Q1/3P4/2P5/5K2 b - - 0 1"
+            },
+            {
+                "move": {
+                    "from": "c2",
+                    "to": "c4",
+                    "piece": "P",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "c2c4",
+                "san": "c4",
+                "lan": "c2-c4",
+                "fen": "7k/2R5/8/1q2NB2/2P3Q1/8/3P4/5K2 b - - 0 1"
+            }
+        ]
     }
 ]

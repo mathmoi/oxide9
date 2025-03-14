@@ -1,6 +1,9 @@
 use std::ops::Index;
 
-use super::{Bitboard, CastlingRight, CastlingSide, Color, File, Piece, PieceType, Rank, Square};
+use super::{
+    move_gen::attacks::{attacks_from, attacks_from_pawns},
+    Bitboard, CastlingRight, CastlingSide, Color, File, Move, Piece, PieceType, Rank, Square,
+};
 
 /// Error type for parsing a FEN (Forsyth-Edwards Notation) string.
 #[derive(Debug)]
@@ -15,6 +18,7 @@ pub enum FenError {
 }
 
 /// A chess position.
+#[derive(Clone)]
 pub struct Position {
     side_to_move: Color,
     board: [Option<Piece>; Square::COUNT],
@@ -73,11 +77,7 @@ impl Position {
             match c {
                 'K' | 'Q' | 'k' | 'q' | 'A'..='H' | 'a'..='h' => {
                     color = if c.is_uppercase() { Color::White } else { Color::Black };
-                    king_file = self
-                        .bb_piece(Piece::new(color, PieceType::King))
-                        .lsb()
-                        .ok_or(FenError::InvalidCastlingAvailability)?
-                        .file();
+                    king_file = self.get_king_square(color).file();
                 }
                 '-' => break,
                 _ => return Err(FenError::InvalidCastlingAvailability),
@@ -123,8 +123,7 @@ impl Position {
             let king_to = Square::new(king_to_file, Rank::R1);
             let rook_from = Square::new(castling_file, Rank::R1);
             let rook_to = Square::new(rook_to_file, Rank::R1);
-            let mut mask =
-                Bitboard::between(king_from, king_to) | Bitboard::between(rook_from, rook_to) | king_to | rook_to;
+            let mut mask = Bitboard::between(king_from, king_to) | Bitboard::between(rook_from, rook_to);
             mask &= !(king_from | rook_from);
             mask |= mask << 56;
             self.castling_path[usize::from(castling_side)] = mask;
@@ -332,8 +331,36 @@ impl Position {
         self.castling_path[usize::from(side)]
     }
 
-    /// Puts a piece on a specific square.
+    /// Returns the square occupied by the king of the specified color.
+    ///
+    /// # Parameters
+    /// * `color` - The color of the king to locate
+    ///
+    /// # Returns
+    /// The square where the king of the specified color is located.
+    ///
+    /// # Panics
+    /// Panics if no king of the specified color is found on the board, which should never
+    /// happen in a valid chess position.
+    pub fn get_king_square(&self, color: Color) -> Square {
+        // TODO: Should we keep this incrementally updated?
+        self.bb_piece(Piece::new(color, PieceType::King)).lsb().expect("There should always be a king on the board.")
+    }
+
+    /// Places a chess piece on a specific square on the board.
+    ///
+    /// # Arguments
+    ///
+    /// * `piece` - The chess piece to place
+    /// * `square` - The square where the piece should be placed
+    ///
+    /// # Note
+    ///
+    /// This method doesn't check if the square is already occupied. If calling code
+    /// needs to replace a piece, it should first remove any existing piece from the square.
     pub fn put_piece(&mut self, piece: Piece, square: Square) {
+        debug_assert_eq!(self.board[usize::from(square)], None);
+
         self.board[usize::from(square)] = Some(piece);
         self.bb_color[usize::from(piece.color())] |= square;
         self.bb_piece[usize::from(piece)] |= Bitboard::from(square);
@@ -359,6 +386,157 @@ impl Position {
         let bb = from | to;
         self.bb_color[usize::from(piece.color())] ^= bb;
         self.bb_piece[usize::from(piece)] ^= bb;
+    }
+
+    /// Returns a bitboard representing all pieces of a specific color that are attacking a specific square.
+    ///
+    /// This function identifies all pieces of the given color that are currently attacking the specified square. It
+    /// works by calculating reverse attack patterns from the target square and checking which pieces of the specified
+    /// color intersect with these patterns.
+    ///
+    /// # Parameters
+    /// * `sq` - The target square being attacked
+    /// * `occupied` - A bitboard representing occupied squares to consider for attack calculations (can be modified
+    ///   from the actual board state to analyze hypothetical positions)
+    /// * `color` - The color of the attacking pieces to consider
+    ///
+    /// # Returns
+    /// A bitboard containing the positions of all pieces of the specified color that are attacking the given square.
+    ///
+    /// # Note
+    /// The occupied parameter affects only sliding piece (rook, bishop, queen) attack calculations; knight, king and
+    /// pawn attacks are determined solely by their geometry.
+    pub fn attacks_to(&self, sq: Square, occupied: Bitboard, color: Color) -> Bitboard {
+        let queens = self.bb_piece(Piece::new(color, PieceType::Queen));
+        let queens_rooks = self.bb_piece(Piece::new(color, PieceType::Rook)) | queens;
+        let queens_bishops = self.bb_piece(Piece::new(color, PieceType::Bishop)) | queens;
+        let knights = self.bb_piece(Piece::new(color, PieceType::Knight));
+        let king = self.bb_piece(Piece::new(color, PieceType::King));
+        let pawns = self.bb_piece(Piece::new(color, PieceType::Pawn));
+
+        attacks_from::<{ PieceType::ROOK_VALUE }>(occupied, sq) & queens_rooks
+            | attacks_from::<{ PieceType::BISHOP_VALUE }>(occupied, sq) & queens_bishops
+            | attacks_from::<{ PieceType::KNIGHT_VALUE }>(Bitboard::EMPTY, sq) & knights
+            | attacks_from::<{ PieceType::KING_VALUE }>(Bitboard::EMPTY, sq) & king
+            | attacks_from_pawns(color, sq) & pawns
+    }
+
+    /// Determines whether a square on the chess board is under attack by pieces of a specific color.
+    ///
+    /// This function checks if any piece of the specified color attacks a pieces the target square according to
+    /// standard chess rules. It considers all piece types (pawns, knights, bishops, rooks, queens, and kings) when
+    /// determining attack vectors.
+    ///
+    /// # Parameters
+    ///
+    /// * `sq` - The target square being checked for attacks
+    /// * `occupied` - A bitboard representing all occupied squares on the board. This parameter allows for hypothetical
+    ///   board states by selectively including/excluding pieces from consideration (useful for checking legality of
+    ///   moves like castling or detecting check).
+    /// * `color` - The color of the attacking pieces to check
+    ///
+    /// # Returns
+    ///
+    /// * `bool` - Returns `true` if any piece of the specified color attacks the target square, `false` otherwise
+    pub fn is_attacked(&self, sq: Square, occupied: Bitboard, color: Color) -> bool {
+        // TODO : Evaluate a possible optimisation from Stockfish where we first check if the square is attacked by a
+        // piece on an empty board. This way we can avoid the expensive bitboard operations for sliders. If event with
+        // an empty position the square is not attacked by a slider, we can return true immediately.
+
+        let queens = self.bb_piece(Piece::new(color, PieceType::Queen));
+        let queens_rooks = self.bb_piece(Piece::new(color, PieceType::Rook)) | queens;
+        if !(attacks_from::<{ PieceType::ROOK_VALUE }>(occupied, sq) & queens_rooks).is_empty() {
+            return true;
+        }
+
+        let queens_bishops = self.bb_piece(Piece::new(color, PieceType::Bishop)) | queens;
+        if !(attacks_from::<{ PieceType::BISHOP_VALUE }>(occupied, sq) & queens_bishops).is_empty() {
+            return true;
+        }
+
+        let knights = self.bb_piece(Piece::new(color, PieceType::Knight));
+        if !(attacks_from::<{ PieceType::KNIGHT_VALUE }>(Bitboard::EMPTY, sq) & knights).is_empty() {
+            return true;
+        }
+
+        let king = self.bb_piece(Piece::new(color, PieceType::King));
+        if !(attacks_from::<{ PieceType::KING_VALUE }>(Bitboard::EMPTY, sq) & king).is_empty() {
+            return true;
+        }
+
+        let pawns = self.bb_piece(Piece::new(color, PieceType::Pawn));
+        if !(attacks_from_pawns(color, sq) & pawns).is_empty() {
+            return true;
+        }
+
+        false
+    }
+
+    /// Determines if the current side to move is in check.
+    ///
+    /// This function checks if the king of the current active player is under attack by any enemy pieces, which
+    /// constitutes a check in chess.
+    ///
+    /// # Returns
+    ///
+    /// * `bool` - Returns `true` if the current side to move is in check, `false` otherwise
+    ///
+    /// # Panics
+    ///
+    /// Panics if the king of the side to move is not present on the board, which indicates an invalid board state. In
+    /// standard chess, both kings must always be present.
+    pub fn is_check(&self) -> bool {
+        self.is_attacked(self.get_king_square(self.side_to_move), self.bb_occupied(), !self.side_to_move)
+    }
+
+    /// Returns a bitboard of all enemy pieces that are currently checking the king of the side to move.
+    ///
+    /// This function identifies all opposing pieces that are delivering check to the current player's king. It works by
+    /// finding the position of the king for the side to move and then determining which enemy pieces are attacking that
+    /// square.
+    ///
+    /// # Returns
+    /// A bitboard containing the positions of all enemy pieces that are checking the king of the side to move.
+    ///
+    /// # Panics
+    /// Panics if the king of the side to move is not found on the board, which should never happen in a valid chess
+    /// position.
+    ///
+    /// # Note
+    /// Multiple pieces may be giving check simultaneously (e.g., in a discovered check scenario).
+    pub fn checkers(&self) -> Bitboard {
+        self.attacks_to(self.get_king_square(self.side_to_move), self.bb_occupied(), !self.side_to_move)
+    }
+
+    /// Determines if a pseudo-legal move is actually legal in the current position.
+    ///
+    /// This function verifies whether a move that follows piece movement rules (pseudo-legal) is actually playable
+    /// according to chess rules, primarily by checking if it would leave the king in check.
+    ///
+    /// # Parameters
+    ///
+    /// * `mv` - The pseudo-legal move to validate
+    ///
+    /// # Returns
+    ///
+    /// * `bool` - Returns `true` if the move is legal, `false` otherwise
+    ///
+    /// # Important
+    ///
+    /// This function assumes the provided move is already pseudo-legal (follows basic movement rules for the piece).
+    /// Behavior is undefined if called with an invalid or non-pseudo-legal move.
+    pub fn is_legal(&self, mv: Move) -> bool {
+        // TODO : Add an assert to check if the move is pseudo-legal when we implement that functionality.
+
+        // If it is a king move and the king moves into check the move is illegal.
+        if mv.piece().piece_type() == PieceType::King {
+            let bb_king = self.bb_piece(mv.piece());
+            if self.is_attacked(mv.to_square(), self.bb_occupied() ^ bb_king, !mv.piece().color()) {
+                return false;
+            }
+        }
+
+        true
     }
 }
 
@@ -445,11 +623,11 @@ mod tests {
         assert_eq!(File::A, position.castling_file(CastlingSide::Queenside));
 
         assert_eq!(
-            Bitboard::between(Square::E1, Square::H1) | Bitboard::between(Square::E8, Square::H8),
+            Bitboard::between(Square::E1, Square::G1) | Bitboard::between(Square::E8, Square::G8),
             position.castling_path(CastlingSide::Kingside)
         );
         assert_eq!(
-            Bitboard::between(Square::E1, Square::A1) | Bitboard::between(Square::E8, Square::A8),
+            Bitboard::between(Square::E1, Square::B1) | Bitboard::between(Square::E8, Square::B8),
             position.castling_path(CastlingSide::Queenside)
         );
 
@@ -577,5 +755,91 @@ mod tests {
         assert_eq!(position[Square::A3], Some(Piece::WHITE_PAWN));
         assert_eq!(position.bb_color(Color::White), Square::A3.into());
         assert_eq!(position.bb_piece(Piece::WHITE_PAWN), Square::A3.into());
+    }
+
+    #[test]
+    fn test_is_attacked_by_rook() {
+        let position = Position::new_from_fen("4k3/8/8/8/8/8/8/1R2K3 w - - 0 1").unwrap();
+
+        assert!(position.is_attacked(Square::B5, position.bb_occupied(), Color::White));
+        assert!(!position.is_attacked(Square::B5, position.bb_occupied(), Color::Black));
+        assert!(!position.is_attacked(Square::C2, position.bb_occupied(), Color::White));
+    }
+
+    #[test]
+    fn test_is_attacked_by_bishop() {
+        let position = Position::new_from_fen("4k3/8/8/8/8/8/8/1B2K3 w - - 0 1").unwrap();
+
+        assert!(position.is_attacked(Square::H7, position.bb_occupied(), Color::White));
+        assert!(!position.is_attacked(Square::H7, position.bb_occupied(), Color::Black));
+        assert!(!position.is_attacked(Square::H6, position.bb_occupied(), Color::White));
+    }
+
+    #[test]
+    fn test_is_attacked_by_queen() {
+        let position = Position::new_from_fen("4k3/8/8/8/8/8/8/1Q2K3 w - - 0 1").unwrap();
+
+        assert!(position.is_attacked(Square::B5, position.bb_occupied(), Color::White));
+        assert!(!position.is_attacked(Square::B5, position.bb_occupied(), Color::Black));
+        assert!(position.is_attacked(Square::C2, position.bb_occupied(), Color::White));
+        assert!(position.is_attacked(Square::H7, position.bb_occupied(), Color::White));
+        assert!(!position.is_attacked(Square::H7, position.bb_occupied(), Color::Black));
+        assert!(!position.is_attacked(Square::H6, position.bb_occupied(), Color::White));
+    }
+
+    #[test]
+    fn test_is_attacked_by_knight() {
+        let position = Position::new_from_fen("4k3/8/8/3n4/8/8/8/4K3 b - - 0 1").unwrap();
+
+        assert!(position.is_attacked(Square::E3, position.bb_occupied(), Color::Black));
+        assert!(!position.is_attacked(Square::D4, position.bb_occupied(), Color::Black));
+        assert!(!position.is_attacked(Square::E3, position.bb_occupied(), Color::White));
+    }
+
+    #[test]
+    fn test_is_attacked_by_king() {
+        let position = Position::new_from_fen("4k3/8/8/8/8/8/8/4K3 b - - 0 1").unwrap();
+
+        assert!(position.is_attacked(Square::E7, position.bb_occupied(), Color::Black));
+        assert!(!position.is_attacked(Square::G6, position.bb_occupied(), Color::Black));
+
+        assert!(!position.is_attacked(Square::E7, position.bb_occupied(), Color::White));
+    }
+
+    #[test]
+    fn test_is_check() {
+        // Simple check
+        let position = Position::new_from_fen("4k3/8/8/1B6/8/8/8/4K3 b - - 0 1").unwrap();
+        assert!(position.is_check());
+
+        // Not in check
+        let position2 = Position::new_from_fen("4k3/2Q3Q1/8/2BR1RB1/8/8/8/4K3 b - - 0 1").unwrap();
+        assert!(!position2.is_check());
+
+        // Check by pawn
+        let position3 = Position::new_from_fen("4k3/5P2/8/8/8/8/8/4K3 b - - 0 1").unwrap();
+        assert!(position3.is_check());
+    }
+
+    #[test]
+    fn test_attacks_to() {
+        let position = Position::new_from_fen("3r4/b7/2n3r1/2p1pn2/q2Nk1q1/3n4/3r1b2/1K6 b - - 0 1").unwrap();
+
+        let attacks_black = position.attacks_to(Square::D4, position.bb_occupied(), Color::Black);
+        assert_eq!(
+            attacks_black,
+            Square::A4 | Square::C5 | Square::C6 | Square::D8 | Square::E5 | Square::E4 | Square::F5 | Square::F2
+        );
+
+        let attacks_white = position.attacks_to(Square::D4, position.bb_occupied(), Color::White);
+        assert_eq!(attacks_white, Bitboard::EMPTY);
+    }
+
+    #[test]
+    fn test_get_king_square() {
+        let position = Position::new_from_fen("8/8/4k3/8/8/8/3K4/8 w - - 0 1").unwrap();
+
+        assert_eq!(position.get_king_square(Color::Black), Square::E6);
+        assert_eq!(position.get_king_square(Color::White), Square::D2);
     }
 }

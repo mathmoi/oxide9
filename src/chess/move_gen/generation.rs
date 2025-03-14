@@ -2,7 +2,7 @@ use crate::chess::{
     Bitboard, CastlingRight, CastlingSide, Color, File, Move, Piece, PieceType, Position, Rank, Square,
 };
 
-use super::attacks::{attacks_from, attacks_to};
+use super::attacks::attacks_from;
 
 /// Enum to specify the type of moves to generate.
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -10,12 +10,14 @@ pub enum MoveGenerationType {
     All = 0,
     Quiet = 1,
     Captures = 2,
+    Evasions = 3,
 }
 
 impl MoveGenerationType {
     pub const ALL_VALUE: u8 = 0;
     pub const QUIET_VALUE: u8 = 1;
     pub const CAPTURES_VALUE: u8 = 2;
+    pub const EVASIONS_VALUE: u8 = 3;
 }
 
 impl From<u8> for MoveGenerationType {
@@ -24,6 +26,7 @@ impl From<u8> for MoveGenerationType {
             MoveGenerationType::ALL_VALUE => MoveGenerationType::All,
             MoveGenerationType::QUIET_VALUE => MoveGenerationType::Quiet,
             MoveGenerationType::CAPTURES_VALUE => MoveGenerationType::Captures,
+            MoveGenerationType::EVASIONS_VALUE => MoveGenerationType::Evasions,
             _ => panic!("Invalid MoveGenerationType value"),
         }
     }
@@ -82,12 +85,9 @@ fn add_captures_promotions<const COLOR_VALUE: u8>(
     ));
 }
 
-fn generate_pawn_moves<const GENERATION_TYPE_VALUE: u8, const COLOR_VALUE: u8>(
-    position: &Position,
-    list: &mut Vec<Move>,
-) {
-    let generation_type: MoveGenerationType = GENERATION_TYPE_VALUE.into();
-    let color: Color = COLOR_VALUE.into();
+fn generate_pawn_moves<const TYPE: u8, const COLOR: u8>(position: &Position, targets: Bitboard, list: &mut Vec<Move>) {
+    let generation_type: MoveGenerationType = TYPE.into();
+    let color: Color = COLOR.into();
 
     let direction_factor = match color {
         Color::White => 1,
@@ -98,15 +98,15 @@ fn generate_pawn_moves<const GENERATION_TYPE_VALUE: u8, const COLOR_VALUE: u8>(
     let bb_file_a: Bitboard = Bitboard::from(File::A);
     let bb_file_h: Bitboard = Bitboard::from(File::H);
     let bb_occupied: Bitboard = position.bb_occupied();
-    let bb_opponent: Bitboard = position.bb_color(color.opposite());
-    let piece = Piece::new(COLOR_VALUE.into(), PieceType::Pawn);
+    let bb_opponent: Bitboard = position.bb_color(!color);
+    let piece = Piece::new(COLOR.into(), PieceType::Pawn);
     let bb_from = position.bb_piece(piece);
 
-    if generation_type == MoveGenerationType::All || generation_type == MoveGenerationType::Quiet {
+    if matches!(generation_type, MoveGenerationType::All | MoveGenerationType::Evasions | MoveGenerationType::Quiet) {
         // Single pawn push
-        let mut bb_to = left_shift::<COLOR_VALUE>(bb_from, 8) & !bb_occupied & !bb_rank_8;
+        let mut bb_to = left_shift::<COLOR>(bb_from, 8) & !bb_occupied & !bb_rank_8;
         collect_pawn_moves(
-            bb_to,
+            bb_to & targets,
             |sq| unsafe { sq.down_unchecked(direction_factor) },
             |from_sq, to_sq| {
                 list.push(Move::new(from_sq, to_sq, piece));
@@ -114,9 +114,9 @@ fn generate_pawn_moves<const GENERATION_TYPE_VALUE: u8, const COLOR_VALUE: u8>(
         );
 
         // Double pawn push
-        bb_to = left_shift::<COLOR_VALUE>(bb_to, 8) & !bb_occupied & bb_rank_4;
+        bb_to = left_shift::<COLOR>(bb_to, 8) & !bb_occupied & bb_rank_4;
         collect_pawn_moves(
-            bb_to,
+            bb_to & targets,
             |sq| unsafe { sq.down_unchecked(direction_factor * 2) },
             |from_sq, to_sq| {
                 list.push(Move::new_two_square_pawn_push(from_sq, to_sq, piece));
@@ -124,7 +124,8 @@ fn generate_pawn_moves<const GENERATION_TYPE_VALUE: u8, const COLOR_VALUE: u8>(
         );
     }
 
-    if generation_type == MoveGenerationType::All || generation_type == MoveGenerationType::Captures {
+    if matches!(generation_type, MoveGenerationType::All | MoveGenerationType::Evasions | MoveGenerationType::Captures)
+    {
         // Captures towards file A
         let mut bb_to = bb_from & !bb_file_a;
         bb_to = match color {
@@ -133,17 +134,17 @@ fn generate_pawn_moves<const GENERATION_TYPE_VALUE: u8, const COLOR_VALUE: u8>(
         };
         bb_to &= bb_opponent;
         collect_pawn_moves(
-            bb_to & !bb_rank_8,
+            bb_to & !bb_rank_8 & targets,
             |sq| unsafe { sq.down_unchecked(direction_factor).right_unchecked(1) },
             |from_sq, to_sq| {
                 list.push(Move::new_capture(from_sq, to_sq, piece, unsafe { position[to_sq].unwrap_unchecked() }));
             },
         );
         collect_pawn_moves(
-            bb_to & bb_rank_8,
+            bb_to & bb_rank_8 & targets,
             |sq| unsafe { sq.down_unchecked(direction_factor).right_unchecked(1) },
             |from_sq, to_sq| {
-                add_captures_promotions::<COLOR_VALUE>(from_sq, to_sq, piece, position, list);
+                add_captures_promotions::<COLOR>(from_sq, to_sq, piece, position, list);
             },
         );
 
@@ -155,17 +156,17 @@ fn generate_pawn_moves<const GENERATION_TYPE_VALUE: u8, const COLOR_VALUE: u8>(
         };
         bb_to &= bb_opponent;
         collect_pawn_moves(
-            bb_to & !bb_rank_8,
+            bb_to & !bb_rank_8 & targets,
             |sq| unsafe { sq.down_unchecked(direction_factor).left_unchecked(1) },
             |from_sq, to_sq| {
                 list.push(Move::new_capture(from_sq, to_sq, piece, unsafe { position[to_sq].unwrap_unchecked() }));
             },
         );
         collect_pawn_moves(
-            bb_to & bb_rank_8,
+            bb_to & bb_rank_8 & targets,
             |sq| unsafe { sq.down_unchecked(direction_factor).left_unchecked(1) },
             |from_sq, to_sq| {
-                add_captures_promotions::<COLOR_VALUE>(from_sq, to_sq, piece, position, list);
+                add_captures_promotions::<COLOR>(from_sq, to_sq, piece, position, list);
             },
         );
 
@@ -176,7 +177,7 @@ fn generate_pawn_moves<const GENERATION_TYPE_VALUE: u8, const COLOR_VALUE: u8>(
         } & !bb_occupied
             & bb_rank_8;
         collect_pawn_moves(
-            bb_to,
+            bb_to & targets,
             |sq| unsafe { sq.down_unchecked(direction_factor) },
             |from_sq, to_sq| {
                 list.push(Move::new_promotion(from_sq, to_sq, piece, Piece::new(color, PieceType::Queen)));
@@ -186,7 +187,11 @@ fn generate_pawn_moves<const GENERATION_TYPE_VALUE: u8, const COLOR_VALUE: u8>(
             },
         );
 
-        // En passant
+        // En passant. En passant square are tricky to calculate in regards to target because it captures on a different
+        // square than the pawn moves to. Because of this, we do not use the targets bitboard to filter the moves. This
+        // means that when generating evasions, we will generate pseudo-legal moves that leave the king in check. It
+        // also possible that we generate moves that put the own king in check by discovering a check. Theses moves will
+        // need to be filtered out by the legality check.
         if let Some(sq) = position.en_passant_square() {
             if sq.file() != File::H {
                 let from_sq = unsafe { sq.down_unchecked(direction_factor).right_unchecked(1) };
@@ -204,32 +209,33 @@ fn generate_pawn_moves<const GENERATION_TYPE_VALUE: u8, const COLOR_VALUE: u8>(
     }
 }
 
-fn generate_piece_moves<const GENERATION_TYPE_VALUE: u8, const COLOR_VALUE: u8, const PIECE_TYPE_VALUE: u8>(
+fn generate_piece_moves<const COLOR: u8, const PIECE_TYPE: u8>(
     position: &Position,
+    targets: Bitboard,
     list: &mut Vec<Move>,
 ) {
-    let piece = Piece::new(COLOR_VALUE.into(), PIECE_TYPE_VALUE.into());
+    let piece = Piece::new(COLOR.into(), PIECE_TYPE.into());
     let bb_from = position.bb_piece(piece);
 
     for from_sq in bb_from {
-        let bb_to = attacks_from::<PIECE_TYPE_VALUE>(position.bb_occupied(), from_sq);
-        let generation_type: MoveGenerationType = GENERATION_TYPE_VALUE.into();
-        if generation_type == MoveGenerationType::All || generation_type == MoveGenerationType::Quiet {
-            for to_sq in bb_to & !position.bb_occupied() {
-                list.push(Move::new(from_sq, to_sq, piece));
-            }
-        }
-        if generation_type == MoveGenerationType::All || generation_type == MoveGenerationType::Captures {
-            for to_sq in bb_to & position.bb_color(Color::from(COLOR_VALUE).opposite()) {
-                list.push(Move::new_capture(from_sq, to_sq, piece, unsafe { position[to_sq].unwrap_unchecked() }));
+        let bb_to = attacks_from::<PIECE_TYPE>(position.bb_occupied(), from_sq) & targets;
+        for to_sq in bb_to {
+            let capture = position[to_sq];
+            match capture {
+                Some(captured_piece) => {
+                    list.push(Move::new_capture(from_sq, to_sq, piece, captured_piece));
+                }
+                None => {
+                    list.push(Move::new(from_sq, to_sq, piece));
+                }
             }
         }
     }
 }
 
-fn generate_castlings<const COLOR_VALUE: u8, const SIDE_VALUE: u8>(position: &Position, list: &mut Vec<Move>) {
-    let color = Color::from(COLOR_VALUE);
-    let side = match SIDE_VALUE {
+fn generate_castlings<const COLOR: u8, const SIDE: u8>(position: &Position, list: &mut Vec<Move>) {
+    let color = Color::from(COLOR);
+    let side = match SIDE {
         CastlingSide::KINGSIDE_VALUE => CastlingSide::Kingside,
         CastlingSide::QUEENSIDE_VALUE => CastlingSide::Queenside,
         _ => panic!("Invalid castling side value"),
@@ -242,9 +248,6 @@ fn generate_castlings<const COLOR_VALUE: u8, const SIDE_VALUE: u8>(position: &Po
 
     let rank = Rank::R1.relative_to_color(color);
 
-    let king = Piece::new(color, PieceType::King);
-    let king_bb = position.bb_piece(king);
-    let king_sq = unsafe { king_bb.lsb().unwrap_unchecked() }; // Safe because there is always a king.
     let king_final_file = match side {
         CastlingSide::Kingside => File::G,
         CastlingSide::Queenside => File::C,
@@ -260,54 +263,77 @@ fn generate_castlings<const COLOR_VALUE: u8, const SIDE_VALUE: u8>(position: &Po
     let rook_final_sq = Square::new(rook_final_file, rank);
 
     // If there is not movement (poissible in chess960), it is not possible to castle.
+    let king_sq = position.get_king_square(color);
     if king_sq == king_final_sq && rook_sq == rook_final_sq {
         return;
     }
 
+    let king_bb = Bitboard::from(king_sq);
     let king_travel_bb = Bitboard::between(king_sq, king_final_sq);
     let rook_travel_bb = Bitboard::between(rook_sq, rook_final_sq);
     let occupied_bb = position.bb_occupied() ^ (king_bb | rook_sq);
 
     // If any of the travel squares are occupied, it is not possible to castle.
-    if (king_travel_bb | rook_travel_bb) & occupied_bb != Bitboard::EMPTY {
+    if !((king_travel_bb | rook_travel_bb) & occupied_bb).is_empty() {
         return;
     }
 
+    // TODO : Stockfish checks for this in the legality check. Should we be doing the same?
     // If any of the travel squares are attacked, it is not possible to castle.
     for sq in king_travel_bb | king_bb | king_final_sq {
-        let attacks = match color {
-            Color::White => attacks_to::<{ Color::BLACK_VALUE }>(position, sq),
-            Color::Black => attacks_to::<{ Color::WHITE_VALUE }>(position, sq),
-        };
-        if attacks != Bitboard::EMPTY {
+        if position.is_attacked(sq, occupied_bb, !color) {
             return;
         }
     }
 
+    let king = Piece::new(color, PieceType::King);
     list.push(Move::new_castling(king_sq, king_final_sq, king, castling_right));
 }
 
-fn generate_moves_color<const GENERATION_TYPE_VALUE: u8, const COLOR_VALUE: u8>(
-    position: &Position,
-    list: &mut Vec<Move>,
-) {
-    generate_piece_moves::<GENERATION_TYPE_VALUE, COLOR_VALUE, { PieceType::KING_VALUE }>(position, list);
-    generate_piece_moves::<GENERATION_TYPE_VALUE, COLOR_VALUE, { PieceType::KNIGHT_VALUE }>(position, list);
-    generate_piece_moves::<GENERATION_TYPE_VALUE, COLOR_VALUE, { PieceType::ROOK_VALUE }>(position, list);
-    generate_piece_moves::<GENERATION_TYPE_VALUE, COLOR_VALUE, { PieceType::BISHOP_VALUE }>(position, list);
-    generate_piece_moves::<GENERATION_TYPE_VALUE, COLOR_VALUE, { PieceType::QUEEN_VALUE }>(position, list);
-    generate_pawn_moves::<GENERATION_TYPE_VALUE, COLOR_VALUE>(position, list);
-    if GENERATION_TYPE_VALUE == MoveGenerationType::ALL_VALUE
-        || GENERATION_TYPE_VALUE == MoveGenerationType::QUIET_VALUE
-    {
-        generate_castlings::<COLOR_VALUE, { CastlingSide::KINGSIDE_VALUE }>(position, list);
-        generate_castlings::<COLOR_VALUE, { CastlingSide::QUEENSIDE_VALUE }>(position, list);
+fn generate_moves_color<const TYPE: u8, const COLOR: u8>(position: &Position, list: &mut Vec<Move>) {
+    debug_assert!(TYPE != MoveGenerationType::EVASIONS_VALUE || position.is_check());
+
+    let color = Color::from(COLOR);
+    let mut targets = Bitboard::EMPTY;
+
+    let checkers = position.checkers();
+
+    // Non-king moves. If we are generating evasions and there are multiple checkers, non-king moves don't need to be
+    // generated.
+    if TYPE != MoveGenerationType::EVASIONS_VALUE || !checkers.has_more_than_one() {
+        targets = match TYPE {
+            MoveGenerationType::ALL_VALUE => !position.bb_color(color),
+            MoveGenerationType::QUIET_VALUE => !position.bb_occupied(),
+            MoveGenerationType::CAPTURES_VALUE => position.bb_color(!color),
+            MoveGenerationType::EVASIONS_VALUE => {
+                Bitboard::between(
+                    position.get_king_square(color),
+                    unsafe { checkers.lsb().unwrap_unchecked() }, // Safe because in evasions, there is at least one checker.
+                )
+            }
+            _ => panic!("Invalid MoveGenerationType value"),
+        };
+
+        generate_piece_moves::<COLOR, { PieceType::KNIGHT_VALUE }>(position, targets, list);
+        generate_piece_moves::<COLOR, { PieceType::ROOK_VALUE }>(position, targets, list);
+        generate_piece_moves::<COLOR, { PieceType::BISHOP_VALUE }>(position, targets, list);
+        generate_piece_moves::<COLOR, { PieceType::QUEEN_VALUE }>(position, targets, list);
+        generate_pawn_moves::<TYPE, COLOR>(position, targets, list);
+    }
+
+    // Kings moves, regular and castlings.
+    targets = if TYPE == MoveGenerationType::EVASIONS_VALUE { !position.bb_color(color) } else { targets };
+    generate_piece_moves::<COLOR, { PieceType::KING_VALUE }>(position, targets, list);
+    if TYPE == MoveGenerationType::ALL_VALUE || TYPE == MoveGenerationType::QUIET_VALUE {
+        generate_castlings::<COLOR, { CastlingSide::KINGSIDE_VALUE }>(position, list);
+        generate_castlings::<COLOR, { CastlingSide::QUEENSIDE_VALUE }>(position, list);
     }
 }
 
-pub fn generate_moves<const GENERATION_TYPE_VALUE: u8>(position: &Position, list: &mut Vec<Move>) {
+/// Generates all pseudo-legal moves for the given position.
+pub fn generate_moves<const TYPE: u8>(position: &Position, list: &mut Vec<Move>) {
     match position.side_to_move() {
-        Color::White => generate_moves_color::<GENERATION_TYPE_VALUE, { Color::WHITE_VALUE }>(position, list),
-        Color::Black => generate_moves_color::<GENERATION_TYPE_VALUE, { Color::BLACK_VALUE }>(position, list),
+        Color::White => generate_moves_color::<TYPE, { Color::WHITE_VALUE }>(position, list),
+        Color::Black => generate_moves_color::<TYPE, { Color::BLACK_VALUE }>(position, list),
     }
 }

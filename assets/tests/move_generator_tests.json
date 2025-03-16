@@ -6260,5 +6260,477 @@
                 "fen": "7k/2R5/8/1q2NB2/2P3Q1/8/3P4/5K2 b - - 0 1"
             }
         ]
+    },
+    {
+        "fen": "4k3/8/8/4r3/8/8/4Q3/4K3 b - - 0 1",
+        "description": "Pinned piece should not move",
+        "moves": [
+            {
+                "move": {
+                    "from": "e8",
+                    "to": "f8",
+                    "piece": "k",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "e8f8",
+                "san": "Kf8",
+                "lan": "Ke8-f8",
+                "fen": "5k2/8/8/4r3/8/8/4Q3/4K3 w - - 1 2"
+            },
+            {
+                "move": {
+                    "from": "e8",
+                    "to": "d8",
+                    "piece": "k",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "e8d8",
+                "san": "Kd8",
+                "lan": "Ke8-d8",
+                "fen": "3k4/8/8/4r3/8/8/4Q3/4K3 w - - 1 2"
+            },
+            {
+                "move": {
+                    "from": "e8",
+                    "to": "f7",
+                    "piece": "k",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "e8f7",
+                "san": "Kf7",
+                "lan": "Ke8-f7",
+                "fen": "8/5k2/8/4r3/8/8/4Q3/4K3 w - - 1 2"
+            },
+            {
+                "move": {
+                    "from": "e8",
+                    "to": "e7",
+                    "piece": "k",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "e8e7",
+                "san": "Ke7",
+                "lan": "Ke8-e7",
+                "fen": "8/4k3/8/4r3/8/8/4Q3/4K3 w - - 1 2"
+            },
+            {
+                "move": {
+                    "from": "e8",
+                    "to": "d7",
+                    "piece": "k",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "e8d7",
+                "san": "Kd7",
+                "lan": "Ke8-d7",
+                "fen": "8/3k4/8/4r3/8/8/4Q3/4K3 w - - 1 2"
+            },
+            {
+                "move": {
+                    "from": "e5",
+                    "to": "e7",
+                    "piece": "r",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "e5e7",
+                "san": "Re7",
+                "lan": "Re5-e7",
+                "fen": "4k3/4r3/8/8/8/8/4Q3/4K3 w - - 1 2"
+            },
+            {
+                "move": {
+                    "from": "e5",
+                    "to": "e6",
+                    "piece": "r",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "e5e6",
+                "san": "Re6",
+                "lan": "Re5-e6",
+                "fen": "4k3/8/4r3/8/8/8/4Q3/4K3 w - - 1 2"
+            },
+            {
+                "move": {
+                    "from": "e5",
+                    "to": "e4",
+                    "piece": "r",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "e5e4",
+                "san": "Re4",
+                "lan": "Re5-e4",
+                "fen": "4k3/8/8/8/4r3/8/4Q3/4K3 w - - 1 2"
+            },
+            {
+                "move": {
+                    "from": "e5",
+                    "to": "e3",
+                    "piece": "r",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "e5e3",
+                "san": "Re3",
+                "lan": "Re5-e3",
+                "fen": "4k3/8/8/8/8/4r3/4Q3/4K3 w - - 1 2"
+            },
+            {
+                "move": {
+                    "from": "e5",
+                    "to": "e2",
+                    "piece": "r",
+                    "capture": "Q",
+                    "promotion": null,
+                    "type": "Capture"
+                },
+                "uci": "e5e2",
+                "san": "Rxe2+",
+                "lan": "Re5xe2+",
+                "fen": "4k3/8/8/8/8/8/4r3/4K3 w - - 0 2"
+            }
+        ]
+    },
+    {
+        "fen": "4k3/8/8/4q3/8/8/4Q3/4K3 b - - 0 1",
+        "description": "Partially pinned piece should move along the pin",
+        "moves": [
+            {
+                "move": {
+                    "from": "e8",
+                    "to": "f8",
+                    "piece": "k",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "e8f8",
+                "san": "Kf8",
+                "lan": "Ke8-f8",
+                "fen": "5k2/8/8/4q3/8/8/4Q3/4K3 w - - 1 2"
+            },
+            {
+                "move": {
+                    "from": "e8",
+                    "to": "d8",
+                    "piece": "k",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "e8d8",
+                "san": "Kd8",
+                "lan": "Ke8-d8",
+                "fen": "3k4/8/8/4q3/8/8/4Q3/4K3 w - - 1 2"
+            },
+            {
+                "move": {
+                    "from": "e8",
+                    "to": "f7",
+                    "piece": "k",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "e8f7",
+                "san": "Kf7",
+                "lan": "Ke8-f7",
+                "fen": "8/5k2/8/4q3/8/8/4Q3/4K3 w - - 1 2"
+            },
+            {
+                "move": {
+                    "from": "e8",
+                    "to": "e7",
+                    "piece": "k",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "e8e7",
+                "san": "Ke7",
+                "lan": "Ke8-e7",
+                "fen": "8/4k3/8/4q3/8/8/4Q3/4K3 w - - 1 2"
+            },
+            {
+                "move": {
+                    "from": "e8",
+                    "to": "d7",
+                    "piece": "k",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "e8d7",
+                "san": "Kd7",
+                "lan": "Ke8-d7",
+                "fen": "8/3k4/8/4q3/8/8/4Q3/4K3 w - - 1 2"
+            },
+            {
+                "move": {
+                    "from": "e5",
+                    "to": "e7",
+                    "piece": "q",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "e5e7",
+                "san": "Qe7",
+                "lan": "Qe5-e7",
+                "fen": "4k3/4q3/8/8/8/8/4Q3/4K3 w - - 1 2"
+            },
+            {
+                "move": {
+                    "from": "e5",
+                    "to": "e6",
+                    "piece": "q",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "e5e6",
+                "san": "Qe6",
+                "lan": "Qe5-e6",
+                "fen": "4k3/8/4q3/8/8/8/4Q3/4K3 w - - 1 2"
+            },
+            {
+                "move": {
+                    "from": "e5",
+                    "to": "e4",
+                    "piece": "q",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "e5e4",
+                "san": "Qe4",
+                "lan": "Qe5-e4",
+                "fen": "4k3/8/8/8/4q3/8/4Q3/4K3 w - - 1 2"
+            },
+            {
+                "move": {
+                    "from": "e5",
+                    "to": "e3",
+                    "piece": "q",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "e5e3",
+                "san": "Qe3",
+                "lan": "Qe5-e3",
+                "fen": "4k3/8/8/8/8/4q3/4Q3/4K3 w - - 1 2"
+            },
+            {
+                "move": {
+                    "from": "e5",
+                    "to": "e2",
+                    "piece": "q",
+                    "capture": "Q",
+                    "promotion": null,
+                    "type": "Capture"
+                },
+                "uci": "e5e2",
+                "san": "Qxe2+",
+                "lan": "Qe5xe2+",
+                "fen": "4k3/8/8/8/8/8/4q3/4K3 w - - 0 2"
+            }
+        ]
+    },
+    {
+        "fen": "4k3/8/8/8/8/2b1b3/3P4/4K3 w - - 0 1",
+        "description": "Pinned pawn can takes the pinning piece, but no other moves",
+        "moves": [
+            {
+                "move": {
+                    "from": "e1",
+                    "to": "e2",
+                    "piece": "K",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "e1e2",
+                "san": "Ke2",
+                "lan": "Ke1-e2",
+                "fen": "4k3/8/8/8/8/2b1b3/3PK3/8 b - - 1 1"
+            },
+            {
+                "move": {
+                    "from": "e1",
+                    "to": "f1",
+                    "piece": "K",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "e1f1",
+                "san": "Kf1",
+                "lan": "Ke1-f1",
+                "fen": "4k3/8/8/8/8/2b1b3/3P4/5K2 b - - 1 1"
+            },
+            {
+                "move": {
+                    "from": "e1",
+                    "to": "d1",
+                    "piece": "K",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "e1d1",
+                "san": "Kd1",
+                "lan": "Ke1-d1",
+                "fen": "4k3/8/8/8/8/2b1b3/3P4/3K4 b - - 1 1"
+            },
+            {
+                "move": {
+                    "from": "d2",
+                    "to": "c3",
+                    "piece": "P",
+                    "capture": "b",
+                    "promotion": null,
+                    "type": "Capture"
+                },
+                "uci": "d2c3",
+                "san": "dxc3",
+                "lan": "d2xc3",
+                "fen": "4k3/8/8/8/8/2P1b3/8/4K3 b - - 0 1"
+            }
+        ]
+    },
+    {
+        "fen": "4k3/8/8/1K1pP1r1/8/8/8/8 w - d6 0 1",
+        "description": "Prise en passant would discover check by moving a pawn and taking a pawn",
+        "moves": [
+            {
+                "move": {
+                    "from": "b5",
+                    "to": "c6",
+                    "piece": "K",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "b5c6",
+                "san": "Kc6",
+                "lan": "Kb5-c6",
+                "fen": "4k3/8/2K5/3pP1r1/8/8/8/8 b - - 1 1"
+            },
+            {
+                "move": {
+                    "from": "b5",
+                    "to": "b6",
+                    "piece": "K",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "b5b6",
+                "san": "Kb6",
+                "lan": "Kb5-b6",
+                "fen": "4k3/8/1K6/3pP1r1/8/8/8/8 b - - 1 1"
+            },
+            {
+                "move": {
+                    "from": "b5",
+                    "to": "a6",
+                    "piece": "K",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "b5a6",
+                "san": "Ka6",
+                "lan": "Kb5-a6",
+                "fen": "4k3/8/K7/3pP1r1/8/8/8/8 b - - 1 1"
+            },
+            {
+                "move": {
+                    "from": "b5",
+                    "to": "c5",
+                    "piece": "K",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "b5c5",
+                "san": "Kc5",
+                "lan": "Kb5-c5",
+                "fen": "4k3/8/8/2KpP1r1/8/8/8/8 b - - 1 1"
+            },
+            {
+                "move": {
+                    "from": "b5",
+                    "to": "a5",
+                    "piece": "K",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "b5a5",
+                "san": "Ka5",
+                "lan": "Kb5-a5",
+                "fen": "4k3/8/8/K2pP1r1/8/8/8/8 b - - 1 1"
+            },
+            {
+                "move": {
+                    "from": "b5",
+                    "to": "b4",
+                    "piece": "K",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "b5b4",
+                "san": "Kb4",
+                "lan": "Kb5-b4",
+                "fen": "4k3/8/8/3pP1r1/1K6/8/8/8 b - - 1 1"
+            },
+            {
+                "move": {
+                    "from": "b5",
+                    "to": "a4",
+                    "piece": "K",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "b5a4",
+                "san": "Ka4",
+                "lan": "Kb5-a4",
+                "fen": "4k3/8/8/3pP1r1/K7/8/8/8 b - - 1 1"
+            },
+            {
+                "move": {
+                    "from": "e5",
+                    "to": "e6",
+                    "piece": "P",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "e5e6",
+                "san": "e6",
+                "lan": "e5-e6",
+                "fen": "4k3/8/4P3/1K1p2r1/8/8/8/8 b - - 0 1"
+            }
+        ]
     }
 ]

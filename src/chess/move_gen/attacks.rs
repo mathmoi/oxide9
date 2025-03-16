@@ -296,6 +296,42 @@ mod pext_sliders {
     }
 }
 
+static ROOK_ATTACKS: OnceLock<[Bitboard; Square::COUNT]> = OnceLock::new();
+
+/// Returns a bitboard representing all squares attacked by a rook on a given square on an empty board.
+///
+/// # Parameters
+/// * `square` - The square from which to calculate rook attacks
+///
+/// # Returns
+/// A bitboard representing all squares that would be attacked by a rook on the given square on an empty board.
+pub fn attacks_from_rooks(square: Square) -> Bitboard {
+    let lookup = ROOK_ATTACKS.get_or_init(|| {
+        std::array::from_fn(|index| {
+            attacks_from::<{ PieceType::ROOK_VALUE }>(Bitboard::EMPTY, Square::from(index as u8))
+        })
+    });
+    lookup[usize::from(square)]
+}
+
+static BISHOP_ATTACKS: OnceLock<[Bitboard; Square::COUNT]> = OnceLock::new();
+
+/// Returns a bitboard representing all squares attacked by a bishop on a given square on an empty board.
+///
+/// # Parameters
+/// * `square` - The square from which to calculate bishop attacks
+///
+/// # Returns
+/// A bitboard representing all squares that would be attacked by a bishop on the given square on an empty board.
+pub fn attacks_from_bishops(square: Square) -> Bitboard {
+    let lookup = BISHOP_ATTACKS.get_or_init(|| {
+        std::array::from_fn(|index| {
+            attacks_from::<{ PieceType::BISHOP_VALUE }>(Bitboard::EMPTY, Square::from(index as u8))
+        })
+    });
+    lookup[usize::from(square)]
+}
+
 /// Lookup table for all squares attacked by a king on a given square.
 static KING_ATTACKS: OnceLock<[Bitboard; Square::COUNT]> = OnceLock::new();
 
@@ -303,39 +339,24 @@ fn attacks_from_kings(square: Square) -> Bitboard {
     let lookup = KING_ATTACKS.get_or_init(|| {
         let mut attacks = [Bitboard::EMPTY; Square::COUNT];
 
+        let directions = [
+            |sq: Square| sq.up(1),
+            |sq: Square| sq.down(1),
+            |sq: Square| sq.left(1),
+            |sq: Square| sq.right(1),
+            |sq: Square| sq.up(1).and_then(|sq| sq.left(1)),
+            |sq: Square| sq.up(1).and_then(|sq| sq.right(1)),
+            |sq: Square| sq.down(1).and_then(|sq| sq.left(1)),
+            |sq: Square| sq.down(1).and_then(|sq| sq.right(1)),
+        ];
+
         for square in Square::ALL {
             let mut sq_attacks = Bitboard::EMPTY;
 
-            if let Ok(to) = square.up(1) {
-                sq_attacks |= to;
-            }
-
-            if let Ok(to) = square.down(1) {
-                sq_attacks |= to;
-            }
-
-            if let Ok(to) = square.left(1) {
-                sq_attacks |= to;
-            }
-
-            if let Ok(to) = square.right(1) {
-                sq_attacks |= to;
-            }
-
-            if let Ok(to) = square.up(1).and_then(|sq| sq.left(1)) {
-                sq_attacks |= to;
-            }
-
-            if let Ok(to) = square.up(1).and_then(|sq| sq.right(1)) {
-                sq_attacks |= to;
-            }
-
-            if let Ok(to) = square.down(1).and_then(|sq| sq.left(1)) {
-                sq_attacks |= to;
-            }
-
-            if let Ok(to) = square.down(1).and_then(|sq| sq.right(1)) {
-                sq_attacks |= to;
+            for direction in directions.iter() {
+                if let Ok(to) = direction(square) {
+                    sq_attacks |= to;
+                }
             }
 
             attacks[usize::from(square)] = sq_attacks;
@@ -351,39 +372,24 @@ fn attacks_from_knight(square: Square) -> Bitboard {
     let lookup = KNIGHT_ATTACKS.get_or_init(|| {
         let mut attacks = [Bitboard::EMPTY; Square::COUNT];
 
+        let directions = [
+            |sq: Square| sq.up(2).and_then(|sq| sq.left(1)),
+            |sq: Square| sq.up(2).and_then(|sq| sq.right(1)),
+            |sq: Square| sq.down(2).and_then(|sq| sq.left(1)),
+            |sq: Square| sq.down(2).and_then(|sq| sq.right(1)),
+            |sq: Square| sq.left(2).and_then(|sq| sq.up(1)),
+            |sq: Square| sq.left(2).and_then(|sq| sq.down(1)),
+            |sq: Square| sq.right(2).and_then(|sq| sq.up(1)),
+            |sq: Square| sq.right(2).and_then(|sq| sq.down(1)),
+        ];
+
         for square in Square::ALL {
             let mut sq_attacks = Bitboard::EMPTY;
 
-            if let Ok(to) = square.up(2).and_then(|sq| sq.left(1)) {
-                sq_attacks |= to;
-            }
-
-            if let Ok(to) = square.up(2).and_then(|sq| sq.right(1)) {
-                sq_attacks |= to;
-            }
-
-            if let Ok(to) = square.down(2).and_then(|sq| sq.left(1)) {
-                sq_attacks |= to;
-            }
-
-            if let Ok(to) = square.down(2).and_then(|sq| sq.right(1)) {
-                sq_attacks |= to;
-            }
-
-            if let Ok(to) = square.left(2).and_then(|sq| sq.up(1)) {
-                sq_attacks |= to;
-            }
-
-            if let Ok(to) = square.left(2).and_then(|sq| sq.down(1)) {
-                sq_attacks |= to;
-            }
-
-            if let Ok(to) = square.right(2).and_then(|sq| sq.up(1)) {
-                sq_attacks |= to;
-            }
-
-            if let Ok(to) = square.right(2).and_then(|sq| sq.down(1)) {
-                sq_attacks |= to;
+            for direction in directions.iter() {
+                if let Ok(to) = direction(square) {
+                    sq_attacks |= to;
+                }
             }
 
             attacks[usize::from(square)] = sq_attacks;
@@ -448,5 +454,49 @@ pub fn attacks_from<const PIECE_TYPE_VALUE: u8>(occupied: Bitboard, sq: Square) 
             pext_sliders::attacks_from_rook(occupied, sq) | pext_sliders::attacks_from_bishop(occupied, sq)
         }
         _ => unimplemented!("Piece type not implemented"),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_attacks_from_rooks() {
+        let expected = Square::E2
+            | Square::E3
+            | Square::E4
+            | Square::E5
+            | Square::E6
+            | Square::E7
+            | Square::E8
+            | Square::A1
+            | Square::B1
+            | Square::C1
+            | Square::D1
+            | Square::F1
+            | Square::G1
+            | Square::H1;
+        let attacks = attacks_from_rooks(Square::E1);
+        assert_eq!(expected, attacks);
+    }
+
+    #[test]
+    fn test_attacks_from_bishop() {
+        let expected = Square::D3
+            | Square::C2
+            | Square::B1
+            | Square::F3
+            | Square::G2
+            | Square::H1
+            | Square::D5
+            | Square::C6
+            | Square::B7
+            | Square::A8
+            | Square::F5
+            | Square::G6
+            | Square::H7;
+        let attacks = attacks_from_bishops(Square::E4);
+        assert_eq!(expected, attacks);
     }
 }

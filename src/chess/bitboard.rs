@@ -16,6 +16,8 @@ pub struct Bitboard(u64);
 
 static BITBOARD_BETWEEN: OnceLock<[Bitboard; Square::COUNT * Square::COUNT]> = OnceLock::new();
 
+static BITBOARD_LINE: OnceLock<[Bitboard; Square::COUNT * Square::COUNT]> = OnceLock::new();
+
 impl Bitboard {
     /// Creates a new bitboard with the given value.
     pub fn new(value: u64) -> Self {
@@ -186,9 +188,38 @@ impl Bitboard {
     /// Checks if the bitboard has no bits set (is completely empty).
     ///
     /// # Returns
-    /// `true` if the bitboard has no bits set, `false` otherwise.
-    pub fn is_empty(self) -> bool {
+    /// * `true` if all bits are unset (bitboard is empty)
+    /// * `false` if at least one bit is set
+    ///
+    /// This function is the logical inverse of `has_any()`. Use this for improved code readability when testing for
+    /// empty bitboards.
+    pub fn has_none(self) -> bool {
         self.0 == 0
+    }
+
+    /// Checks if the bitboard has any bits set (is not completely empty).
+    ///
+    /// # Returns
+    /// * `true` if at least one bit is set (bitboard is not empty)
+    /// * `false` if all bits are unset (bitboard is empty)
+    ///
+    /// This function is the logical inverse of `has_none()`. Use this for improved code readability when testing for
+    /// non-empty bitboards.
+    pub fn has_any(self) -> bool {
+        self.0 != 0
+    }
+
+    /// Determines if the bitboard has exactly one bit set to 1.
+    ///
+    /// Checks whether the bitboard contains precisely one set bit.
+    ///
+    /// # Returns
+    /// `true` if the bitboard has exactly one bit set to 1, `false` otherwise.
+    ///
+    /// # Note
+    /// This is a convenience function that combines the checks for "not empty" and "not multiple bits".
+    pub fn has_one(self) -> bool {
+        self.0 > 0 && (self.0 & (self.0 - 1)) == 0
     }
 
     /// Determines if the bitboard has more than one bit set to 1.
@@ -202,7 +233,7 @@ impl Bitboard {
     /// # Note
     /// Uses a bit manipulation trick: for any number n, (n & (n-1)) clears the least significant set bit. If the result
     /// is non-zero, there must be at least one more set bit.
-    pub fn has_more_than_one(self) -> bool {
+    pub fn has_many(self) -> bool {
         (self.0 & (self.0 - 1)) != 0
     }
 
@@ -241,6 +272,50 @@ impl Bitboard {
         });
 
         lookup[usize::from(from) * Square::COUNT + usize::from(to)]
+    }
+
+    /// Returns a bitboard representing the line (file, rank, or diagonal) shared between two squares.
+    ///
+    /// This function identifies the line (horizontal, vertical, or diagonal) that passes through both provided squares,
+    /// and returns a bitboard with all squares on that line set to 1.
+    ///
+    /// # Parameters
+    /// * `sq1`: The first square
+    /// * `sq2`: The second square
+    ///
+    /// # Returns
+    /// * A bitboard with all squares on the shared line set to 1
+    ///
+    /// # Behavior with non-aligned squares
+    /// If the squares are not on the same rank, file, diagonal, or antidiagonal (i.e., they are not "aligned"), the
+    /// function returns an empty bitboard (Bitboard::EMPTY).
+    pub fn line(sq1: Square, sq2: Square) -> Bitboard {
+        let lookup = BITBOARD_LINE.get_or_init(|| {
+            #[rustfmt::skip]
+            let directions: [(fn(Square) -> CoordinatesResult<Square>, fn(Square) -> Bitboard); 4] = [
+                (|sq| sq.right(1),                           |sq| Bitboard::from(sq.rank())),
+                (|sq| sq.up(1),                              |sq| Bitboard::from(sq.file())),
+                (|sq| sq.right(1).and_then(|sq| sq.up(1)),   |sq| Bitboard::from(sq.diagonal())),
+                (|sq| sq.right(1).and_then(|sq| sq.down(1)), |sq| Bitboard::from(sq.antidiagonal())),
+            ];
+
+            let mut lines = [Bitboard::EMPTY; Square::COUNT * Square::COUNT];
+            for sq1 in Square::ALL {
+                for (get_next, get_line) in directions {
+                    let line = get_line(sq1);
+                    let mut maybe_sq2 = get_next(sq1);
+                    while let Ok(sq2) = maybe_sq2 {
+                        lines[usize::from(sq1) * Square::COUNT + usize::from(sq2)] = line;
+                        lines[usize::from(sq2) * Square::COUNT + usize::from(sq1)] = line;
+                        maybe_sq2 = get_next(sq2);
+                    }
+                }
+            }
+
+            lines
+        });
+
+        lookup[usize::from(sq1) * Square::COUNT + usize::from(sq2)]
     }
 }
 
@@ -767,5 +842,21 @@ mod tests {
         assert_eq!(Bitboard(0x8181818181818181), File::A | File::H);
         assert_eq!(Bitboard(0x101010101010101), Bitboard::EMPTY | File::A);
         assert_eq!(Bitboard(0x7f7f7f7f7f7f7f7f), Bitboard::ALL ^ File::H);
+    }
+
+    #[test]
+    fn test_line() {
+        assert_eq!(Bitboard::line(Square::A1, Square::A1), Bitboard::EMPTY);
+        assert_eq!(Bitboard::line(Square::E4, Square::D3), Bitboard::from(Square::D3.diagonal()));
+        assert_eq!(Bitboard::line(Square::D3, Square::E4), Bitboard::from(Square::D3.diagonal()));
+        assert_eq!(Bitboard::line(Square::C6, Square::F3), Bitboard::from(Square::F3.antidiagonal()));
+        assert_eq!(Bitboard::line(Square::F3, Square::C6), Bitboard::from(Square::F3.antidiagonal()));
+        assert_eq!(Bitboard::line(Square::B7, Square::H7), Bitboard::from(Rank::R7));
+        assert_eq!(Bitboard::line(Square::H7, Square::B7), Bitboard::from(Rank::R7));
+        assert_eq!(Bitboard::line(Square::A2, Square::A4), Bitboard::from(File::A));
+        assert_eq!(Bitboard::line(Square::A4, Square::A2), Bitboard::from(File::A));
+
+        assert_eq!(Bitboard::line(Square::C6, Square::F4), Bitboard::EMPTY);
+        assert_eq!(Bitboard::line(Square::F4, Square::C6), Bitboard::EMPTY);
     }
 }

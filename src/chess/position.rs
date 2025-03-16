@@ -1,8 +1,8 @@
 use std::ops::Index;
 
 use super::{
-    move_gen::attacks::{attacks_from, attacks_from_pawns},
-    Bitboard, CastlingRight, CastlingSide, Color, File, Move, Piece, PieceType, Rank, Square,
+    move_gen::attacks::{attacks_from, attacks_from_bishops, attacks_from_pawns, attacks_from_rooks},
+    Bitboard, CastlingRight, CastlingSide, Color, File, Move, MoveType, Piece, PieceType, Rank, Square,
 };
 
 /// Error type for parsing a FEN (Forsyth-Edwards Notation) string.
@@ -77,7 +77,7 @@ impl Position {
             match c {
                 'K' | 'Q' | 'k' | 'q' | 'A'..='H' | 'a'..='h' => {
                     color = if c.is_uppercase() { Color::White } else { Color::Black };
-                    king_file = self.get_king_square(color).file();
+                    king_file = self.king_square(color).file();
                 }
                 '-' => break,
                 _ => return Err(FenError::InvalidCastlingAvailability),
@@ -342,7 +342,7 @@ impl Position {
     /// # Panics
     /// Panics if no king of the specified color is found on the board, which should never
     /// happen in a valid chess position.
-    pub fn get_king_square(&self, color: Color) -> Square {
+    pub fn king_square(&self, color: Color) -> Square {
         // TODO: Should we keep this incrementally updated?
         self.bb_piece(Piece::new(color, PieceType::King)).lsb().expect("There should always be a king on the board.")
     }
@@ -445,27 +445,27 @@ impl Position {
 
         let queens = self.bb_piece(Piece::new(color, PieceType::Queen));
         let queens_rooks = self.bb_piece(Piece::new(color, PieceType::Rook)) | queens;
-        if !(attacks_from::<{ PieceType::ROOK_VALUE }>(occupied, sq) & queens_rooks).is_empty() {
+        if !(attacks_from::<{ PieceType::ROOK_VALUE }>(occupied, sq) & queens_rooks).has_none() {
             return true;
         }
 
         let queens_bishops = self.bb_piece(Piece::new(color, PieceType::Bishop)) | queens;
-        if !(attacks_from::<{ PieceType::BISHOP_VALUE }>(occupied, sq) & queens_bishops).is_empty() {
+        if !(attacks_from::<{ PieceType::BISHOP_VALUE }>(occupied, sq) & queens_bishops).has_none() {
             return true;
         }
 
         let knights = self.bb_piece(Piece::new(color, PieceType::Knight));
-        if !(attacks_from::<{ PieceType::KNIGHT_VALUE }>(Bitboard::EMPTY, sq) & knights).is_empty() {
+        if !(attacks_from::<{ PieceType::KNIGHT_VALUE }>(Bitboard::EMPTY, sq) & knights).has_none() {
             return true;
         }
 
         let king = self.bb_piece(Piece::new(color, PieceType::King));
-        if !(attacks_from::<{ PieceType::KING_VALUE }>(Bitboard::EMPTY, sq) & king).is_empty() {
+        if !(attacks_from::<{ PieceType::KING_VALUE }>(Bitboard::EMPTY, sq) & king).has_none() {
             return true;
         }
 
         let pawns = self.bb_piece(Piece::new(color, PieceType::Pawn));
-        if !(attacks_from_pawns(color, sq) & pawns).is_empty() {
+        if !(attacks_from_pawns(color, sq) & pawns).has_none() {
             return true;
         }
 
@@ -486,7 +486,7 @@ impl Position {
     /// Panics if the king of the side to move is not present on the board, which indicates an invalid board state. In
     /// standard chess, both kings must always be present.
     pub fn is_check(&self) -> bool {
-        self.is_attacked(self.get_king_square(self.side_to_move), self.bb_occupied(), !self.side_to_move)
+        self.is_attacked(self.king_square(self.side_to_move), self.bb_occupied(), !self.side_to_move)
     }
 
     /// Returns a bitboard of all enemy pieces that are currently checking the king of the side to move.
@@ -505,7 +505,49 @@ impl Position {
     /// # Note
     /// Multiple pieces may be giving check simultaneously (e.g., in a discovered check scenario).
     pub fn checkers(&self) -> Bitboard {
-        self.attacks_to(self.get_king_square(self.side_to_move), self.bb_occupied(), !self.side_to_move)
+        self.attacks_to(self.king_square(self.side_to_move), self.bb_occupied(), !self.side_to_move)
+    }
+
+    /// Returns a bitboard of all pieces that are blocking a check on the king of the specified color.
+    ///
+    /// Identifies all pieces (of either color) that are currently preventing the king from being in check by standing
+    /// between the king and an enemy sliding piece (rook, bishop, or queen). These pieces are "pinned" to the king and
+    /// have restricted movement.
+    ///
+    /// # Parameters
+    /// * `color` - The color of the king to analyze blockers for
+    ///
+    /// # Returns
+    /// A bitboard containing all pieces that are currently blocking a check on the specified king.
+    ///
+    /// # Note
+    /// Only considers absolute pins from sliding pieces. A piece is considered a blocker only if it is the single piece
+    /// between the king and an attacking sliding piece. Multiple pieces between the king and a sliding piece are not
+    /// considered blockers since they don't create a pin.
+    pub fn blockers(&self, color: Color) -> Bitboard {
+        // TODO : This should be part of the position state to avoid recomputing it every time.
+        let king_sq = self.king_square(color);
+
+        let rooks = self.bb_piece(Piece::new(!color, PieceType::Rook));
+        let bishops = self.bb_piece(Piece::new(!color, PieceType::Bishop));
+        let queens = self.bb_piece(Piece::new(!color, PieceType::Queen));
+
+        let mut snipers = attacks_from_rooks(king_sq) & (rooks | queens);
+        snipers |= attacks_from_bishops(king_sq) & (bishops | queens);
+        snipers &= self.bb_color(!color);
+
+        let occupancy = self.bb_occupied() ^ snipers;
+
+        let mut blockers = Bitboard::EMPTY;
+        for sniper_sq in snipers {
+            let potential_blockers = Bitboard::between(king_sq, sniper_sq) & occupancy;
+
+            if potential_blockers.has_one() {
+                blockers |= potential_blockers;
+            }
+        }
+
+        blockers
     }
 
     /// Determines if a pseudo-legal move is actually legal in the current position.
@@ -528,15 +570,33 @@ impl Position {
     pub fn is_legal(&self, mv: Move) -> bool {
         // TODO : Add an assert to check if the move is pseudo-legal when we implement that functionality.
 
+        // TODO : Stockfish checs if the traveled square are attacked during castling here instead of during move
+        // generation. Should we to that?
+
         // If it is a king move and the king moves into check the move is illegal.
         if mv.piece().piece_type() == PieceType::King {
             let bb_king = self.bb_piece(mv.piece());
-            if self.is_attacked(mv.to_square(), self.bb_occupied() ^ bb_king, !mv.piece().color()) {
-                return false;
-            }
+            return !self.is_attacked(mv.to_square(), self.bb_occupied() ^ bb_king, !mv.piece().color());
         }
 
-        true
+        // We have a special case for en passant captures, because it has a special behavior of removig pieces from two
+        // squares.
+        if mv.move_type() == MoveType::EnPassant {
+            let en_passant_capture_sq = Square::new(mv.to_square().file(), mv.from_square().rank());
+            let occupied = self.bb_occupied() ^ mv.to_square() ^ mv.from_square() ^ en_passant_capture_sq;
+            let oppenent = !self.side_to_move();
+            let queens = self.bb_piece(Piece::new(oppenent, PieceType::Queen));
+            let queens_rooks = self.bb_piece(Piece::new(oppenent, PieceType::Rook)) | queens;
+            let queens_bishops = self.bb_piece(Piece::new(oppenent, PieceType::Bishop)) | queens;
+            let king_sq = self.king_square(mv.piece().color());
+            return (attacks_from::<{ PieceType::ROOK_VALUE }>(occupied, king_sq) & queens_rooks).has_none()
+                && (attacks_from::<{ PieceType::BISHOP_VALUE }>(occupied, king_sq) & queens_bishops).has_none();
+        }
+
+        // If the move is not a king move, the piece must not be pinned or if it is pinned it must move along the pin.
+        let blockers = self.blockers(mv.piece().color());
+        (blockers & mv.from_square()).has_none()
+            || Square::are_aligned(mv.from_square(), mv.to_square(), self.king_square(self.side_to_move()))
     }
 }
 
@@ -573,8 +633,8 @@ mod tests {
         let position = Position::default();
         assert_eq!(position.side_to_move, Color::White);
         assert!(position.board.iter().all(|square| square.is_none()));
-        assert!(position.bb_color.iter().all(|bb| bb.is_empty()));
-        assert!(position.bb_piece.iter().all(|bb| bb.is_empty()));
+        assert!(position.bb_color.iter().all(|bb| bb.has_none()));
+        assert!(position.bb_piece.iter().all(|bb| bb.has_none()));
     }
 
     #[test]
@@ -839,7 +899,23 @@ mod tests {
     fn test_get_king_square() {
         let position = Position::new_from_fen("8/8/4k3/8/8/8/3K4/8 w - - 0 1").unwrap();
 
-        assert_eq!(position.get_king_square(Color::Black), Square::E6);
-        assert_eq!(position.get_king_square(Color::White), Square::D2);
+        assert_eq!(position.king_square(Color::Black), Square::E6);
+        assert_eq!(position.king_square(Color::White), Square::D2);
+    }
+
+    #[test]
+    fn test_blockers_lots_of_blockers() {
+        let position = Position::new_from_fen("4k3/4q3/8/8/7b/2b1N1N1/3r4/1rN1KN1r w - - 0 1").unwrap();
+
+        let blockers = position.blockers(Color::White);
+        assert_eq!(blockers, Square::C1 | Square::D2 | Square::E3 | Square::F1 | Square::G3);
+    }
+
+    #[test]
+    fn test_blocker_no_blockers_because_two_pieces() {
+        let position = Position::new_from_fen("4k3/8/8/b7/1B6/8/3B4/4K3 w - - 0 1").unwrap();
+
+        let blockers = position.blockers(Color::White);
+        assert_eq!(blockers, Bitboard::EMPTY);
     }
 }

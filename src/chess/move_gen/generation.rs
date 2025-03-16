@@ -263,7 +263,7 @@ fn generate_castlings<const COLOR: u8, const SIDE: u8>(position: &Position, list
     let rook_final_sq = Square::new(rook_final_file, rank);
 
     // If there is not movement (poissible in chess960), it is not possible to castle.
-    let king_sq = position.get_king_square(color);
+    let king_sq = position.king_square(color);
     if king_sq == king_final_sq && rook_sq == rook_final_sq {
         return;
     }
@@ -274,7 +274,7 @@ fn generate_castlings<const COLOR: u8, const SIDE: u8>(position: &Position, list
     let occupied_bb = position.bb_occupied() ^ (king_bb | rook_sq);
 
     // If any of the travel squares are occupied, it is not possible to castle.
-    if !((king_travel_bb | rook_travel_bb) & occupied_bb).is_empty() {
+    if !((king_travel_bb | rook_travel_bb) & occupied_bb).has_none() {
         return;
     }
 
@@ -300,14 +300,14 @@ fn generate_moves_color<const TYPE: u8, const COLOR: u8>(position: &Position, li
 
     // Non-king moves. If we are generating evasions and there are multiple checkers, non-king moves don't need to be
     // generated.
-    if TYPE != MoveGenerationType::EVASIONS_VALUE || !checkers.has_more_than_one() {
+    if TYPE != MoveGenerationType::EVASIONS_VALUE || !checkers.has_many() {
         targets = match TYPE {
             MoveGenerationType::ALL_VALUE => !position.bb_color(color),
             MoveGenerationType::QUIET_VALUE => !position.bb_occupied(),
             MoveGenerationType::CAPTURES_VALUE => position.bb_color(!color),
             MoveGenerationType::EVASIONS_VALUE => {
                 Bitboard::between(
-                    position.get_king_square(color),
+                    position.king_square(color),
                     unsafe { checkers.lsb().unwrap_unchecked() }, // Safe because in evasions, there is at least one checker.
                 )
             }

@@ -19,6 +19,70 @@ pub enum FenError {
     InvalidFullmoveNumber,
     MissingField,
 }
+/// Defines filtering criteria for retrieving occupied squares from a chess position.
+///
+/// This enum provides different ways to filter which occupied squares should be included when querying a position's
+/// occupancy. It allows for retrieving all occupied squares or filtering by various combinations of piece
+/// characteristics.
+///
+/// # Variants
+/// * `All` - Selects all occupied squares regardless of the pieces on them
+/// * `ByColor(Color)` - Selects only squares occupied by pieces of the specified color (e.g., all white pieces)
+/// * `ByType(PieceType)` - Selects only squares occupied by pieces of the specified type (e.g., all knights, regardless
+///   of color)
+/// * `ByPiece(Piece)` - Selects only squares occupied by the specific piece (a combination of both color and type,
+///   e.g., white queen)
+/// * `ByColorAndType(Color, PieceType)` - Functionally equivalent to `ByPiece` but constructed from separate color and
+///   type parameters instead of a pre-constructed Piece (e.g., white knights)
+/// * `ByColorAndTwoTypes(Color, PieceType, PieceType)` - Selects squares occupied by pieces of the specified color that
+///   match either of the two piece types
+///
+/// # Usage Context
+/// This enum is typically passed to a position's `occupied()` method to filter which squares should be included in the
+/// returned bitboard. The filtering happens at query time rather than requiring separate bitboards to be maintained for
+/// each possible filter combination.
+///
+/// These filters enable efficient and expressive queries about piece locations on the board, supporting common chess
+/// programming patterns like finding all attacking pieces of a certain type or evaluating mobility of specific piece
+/// combinations.
+pub enum OccupancyFilter {
+    All,
+    ByColor(Color),
+    ByType(PieceType),
+    ByPiece(Piece),
+    ByColorAndType(Color, PieceType),
+    ByColorAndTwoTypes(Color, PieceType, PieceType),
+}
+
+impl From<Color> for OccupancyFilter {
+    fn from(color: Color) -> Self {
+        Self::ByColor(color)
+    }
+}
+
+impl From<PieceType> for OccupancyFilter {
+    fn from(piece_type: PieceType) -> Self {
+        Self::ByType(piece_type)
+    }
+}
+
+impl From<Piece> for OccupancyFilter {
+    fn from(piece: Piece) -> Self {
+        Self::ByPiece(piece)
+    }
+}
+
+impl From<(Color, PieceType)> for OccupancyFilter {
+    fn from((color, piece_type): (Color, PieceType)) -> Self {
+        Self::ByColorAndType(color, piece_type)
+    }
+}
+
+impl From<(Color, PieceType, PieceType)> for OccupancyFilter {
+    fn from((color, type1, type2): (Color, PieceType, PieceType)) -> Self {
+        Self::ByColorAndTwoTypes(color, type1, type2)
+    }
+}
 
 /// A chess position.
 #[derive(Clone)]
@@ -87,12 +151,12 @@ impl Position {
             }
 
             let castling_file = match c {
-                'K' | 'k' => (self.bb_piece(Piece::new(color, PieceType::Rook))
+                'K' | 'k' => (self.occupied((color, PieceType::Rook))
                     & Bitboard::from(Rank::R1.relative_to_color(color)))
                 .msb()
                 .ok_or(FenError::InvalidCastlingAvailability)?
                 .file(),
-                'Q' | 'q' => (self.bb_piece(Piece::new(color, PieceType::Rook))
+                'Q' | 'q' => (self.occupied((color, PieceType::Rook))
                     & Bitboard::from(Rank::R1.relative_to_color(color)))
                 .lsb()
                 .ok_or(FenError::InvalidCastlingAvailability)?
@@ -254,8 +318,8 @@ impl Position {
                     continue;
                 }
 
-                let candidate_rooks = self.bb_piece(Piece::new(color, PieceType::Rook))
-                    & Bitboard::from(Rank::R1.relative_to_color(color));
+                let candidate_rooks =
+                    self.occupied((color, PieceType::Rook)) & Bitboard::from(Rank::R1.relative_to_color(color));
                 let outter_most_rook =
                     if side == CastlingSide::Queenside { candidate_rooks.lsb() } else { candidate_rooks.msb() }
                         .expect("There should be a candidate rook for castling.");
@@ -292,19 +356,55 @@ impl Position {
         )
     }
 
-    /// Returns the bitboard representing the positions of all pieces of a specific color.
-    pub fn bb_color(&self, color: Color) -> Bitboard {
-        self.bb_color[usize::from(color)]
-    }
+    /// Returns a bitboard of squares occupied by pieces matching the specified filter.
+    ///
+    /// This method retrieves a bitboard representing all squares that contain pieces matching the provided filter
+    /// criteria. The filter determines which pieces are included based on their color, type, or specific identity.
+    ///
+    /// # Parameters
+    /// * `filter`: Criteria for which pieces to include in the returned bitboard. Any type that can be converted into
+    ///   an `OccupancyFilter` is accepted.
+    ///
+    /// # Returns
+    /// * A bitboard with 1-bits in positions where matching pieces are located.
+    ///
+    /// # Performance Note
+    /// This method is always inlined to ensure the match on filter types is optimized away at compile time, eliminating
+    /// any runtime overhead from the filter selection.
+    ///
+    /// # Example Usage Contexts
+    /// - Get all occupied squares with `position.occupied(OccupancyFilter::All)`
+    /// - Get only white pieces with `position.occupied(Color::White)`
+    /// - Get all knights with `position.occupied(PieceType::Knight)`
+    /// - Get black queens with `position.occupied(Piece::BlackQueen)`
+    ///
+    /// # Related
+    /// See `OccupancyFilter` for the full set of filtering options available.
+    #[inline(always)]
+    pub fn occupied<F: Into<OccupancyFilter>>(&self, filter: F) -> Bitboard {
+        #[rustfmt::skip]
+        return match filter.into() {
+            OccupancyFilter::All
+                => self.bb_color[usize::from(Color::White)]
+                 | self.bb_color[usize::from(Color::Black)],
 
-    /// Returns the bitboard representing the positions of all pieces of a specific type.
-    pub fn bb_piece(&self, piece: Piece) -> Bitboard {
-        self.bb_piece[usize::from(piece)]
-    }
+            OccupancyFilter::ByColor(color) 
+                => self.bb_color[usize::from(color)],
 
-    /// Returns the bitboard representing the positions of all pieces.
-    pub fn bb_occupied(&self) -> Bitboard {
-        self.bb_color(Color::White) | self.bb_color(Color::Black)
+            OccupancyFilter::ByType(piece_type) 
+                => self.bb_piece[usize::from(Piece::new(Color::White, piece_type))]
+                 | self.bb_piece[usize::from(Piece::new(Color::Black, piece_type))],
+
+            OccupancyFilter::ByPiece(piece) 
+                => self.bb_piece[usize::from(piece)],
+
+            OccupancyFilter::ByColorAndType(color, piece_type)
+                => self.bb_piece[usize::from(Piece::new(color, piece_type))],
+
+            OccupancyFilter::ByColorAndTwoTypes(color, type1, type2)
+                => self.bb_piece[usize::from(Piece::new(color, type1))]
+                 | self.bb_piece[usize::from(Piece::new(color, type2))]
+        };
     }
 
     /// Returns the color of the side to move.
@@ -345,7 +445,7 @@ impl Position {
     /// happen in a valid chess position.
     pub fn king_square(&self, color: Color) -> Square {
         // TODO: Should we keep this incrementally updated?
-        self.bb_piece(Piece::new(color, PieceType::King)).lsb().expect("There should always be a king on the board.")
+        self.occupied((color, PieceType::King)).lsb().expect("There should always be a king on the board.")
     }
 
     /// Places a chess piece on a specific square on the board.
@@ -408,12 +508,11 @@ impl Position {
     /// The occupied parameter affects only sliding piece (rook, bishop, queen) attack calculations; knight, king and
     /// pawn attacks are determined solely by their geometry.
     pub fn attacks_to(&self, sq: Square, occupied: Bitboard, color: Color) -> Bitboard {
-        let queens = self.bb_piece(Piece::new(color, PieceType::Queen));
-        let queens_rooks = self.bb_piece(Piece::new(color, PieceType::Rook)) | queens;
-        let queens_bishops = self.bb_piece(Piece::new(color, PieceType::Bishop)) | queens;
-        let knights = self.bb_piece(Piece::new(color, PieceType::Knight));
-        let king = self.bb_piece(Piece::new(color, PieceType::King));
-        let pawns = self.bb_piece(Piece::new(color, PieceType::Pawn));
+        let queens_rooks = self.occupied((color, PieceType::Rook, PieceType::Queen));
+        let queens_bishops = self.occupied((color, PieceType::Bishop, PieceType::Queen));
+        let knights = self.occupied((color, PieceType::Knight));
+        let king = self.occupied((color, PieceType::King));
+        let pawns = self.occupied((color, PieceType::Pawn));
 
         attacks_from::<{ PieceType::ROOK_VALUE }>(occupied, sq) & queens_rooks
             | attacks_from::<{ PieceType::BISHOP_VALUE }>(occupied, sq) & queens_bishops
@@ -444,28 +543,27 @@ impl Position {
         // piece on an empty board. This way we can avoid the expensive bitboard operations for sliders. If event with
         // an empty position the square is not attacked by a slider, we can return true immediately.
 
-        let queens = self.bb_piece(Piece::new(color, PieceType::Queen));
-        let queens_rooks = self.bb_piece(Piece::new(color, PieceType::Rook)) | queens;
+        let queens_rooks = self.occupied((color, PieceType::Rook, PieceType::Queen));
         if !(attacks_from::<{ PieceType::ROOK_VALUE }>(occupied, sq) & queens_rooks).has_none() {
             return true;
         }
 
-        let queens_bishops = self.bb_piece(Piece::new(color, PieceType::Bishop)) | queens;
+        let queens_bishops = self.occupied((color, PieceType::Bishop, PieceType::Queen));
         if !(attacks_from::<{ PieceType::BISHOP_VALUE }>(occupied, sq) & queens_bishops).has_none() {
             return true;
         }
 
-        let knights = self.bb_piece(Piece::new(color, PieceType::Knight));
+        let knights = self.occupied((color, PieceType::Knight));
         if !(attacks_from::<{ PieceType::KNIGHT_VALUE }>(Bitboard::EMPTY, sq) & knights).has_none() {
             return true;
         }
 
-        let king = self.bb_piece(Piece::new(color, PieceType::King));
+        let king = self.occupied((color, PieceType::King));
         if !(attacks_from::<{ PieceType::KING_VALUE }>(Bitboard::EMPTY, sq) & king).has_none() {
             return true;
         }
 
-        let pawns = self.bb_piece(Piece::new(color, PieceType::Pawn));
+        let pawns = self.occupied((color, PieceType::Pawn));
         if !(attacks_from_pawns(color, sq) & pawns).has_none() {
             return true;
         }
@@ -487,7 +585,7 @@ impl Position {
     /// Panics if the king of the side to move is not present on the board, which indicates an invalid board state. In
     /// standard chess, both kings must always be present.
     pub fn is_check(&self) -> bool {
-        self.is_attacked(self.king_square(self.side_to_move), self.bb_occupied(), !self.side_to_move)
+        self.is_attacked(self.king_square(self.side_to_move), self.occupied(OccupancyFilter::All), !self.side_to_move)
     }
 
     /// Returns a bitboard of all enemy pieces that are currently checking the king of the side to move.
@@ -506,7 +604,7 @@ impl Position {
     /// # Note
     /// Multiple pieces may be giving check simultaneously (e.g., in a discovered check scenario).
     pub fn checkers(&self) -> Bitboard {
-        self.attacks_to(self.king_square(self.side_to_move), self.bb_occupied(), !self.side_to_move)
+        self.attacks_to(self.king_square(self.side_to_move), self.occupied(OccupancyFilter::All), !self.side_to_move)
     }
 
     /// Returns a bitboard of all pieces that are blocking a check on the king of the specified color.
@@ -529,15 +627,15 @@ impl Position {
         // TODO : This should be part of the position state to avoid recomputing it every time.
         let king_sq = self.king_square(color);
 
-        let rooks = self.bb_piece(Piece::new(!color, PieceType::Rook));
-        let bishops = self.bb_piece(Piece::new(!color, PieceType::Bishop));
-        let queens = self.bb_piece(Piece::new(!color, PieceType::Queen));
+        let rooks = self.occupied((!color, PieceType::Rook));
+        let bishops = self.occupied((!color, PieceType::Bishop));
+        let queens = self.occupied((!color, PieceType::Queen));
 
         let mut snipers = attacks_from_rooks(king_sq) & (rooks | queens);
         snipers |= attacks_from_bishops(king_sq) & (bishops | queens);
-        snipers &= self.bb_color(!color);
+        snipers &= self.occupied(!color);
 
-        let occupancy = self.bb_occupied() ^ snipers;
+        let occupancy = self.occupied(OccupancyFilter::All) ^ snipers;
 
         let mut blockers = Bitboard::EMPTY;
         for sniper_sq in snipers {
@@ -576,19 +674,23 @@ impl Position {
 
         // If it is a king move and the king moves into check the move is illegal.
         if mv.piece().piece_type() == PieceType::King {
-            let bb_king = self.bb_piece(mv.piece());
-            return !self.is_attacked(mv.to_square(), self.bb_occupied() ^ bb_king, !mv.piece().color());
+            let bb_king = self.occupied(mv.piece());
+            return !self.is_attacked(
+                mv.to_square(),
+                self.occupied(OccupancyFilter::All) ^ bb_king,
+                !mv.piece().color(),
+            );
         }
 
         // We have a special case for en passant captures, because it has a special behavior of removig pieces from two
         // squares.
         if mv.move_type() == MoveType::EnPassant {
             let en_passant_capture_sq = Square::new(mv.to_square().file(), mv.from_square().rank());
-            let occupied = self.bb_occupied() ^ mv.to_square() ^ mv.from_square() ^ en_passant_capture_sq;
-            let oppenent = !self.side_to_move();
-            let queens = self.bb_piece(Piece::new(oppenent, PieceType::Queen));
-            let queens_rooks = self.bb_piece(Piece::new(oppenent, PieceType::Rook)) | queens;
-            let queens_bishops = self.bb_piece(Piece::new(oppenent, PieceType::Bishop)) | queens;
+            let occupied =
+                self.occupied(OccupancyFilter::All) ^ mv.to_square() ^ mv.from_square() ^ en_passant_capture_sq;
+            let them = !self.side_to_move();
+            let queens_rooks = self.occupied((them, PieceType::Rook, PieceType::Queen));
+            let queens_bishops = self.occupied((them, PieceType::Bishop, PieceType::Queen));
             let king_sq = self.king_square(mv.piece().color());
             return (attacks_from::<{ PieceType::ROOK_VALUE }>(occupied, king_sq) & queens_rooks).has_none()
                 && (attacks_from::<{ PieceType::BISHOP_VALUE }>(occupied, king_sq) & queens_bishops).has_none();
@@ -784,13 +886,13 @@ mod tests {
         position.put_piece(Piece::WHITE_QUEEN, Square::E4);
 
         assert_eq!(position[Square::E4], Some(Piece::WHITE_QUEEN));
-        assert_eq!(position.bb_color(Color::White), Bitboard::from(Square::E4));
-        assert_eq!(position.bb_piece(Piece::WHITE_QUEEN), Square::E4.into());
+        assert_eq!(position.occupied(Color::White), Bitboard::from(Square::E4));
+        assert_eq!(position.occupied(Piece::WHITE_QUEEN), Square::E4.into());
 
         position.put_piece(Piece::BLACK_KNIGHT, Square::H8);
         assert_eq!(position[Square::H8], Some(Piece::BLACK_KNIGHT));
-        assert_eq!(position.bb_color(Color::Black), Bitboard::from(Square::H8));
-        assert_eq!(position.bb_piece(Piece::BLACK_KNIGHT), Square::H8.into());
+        assert_eq!(position.occupied(Color::Black), Bitboard::from(Square::H8));
+        assert_eq!(position.occupied(Piece::BLACK_KNIGHT), Square::H8.into());
     }
 
     #[test]
@@ -801,8 +903,8 @@ mod tests {
         position.remove_piece(Square::B5);
 
         assert_eq!(position[Square::B5], None);
-        assert_eq!(position.bb_color(Color::Black), Bitboard::EMPTY);
-        assert_eq!(position.bb_piece(Piece::BLACK_PAWN), Bitboard::EMPTY);
+        assert_eq!(position.occupied(Color::Black), Bitboard::EMPTY);
+        assert_eq!(position.occupied(Piece::BLACK_PAWN), Bitboard::EMPTY);
     }
 
     #[test]
@@ -814,57 +916,57 @@ mod tests {
 
         assert_eq!(position[Square::A2], None);
         assert_eq!(position[Square::A3], Some(Piece::WHITE_PAWN));
-        assert_eq!(position.bb_color(Color::White), Square::A3.into());
-        assert_eq!(position.bb_piece(Piece::WHITE_PAWN), Square::A3.into());
+        assert_eq!(position.occupied(Color::White), Square::A3.into());
+        assert_eq!(position.occupied(Piece::WHITE_PAWN), Square::A3.into());
     }
 
     #[test]
     fn test_is_attacked_by_rook() {
         let position = Position::new_from_fen("4k3/8/8/8/8/8/8/1R2K3 w - - 0 1").unwrap();
 
-        assert!(position.is_attacked(Square::B5, position.bb_occupied(), Color::White));
-        assert!(!position.is_attacked(Square::B5, position.bb_occupied(), Color::Black));
-        assert!(!position.is_attacked(Square::C2, position.bb_occupied(), Color::White));
+        assert!(position.is_attacked(Square::B5, position.occupied(OccupancyFilter::All), Color::White));
+        assert!(!position.is_attacked(Square::B5, position.occupied(OccupancyFilter::All), Color::Black));
+        assert!(!position.is_attacked(Square::C2, position.occupied(OccupancyFilter::All), Color::White));
     }
 
     #[test]
     fn test_is_attacked_by_bishop() {
         let position = Position::new_from_fen("4k3/8/8/8/8/8/8/1B2K3 w - - 0 1").unwrap();
 
-        assert!(position.is_attacked(Square::H7, position.bb_occupied(), Color::White));
-        assert!(!position.is_attacked(Square::H7, position.bb_occupied(), Color::Black));
-        assert!(!position.is_attacked(Square::H6, position.bb_occupied(), Color::White));
+        assert!(position.is_attacked(Square::H7, position.occupied(OccupancyFilter::All), Color::White));
+        assert!(!position.is_attacked(Square::H7, position.occupied(OccupancyFilter::All), Color::Black));
+        assert!(!position.is_attacked(Square::H6, position.occupied(OccupancyFilter::All), Color::White));
     }
 
     #[test]
     fn test_is_attacked_by_queen() {
         let position = Position::new_from_fen("4k3/8/8/8/8/8/8/1Q2K3 w - - 0 1").unwrap();
 
-        assert!(position.is_attacked(Square::B5, position.bb_occupied(), Color::White));
-        assert!(!position.is_attacked(Square::B5, position.bb_occupied(), Color::Black));
-        assert!(position.is_attacked(Square::C2, position.bb_occupied(), Color::White));
-        assert!(position.is_attacked(Square::H7, position.bb_occupied(), Color::White));
-        assert!(!position.is_attacked(Square::H7, position.bb_occupied(), Color::Black));
-        assert!(!position.is_attacked(Square::H6, position.bb_occupied(), Color::White));
+        assert!(position.is_attacked(Square::B5, position.occupied(OccupancyFilter::All), Color::White));
+        assert!(!position.is_attacked(Square::B5, position.occupied(OccupancyFilter::All), Color::Black));
+        assert!(position.is_attacked(Square::C2, position.occupied(OccupancyFilter::All), Color::White));
+        assert!(position.is_attacked(Square::H7, position.occupied(OccupancyFilter::All), Color::White));
+        assert!(!position.is_attacked(Square::H7, position.occupied(OccupancyFilter::All), Color::Black));
+        assert!(!position.is_attacked(Square::H6, position.occupied(OccupancyFilter::All), Color::White));
     }
 
     #[test]
     fn test_is_attacked_by_knight() {
         let position = Position::new_from_fen("4k3/8/8/3n4/8/8/8/4K3 b - - 0 1").unwrap();
 
-        assert!(position.is_attacked(Square::E3, position.bb_occupied(), Color::Black));
-        assert!(!position.is_attacked(Square::D4, position.bb_occupied(), Color::Black));
-        assert!(!position.is_attacked(Square::E3, position.bb_occupied(), Color::White));
+        assert!(position.is_attacked(Square::E3, position.occupied(OccupancyFilter::All), Color::Black));
+        assert!(!position.is_attacked(Square::D4, position.occupied(OccupancyFilter::All), Color::Black));
+        assert!(!position.is_attacked(Square::E3, position.occupied(OccupancyFilter::All), Color::White));
     }
 
     #[test]
     fn test_is_attacked_by_king() {
         let position = Position::new_from_fen("4k3/8/8/8/8/8/8/4K3 b - - 0 1").unwrap();
 
-        assert!(position.is_attacked(Square::E7, position.bb_occupied(), Color::Black));
-        assert!(!position.is_attacked(Square::G6, position.bb_occupied(), Color::Black));
+        assert!(position.is_attacked(Square::E7, position.occupied(OccupancyFilter::All), Color::Black));
+        assert!(!position.is_attacked(Square::G6, position.occupied(OccupancyFilter::All), Color::Black));
 
-        assert!(!position.is_attacked(Square::E7, position.bb_occupied(), Color::White));
+        assert!(!position.is_attacked(Square::E7, position.occupied(OccupancyFilter::All), Color::White));
     }
 
     #[test]
@@ -886,13 +988,13 @@ mod tests {
     fn test_attacks_to() {
         let position = Position::new_from_fen("3r4/b7/2n3r1/2p1pn2/q2Nk1q1/3n4/3r1b2/1K6 b - - 0 1").unwrap();
 
-        let attacks_black = position.attacks_to(Square::D4, position.bb_occupied(), Color::Black);
+        let attacks_black = position.attacks_to(Square::D4, position.occupied(OccupancyFilter::All), Color::Black);
         assert_eq!(
             attacks_black,
             Square::A4 | Square::C5 | Square::C6 | Square::D8 | Square::E5 | Square::E4 | Square::F5 | Square::F2
         );
 
-        let attacks_white = position.attacks_to(Square::D4, position.bb_occupied(), Color::White);
+        let attacks_white = position.attacks_to(Square::D4, position.occupied(OccupancyFilter::All), Color::White);
         assert_eq!(attacks_white, Bitboard::EMPTY);
     }
 

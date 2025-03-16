@@ -2,7 +2,7 @@ use crate::chess::{
     bitboard::Bitboard,
     coordinates::{File, Rank, Square},
     piece::{Color, Piece, PieceType},
-    position::Position,
+    position::{OccupancyFilter, Position},
     r#move::{CastlingRight, CastlingSide, Move},
 };
 
@@ -101,10 +101,10 @@ fn generate_pawn_moves<const TYPE: u8, const COLOR: u8>(position: &Position, tar
     let bb_rank_8: Bitboard = Bitboard::from(Rank::R8.relative_to_color(color));
     let bb_file_a: Bitboard = Bitboard::from(File::A);
     let bb_file_h: Bitboard = Bitboard::from(File::H);
-    let bb_occupied: Bitboard = position.bb_occupied();
-    let bb_opponent: Bitboard = position.bb_color(!color);
+    let bb_occupied: Bitboard = position.occupied(OccupancyFilter::All);
+    let bb_them: Bitboard = position.occupied(!color);
     let piece = Piece::new(COLOR.into(), PieceType::Pawn);
-    let bb_from = position.bb_piece(piece);
+    let bb_from = position.occupied(piece);
 
     if matches!(generation_type, MoveGenerationType::All | MoveGenerationType::Evasions | MoveGenerationType::Quiet) {
         // Single pawn push
@@ -136,7 +136,7 @@ fn generate_pawn_moves<const TYPE: u8, const COLOR: u8>(position: &Position, tar
             Color::White => bb_to << 7,
             Color::Black => bb_to >> 9,
         };
-        bb_to &= bb_opponent;
+        bb_to &= bb_them;
         collect_pawn_moves(
             bb_to & !bb_rank_8 & targets,
             |sq| unsafe { sq.down_unchecked(direction_factor).right_unchecked(1) },
@@ -158,7 +158,7 @@ fn generate_pawn_moves<const TYPE: u8, const COLOR: u8>(position: &Position, tar
             Color::White => bb_to << 9,
             Color::Black => bb_to >> 7,
         };
-        bb_to &= bb_opponent;
+        bb_to &= bb_them;
         collect_pawn_moves(
             bb_to & !bb_rank_8 & targets,
             |sq| unsafe { sq.down_unchecked(direction_factor).left_unchecked(1) },
@@ -219,10 +219,10 @@ fn generate_piece_moves<const COLOR: u8, const PIECE_TYPE: u8>(
     list: &mut Vec<Move>,
 ) {
     let piece = Piece::new(COLOR.into(), PIECE_TYPE.into());
-    let bb_from = position.bb_piece(piece);
+    let bb_from = position.occupied(piece);
 
     for from_sq in bb_from {
-        let bb_to = attacks_from::<PIECE_TYPE>(position.bb_occupied(), from_sq) & targets;
+        let bb_to = attacks_from::<PIECE_TYPE>(position.occupied(OccupancyFilter::All), from_sq) & targets;
         for to_sq in bb_to {
             let capture = position[to_sq];
             match capture {
@@ -275,7 +275,7 @@ fn generate_castlings<const COLOR: u8, const SIDE: u8>(position: &Position, list
     let king_bb = Bitboard::from(king_sq);
     let king_travel_bb = Bitboard::between(king_sq, king_final_sq);
     let rook_travel_bb = Bitboard::between(rook_sq, rook_final_sq);
-    let occupied_bb = position.bb_occupied() ^ (king_bb | rook_sq);
+    let occupied_bb = position.occupied(OccupancyFilter::All) ^ (king_bb | rook_sq);
 
     // If any of the travel squares are occupied, it is not possible to castle.
     if !((king_travel_bb | rook_travel_bb) & occupied_bb).has_none() {
@@ -306,9 +306,9 @@ fn generate_moves_color<const TYPE: u8, const COLOR: u8>(position: &Position, li
     // generated.
     if TYPE != MoveGenerationType::EVASIONS_VALUE || !checkers.has_many() {
         targets = match TYPE {
-            MoveGenerationType::ALL_VALUE => !position.bb_color(color),
-            MoveGenerationType::QUIET_VALUE => !position.bb_occupied(),
-            MoveGenerationType::CAPTURES_VALUE => position.bb_color(!color),
+            MoveGenerationType::ALL_VALUE => !position.occupied(color),
+            MoveGenerationType::QUIET_VALUE => !position.occupied(OccupancyFilter::All),
+            MoveGenerationType::CAPTURES_VALUE => position.occupied(!color),
             MoveGenerationType::EVASIONS_VALUE => {
                 Bitboard::between(
                     position.king_square(color),
@@ -326,7 +326,7 @@ fn generate_moves_color<const TYPE: u8, const COLOR: u8>(position: &Position, li
     }
 
     // Kings moves, regular and castlings.
-    targets = if TYPE == MoveGenerationType::EVASIONS_VALUE { !position.bb_color(color) } else { targets };
+    targets = if TYPE == MoveGenerationType::EVASIONS_VALUE { !position.occupied(color) } else { targets };
     generate_piece_moves::<COLOR, { PieceType::KING_VALUE }>(position, targets, list);
     if TYPE == MoveGenerationType::ALL_VALUE || TYPE == MoveGenerationType::QUIET_VALUE {
         generate_castlings::<COLOR, { CastlingSide::KINGSIDE_VALUE }>(position, list);

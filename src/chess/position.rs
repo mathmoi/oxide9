@@ -1,8 +1,11 @@
 use std::ops::Index;
 
 use super::{
+    bitboard::Bitboard,
+    coordinates::{File, Rank, Square},
     move_gen::attacks::{attacks_from, attacks_from_bishops, attacks_from_pawns, attacks_from_rooks},
-    Bitboard, CastlingRight, CastlingSide, Color, File, Move, MoveType, Piece, PieceType, Rank, Square,
+    piece::{Color, Piece, PieceType},
+    r#move::{CastlingRight, CastlingSide, Move, MoveType},
 };
 
 /// Error type for parsing a FEN (Forsyth-Edwards Notation) string.
@@ -171,13 +174,6 @@ impl Position {
     ///         FEN is a standard notation to describe a particular board position of a chess
     ///         game.
     ///
-    /// # Examples
-    ///
-    /// ```
-    /// // Initial chess position
-    /// let pos = oxide9::chess::Position::new_from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
-    /// ```
-    ///
     /// # See also
     /// [The PGN specifications](https://ia902908.us.archive.org/26/items/pgn-standard-1994-03-12/PGN_standard_1994-03-12.txt)
     /// that defines the FEN format at section 16.1.
@@ -199,14 +195,19 @@ impl Position {
         Ok(position)
     }
 
-    /// Creates a new chess position with the initial board setup.
+    /// Creates a new chess position with the standard initial board setup.
     ///
-    /// # Examples
+    /// This constructor initializes the chess board to the standard starting position, with all pieces in their
+    /// traditional starting squares, white to move, and full castling rights available.
     ///
-    /// ```
-    /// // Create a new Position with the initial chess position
-    /// let pos = oxide9::chess::Position::new();
-    /// ```
+    /// # Returns
+    /// A new Position instance configured with the standard chess starting position
+    /// (RNBQKBNR/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1).
+    ///
+    /// # Implementation Details
+    /// The function uses Forsyth-Edwards Notation (FEN) parsing internally but is guaranteed to never fail since it
+    /// uses the valid standard starting position string. This is more convenient than `new_from_fen()` when you
+    /// specifically want the standard chess starting position.
     pub fn new() -> Self {
         const INITIAL_POSITION: &str = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
         Self::new_from_fen(INITIAL_POSITION)

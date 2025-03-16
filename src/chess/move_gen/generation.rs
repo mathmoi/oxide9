@@ -1,5 +1,9 @@
 use crate::chess::{
-    Bitboard, CastlingRight, CastlingSide, Color, File, Move, Piece, PieceType, Position, Rank, Square,
+    bitboard::Bitboard,
+    coordinates::{File, Rank, Square},
+    piece::{Color, Piece, PieceType},
+    position::Position,
+    r#move::{CastlingRight, CastlingSide, Move},
 };
 
 use super::attacks::attacks_from;

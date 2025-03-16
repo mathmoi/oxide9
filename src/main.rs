@@ -1,4 +1,4 @@
-use oxide9::chess::Square;
+use oxide9::chess::coordinates::Square;
 
 fn main() {
     let a1 = Square::A1;

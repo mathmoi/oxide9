@@ -1,6 +1,10 @@
 use colored::*;
 use oxide9::chess::{
-    generate_moves, CastlingRight, CastlingSide, Move, MoveGenerationType, Piece, PieceType, Position, Rank, Square,
+    coordinates::{Rank, Square},
+    move_gen::generation::{generate_moves, MoveGenerationType},
+    piece::{Piece, PieceType},
+    position::Position,
+    r#move::{CastlingRight, CastlingSide, Move},
 };
 use serde::Deserialize;
 use std::{collections::HashSet, fs::File, io::BufReader, path::PathBuf, time::Instant};

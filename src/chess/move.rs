@@ -1,5 +1,9 @@
-use super::{Color, Piece, Square};
 use bitflags::bitflags;
+
+use super::{
+    coordinates::Square,
+    piece::{Color, Piece},
+};
 
 /// This is an enum that represents the different sides of the board that a castling move can be
 /// made.
@@ -240,8 +244,6 @@ mod tests {
     }
 
     mod move_tests {
-        use crate::chess::Square;
-
         use super::*;
 
         #[test]

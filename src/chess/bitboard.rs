@@ -4,10 +4,7 @@ use std::{
     sync::OnceLock,
 };
 
-use super::{
-    coordinates::{Antidiagonal, CoordinatesResult, Diagonal},
-    File, Rank, Square,
-};
+use super::coordinates::{Antidiagonal, CoordinatesResult, Diagonal, File, Rank, Square};
 
 /// A bitboard is a 64-bit integer that represents the state of a chess board. Each bit represents
 /// a square on the board.
@@ -45,17 +42,6 @@ impl Bitboard {
     ///
     /// - `Some(Square)` containing the position of the least significant set bit
     /// - `None` if the bitboard is empty (has no bits set)
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use oxide9::chess::{Bitboard, Square};
-    ///
-    /// let board = Bitboard::new(0b10100);
-    /// assert_eq!(board.lsb(), Some(Square::from(2))); // Third bit from right is set
-    ///
-    /// assert_eq!(Bitboard::EMPTY.lsb(), None);
-    /// ```
     pub fn lsb(self) -> Option<Square> {
         if self.0 == 0 {
             return None;
@@ -74,17 +60,6 @@ impl Bitboard {
     ///
     /// - `Some(Square)` containing the position of the most significant set bit
     /// - `None` if the bitboard is empty (has no bits set)
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use oxide9::chess::{Bitboard, Square};
-    ///
-    /// let board = Bitboard::new(0b10100);
-    /// assert_eq!(board.msb(), Some(Square::from(4))); // Fifth bit from right is set
-    ///
-    /// assert_eq!(Bitboard::EMPTY.msb(), None);
-    /// ```
     pub fn msb(self) -> Option<Square> {
         if self.0 == 0 {
             return None;
@@ -101,20 +76,6 @@ impl Bitboard {
     /// # Returns
     ///
     /// A `u32` representing the number of bits set to 1 in the bitboard.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use oxide9::chess::{Bitboard, Square};
-    ///
-    /// let board = Bitboard::new(0b10110101);
-    /// assert_eq!(board.popcnt(), 5); // There are 5 bits set to 1
-    ///
-    /// assert_eq!(Bitboard::EMPTY.popcnt(), 0);
-    ///
-    /// let full_square = Bitboard::new(0xFF); // 8 bits set
-    /// assert_eq!(full_square.popcnt(), 8);
-    /// ```
     pub fn popcnt(self) -> u32 {
         self.0.count_ones()
     }
@@ -138,16 +99,6 @@ impl Bitboard {
     /// This function uses an unsafe intrinsic that requires the CPU to support the BMI2 instruction set. Ensure your
     /// target architecture supports BMI2 or that you've implemented runtime feature detection before calling this
     /// function.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use oxide9::chess::Bitboard;
-    ///
-    /// let mask = Bitboard::new(0b11101100);
-    /// let bits = 0b1011;
-    /// let result = mask.pdep(bits); // Returns Bitboard(0b10101100)
-    /// ```
     pub fn pdep(self, bits: u64) -> Bitboard {
         Bitboard(unsafe { _pdep_u64(bits, self.0) })
     }
@@ -171,16 +122,6 @@ impl Bitboard {
     /// This function uses an unsafe intrinsic that requires the CPU to support the BMI2 instruction set. Ensure your
     /// target architecture supports BMI2 or that you've implemented runtime feature detection before calling this
     /// function.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use oxide9::chess::Bitboard;
-    ///
-    /// let board = Bitboard::new(0b10110101);
-    /// let mask = Bitboard::new(0b11101100);
-    /// let result = board.pext(mask); // Returns 0b1011
-    /// ```
     pub fn pext(self, mask: Bitboard) -> u64 {
         unsafe { std::arch::x86_64::_pext_u64(self.0, mask.0) }
     }

@@ -1,7 +1,8 @@
 use std::convert::From;
 use std::fmt::{self, Display};
 
-use super::{Bitboard, Color};
+use crate::chess::bitboard::Bitboard;
+use crate::chess::piece::Color;
 
 /// Error type for the coordinates module.
 #[derive(Debug, PartialEq)]
@@ -1029,8 +1030,7 @@ mod tests {
         }
 
         #[test]
-        fn test_are_aligned()
-        {
+        fn test_are_aligned() {
             // Test squares on the same rank
             assert!(Square::are_aligned(Square::A1, Square::E1, Square::H1));
             assert!(Square::are_aligned(Square::A1, Square::H1, Square::E1));

@@ -1,9 +1,13 @@
 use std::sync::OnceLock;
 
-use crate::chess::{Bitboard, Color, File, PieceType, Square};
+use crate::chess::{
+    bitboard::Bitboard,
+    coordinates::{File, Square},
+    piece::{Color, PieceType},
+};
 
 mod naive_sliders {
-    use crate::chess::{Bitboard, Square};
+    use crate::chess::{bitboard::Bitboard, coordinates::Square};
 
     /// Returns a bitboard with all squares attacked by a rook on a given square. This function has
     /// poor performance and should not be used during move generation.
@@ -230,7 +234,10 @@ mod naive_sliders {
 mod pext_sliders {
     use std::{array, sync::OnceLock};
 
-    use crate::chess::{Bitboard, File, Rank, Square};
+    use crate::chess::{
+        bitboard::Bitboard,
+        coordinates::{File, Rank, Square},
+    };
 
     /// This structure contains the data required to perform the PEXT operation for a given square.   
     pub struct PextData {

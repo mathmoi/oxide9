@@ -100,6 +100,7 @@ pub struct GameState {
     en_passant_square: Option<Square>,
     halfmove_clock: u16,
     fullmove_number: u16,
+    last_move: Option<Move>,
 }
 
 /// Default implementation for the GameState struct.
@@ -111,6 +112,7 @@ impl Default for GameState {
             en_passant_square: None,
             halfmove_clock: 0,
             fullmove_number: 1,
+            last_move: None,
         }
     }
 }
@@ -895,8 +897,10 @@ impl Position {
         };
         let rook_to = Square::new(rook_to_file, rank);
 
-        self.move_piece(mv.piece(), mv.from_square(), mv.to_square());
-        self.move_piece(rook, rook_from, rook_to);
+        self.remove_piece(mv.from_square());
+        self.remove_piece(rook_from);
+        self.put_piece(mv.piece(), mv.to_square());
+        self.put_piece(rook, rook_to);
 
         self.state.en_passant_square = None;
         self.state.halfmove_clock += 1
@@ -921,6 +925,8 @@ impl Position {
     pub fn make(&mut self, mv: Move) {
         debug_assert!(self.is_legal(mv), "Tried to make an illegal move: {:?}", mv);
 
+        self.history.push(self.state);
+
         match mv.move_type() {
             MoveType::Basic => self.make_basic(mv),
             MoveType::Capture(capture) => self.make_capture(mv, capture),
@@ -943,6 +949,80 @@ impl Position {
         }
 
         self.state.side_to_move = !self.state.side_to_move;
+
+        self.state.last_move = Some(mv);
+    }
+
+    fn unmake_basic(&mut self, mv: Move) {
+        self.move_piece(mv.piece(), mv.to_square(), mv.from_square());
+    }
+
+    fn unmake_capture(&mut self, mv: Move, capture: Piece) {
+        self.move_piece(mv.piece(), mv.to_square(), mv.from_square());
+        self.put_piece(capture, mv.to_square());
+    }
+
+    fn unmake_promotion(&mut self, mv: Move) {
+        self.remove_piece(mv.to_square());
+        self.put_piece(mv.piece(), mv.from_square());
+    }
+
+    fn unmake_capture_promotion(&mut self, mv: Move, capture: Piece) {
+        self.remove_piece(mv.to_square());
+        self.put_piece(capture, mv.to_square());
+        self.put_piece(mv.piece(), mv.from_square());
+    }
+
+    fn unmake_en_passant(&mut self, mv: Move) {
+        self.move_piece(mv.piece(), mv.to_square(), mv.from_square());
+        let capture_sq = unsafe { mv.to_square().down_unchecked(mv.piece().color().forward()) }; // Safe because prise en passant square is never on edge.
+        self.put_piece(Piece::new(self.side_to_move(), PieceType::Pawn), capture_sq);
+    }
+
+    fn unmake_castling(&mut self, mv: Move, side: CastlingSide) {
+        let rook = Piece::new(!self.side_to_move(), PieceType::Rook);
+        let rank = mv.from_square().rank();
+        let rook_from_file = self.castling_rook_file[usize::from(side)];
+        let rook_from = Square::new(rook_from_file, rank);
+        let rook_to_file = match side {
+            CastlingSide::Queenside => File::D,
+            CastlingSide::Kingside => File::F,
+        };
+        let rook_to = Square::new(rook_to_file, rank);
+
+        self.remove_piece(mv.to_square());
+        self.remove_piece(rook_to);
+        self.put_piece(mv.piece(), mv.from_square());
+        self.put_piece(rook, rook_from);
+    }
+
+    /// Reverts the last move made on the board and restores the previous game state.
+    ///
+    /// This function handles all move types (basic moves, captures, promotions, en passant, and castling)
+    /// and completely restores the previous board position including piece positions, castling rights,
+    /// en passant possibilities, and turn information.
+    ///
+    /// # Panics
+    /// Panics if there is no last move to undo (state.last_move is None) or if there's no previous state
+    /// in the history stack.
+    ///
+    /// # Note
+    /// This function assumes that moves and states have been properly tracked and stored in the history.
+    /// It should only be called if a previous move exists.
+    pub fn unmake(&mut self) {
+        let mv = self.state.last_move.expect("There should be a last move.");
+
+        match mv.move_type() {
+            MoveType::Basic => self.unmake_basic(mv),
+            MoveType::Capture(capture) => self.unmake_capture(mv, capture),
+            MoveType::TwoSquarePawnPush => self.unmake_basic(mv),
+            MoveType::Promotion(_) => self.unmake_promotion(mv),
+            MoveType::CapturePromotion { capture, .. } => self.unmake_capture_promotion(mv, capture),
+            MoveType::EnPassant => self.unmake_en_passant(mv),
+            MoveType::Castling(side) => self.unmake_castling(mv, side),
+        }
+
+        self.state = self.history.pop().expect("There should be a state in the history.");
     }
 }
 

@@ -62,7 +62,10 @@ enum TestFailureError {
     ExtraMoves(HashSet<Move>),
 
     #[error("Unexpected position after making a move ({:?})\n\nOriginal:\n{}\n\nExpected:\n{}\n\nActual:\n{}\n", .mv, .original, .expected, .actual)]
-    UnexpectedPositionAfterMove { mv: Move, original: String, expected: String, actual: String },
+    UnexpectedPositionAfterMake { mv: Move, original: String, expected: String, actual: String },
+
+    #[error("Unexpected position after unmaking a move ({:?})\n\nOriginal:\n{}\n\nActual:\n{}\n", .mv, .original, .actual)]
+    UnexpectedPositionAfterUnmake { mv: Move, original: String, actual: String },
 }
 
 /// Global errors for this module.
@@ -252,6 +255,8 @@ fn test_move_execution(test: &Test) -> Result<(), MoveGeneratorTestError> {
     for test_move in test.moves.iter() {
         let mut position = test_position.clone();
         let mv = Move::try_from(&test_move.details)?;
+
+        // Make the move
         position.make(mv);
         let actual_fen = position.to_fen();
         if test_move.fen != actual_fen {
@@ -259,10 +264,24 @@ fn test_move_execution(test: &Test) -> Result<(), MoveGeneratorTestError> {
                 .or(Err(TestDataError::UnableToParseFen(test_move.fen.clone())))?;
             return Err(MoveGeneratorTestError::TestFailed {
                 test_name: test.description.clone(),
-                test_failure_error: TestFailureError::UnexpectedPositionAfterMove {
+                test_failure_error: TestFailureError::UnexpectedPositionAfterMake {
                     mv,
                     original: test_position.to_compact_string() + "\n" + &test_position.to_fen(),
                     expected: expected_position.to_compact_string() + "\n" + &test_move.fen,
+                    actual: position.to_compact_string() + "\n" + &actual_fen,
+                },
+            });
+        }
+
+        // Unmake the move
+        position.unmake();
+        let actual_fen = position.to_fen();
+        if test.fen != actual_fen {
+            return Err(MoveGeneratorTestError::TestFailed {
+                test_name: test.description.clone(),
+                test_failure_error: TestFailureError::UnexpectedPositionAfterUnmake {
+                    mv,
+                    original: test_position.to_compact_string() + "\n" + &test_position.to_fen(),
                     actual: position.to_compact_string() + "\n" + &actual_fen,
                 },
             });

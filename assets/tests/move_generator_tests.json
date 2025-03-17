@@ -1,6 +1,6 @@
 [
     {
-        "fen": "4k3/8/8/8/8/8/8/4K3 w - - 0 1",
+        "fen": "4k3/8/8/8/8/8/8/4K3 w - - 2 2",
         "description": "White king on starting square",
         "moves": [
             {
@@ -15,7 +15,7 @@
                 "uci": "e1f2",
                 "san": "Kf2",
                 "lan": "Ke1-f2",
-                "fen": "4k3/8/8/8/8/8/5K2/8 b - - 1 1"
+                "fen": "4k3/8/8/8/8/8/5K2/8 b - - 3 2"
             },
             {
                 "move": {
@@ -29,7 +29,7 @@
                 "uci": "e1e2",
                 "san": "Ke2",
                 "lan": "Ke1-e2",
-                "fen": "4k3/8/8/8/8/8/4K3/8 b - - 1 1"
+                "fen": "4k3/8/8/8/8/8/4K3/8 b - - 3 2"
             },
             {
                 "move": {
@@ -43,7 +43,7 @@
                 "uci": "e1d2",
                 "san": "Kd2",
                 "lan": "Ke1-d2",
-                "fen": "4k3/8/8/8/8/8/3K4/8 b - - 1 1"
+                "fen": "4k3/8/8/8/8/8/3K4/8 b - - 3 2"
             },
             {
                 "move": {
@@ -57,7 +57,7 @@
                 "uci": "e1f1",
                 "san": "Kf1",
                 "lan": "Ke1-f1",
-                "fen": "4k3/8/8/8/8/8/8/5K2 b - - 1 1"
+                "fen": "4k3/8/8/8/8/8/8/5K2 b - - 3 2"
             },
             {
                 "move": {
@@ -71,12 +71,12 @@
                 "uci": "e1d1",
                 "san": "Kd1",
                 "lan": "Ke1-d1",
-                "fen": "4k3/8/8/8/8/8/8/3K4 b - - 1 1"
+                "fen": "4k3/8/8/8/8/8/8/3K4 b - - 3 2"
             }
         ]
     },
     {
-        "fen": "4k3/8/8/8/8/8/8/4K3 b - - 0 1",
+        "fen": "4k3/8/8/8/8/8/8/4K3 b - - 2 2",
         "description": "Black king on starting square",
         "moves": [
             {
@@ -91,7 +91,7 @@
                 "uci": "e8f8",
                 "san": "Kf8",
                 "lan": "Ke8-f8",
-                "fen": "5k2/8/8/8/8/8/8/4K3 w - - 1 2"
+                "fen": "5k2/8/8/8/8/8/8/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -105,7 +105,7 @@
                 "uci": "e8d8",
                 "san": "Kd8",
                 "lan": "Ke8-d8",
-                "fen": "3k4/8/8/8/8/8/8/4K3 w - - 1 2"
+                "fen": "3k4/8/8/8/8/8/8/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -119,7 +119,7 @@
                 "uci": "e8f7",
                 "san": "Kf7",
                 "lan": "Ke8-f7",
-                "fen": "8/5k2/8/8/8/8/8/4K3 w - - 1 2"
+                "fen": "8/5k2/8/8/8/8/8/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -133,7 +133,7 @@
                 "uci": "e8e7",
                 "san": "Ke7",
                 "lan": "Ke8-e7",
-                "fen": "8/4k3/8/8/8/8/8/4K3 w - - 1 2"
+                "fen": "8/4k3/8/8/8/8/8/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -147,12 +147,12 @@
                 "uci": "e8d7",
                 "san": "Kd7",
                 "lan": "Ke8-d7",
-                "fen": "8/3k4/8/8/8/8/8/4K3 w - - 1 2"
+                "fen": "8/3k4/8/8/8/8/8/4K3 w - - 3 3"
             }
         ]
     },
     {
-        "fen": "4k3/8/8/8/4K3/8/8/8 w - - 0 1",
+        "fen": "4k3/8/8/8/4K3/8/8/8 w - - 2 2",
         "description": "White king on a middle square",
         "moves": [
             {
@@ -167,7 +167,7 @@
                 "uci": "e4f5",
                 "san": "Kf5",
                 "lan": "Ke4-f5",
-                "fen": "4k3/8/8/5K2/8/8/8/8 b - - 1 1"
+                "fen": "4k3/8/8/5K2/8/8/8/8 b - - 3 2"
             },
             {
                 "move": {
@@ -181,7 +181,7 @@
                 "uci": "e4e5",
                 "san": "Ke5",
                 "lan": "Ke4-e5",
-                "fen": "4k3/8/8/4K3/8/8/8/8 b - - 1 1"
+                "fen": "4k3/8/8/4K3/8/8/8/8 b - - 3 2"
             },
             {
                 "move": {
@@ -195,7 +195,7 @@
                 "uci": "e4d5",
                 "san": "Kd5",
                 "lan": "Ke4-d5",
-                "fen": "4k3/8/8/3K4/8/8/8/8 b - - 1 1"
+                "fen": "4k3/8/8/3K4/8/8/8/8 b - - 3 2"
             },
             {
                 "move": {
@@ -209,7 +209,7 @@
                 "uci": "e4f4",
                 "san": "Kf4",
                 "lan": "Ke4-f4",
-                "fen": "4k3/8/8/8/5K2/8/8/8 b - - 1 1"
+                "fen": "4k3/8/8/8/5K2/8/8/8 b - - 3 2"
             },
             {
                 "move": {
@@ -223,7 +223,7 @@
                 "uci": "e4d4",
                 "san": "Kd4",
                 "lan": "Ke4-d4",
-                "fen": "4k3/8/8/8/3K4/8/8/8 b - - 1 1"
+                "fen": "4k3/8/8/8/3K4/8/8/8 b - - 3 2"
             },
             {
                 "move": {
@@ -237,7 +237,7 @@
                 "uci": "e4f3",
                 "san": "Kf3",
                 "lan": "Ke4-f3",
-                "fen": "4k3/8/8/8/8/5K2/8/8 b - - 1 1"
+                "fen": "4k3/8/8/8/8/5K2/8/8 b - - 3 2"
             },
             {
                 "move": {
@@ -251,7 +251,7 @@
                 "uci": "e4e3",
                 "san": "Ke3",
                 "lan": "Ke4-e3",
-                "fen": "4k3/8/8/8/8/4K3/8/8 b - - 1 1"
+                "fen": "4k3/8/8/8/8/4K3/8/8 b - - 3 2"
             },
             {
                 "move": {
@@ -265,12 +265,12 @@
                 "uci": "e4d3",
                 "san": "Kd3",
                 "lan": "Ke4-d3",
-                "fen": "4k3/8/8/8/8/3K4/8/8 b - - 1 1"
+                "fen": "4k3/8/8/8/8/3K4/8/8 b - - 3 2"
             }
         ]
     },
     {
-        "fen": "4k3/8/8/8/4N3/8/8/4K3 w - - 0 1",
+        "fen": "4k3/8/8/8/4N3/8/8/4K3 w - - 2 2",
         "description": "White knight on a middle square",
         "moves": [
             {
@@ -285,7 +285,7 @@
                 "uci": "e4f6",
                 "san": "Nf6+",
                 "lan": "Ne4-f6+",
-                "fen": "4k3/8/5N2/8/8/8/8/4K3 b - - 1 1"
+                "fen": "4k3/8/5N2/8/8/8/8/4K3 b - - 3 2"
             },
             {
                 "move": {
@@ -299,7 +299,7 @@
                 "uci": "e4d6",
                 "san": "Nd6+",
                 "lan": "Ne4-d6+",
-                "fen": "4k3/8/3N4/8/8/8/8/4K3 b - - 1 1"
+                "fen": "4k3/8/3N4/8/8/8/8/4K3 b - - 3 2"
             },
             {
                 "move": {
@@ -313,7 +313,7 @@
                 "uci": "e4g5",
                 "san": "Ng5",
                 "lan": "Ne4-g5",
-                "fen": "4k3/8/8/6N1/8/8/8/4K3 b - - 1 1"
+                "fen": "4k3/8/8/6N1/8/8/8/4K3 b - - 3 2"
             },
             {
                 "move": {
@@ -327,7 +327,7 @@
                 "uci": "e4c5",
                 "san": "Nc5",
                 "lan": "Ne4-c5",
-                "fen": "4k3/8/8/2N5/8/8/8/4K3 b - - 1 1"
+                "fen": "4k3/8/8/2N5/8/8/8/4K3 b - - 3 2"
             },
             {
                 "move": {
@@ -341,7 +341,7 @@
                 "uci": "e4g3",
                 "san": "Ng3",
                 "lan": "Ne4-g3",
-                "fen": "4k3/8/8/8/8/6N1/8/4K3 b - - 1 1"
+                "fen": "4k3/8/8/8/8/6N1/8/4K3 b - - 3 2"
             },
             {
                 "move": {
@@ -355,7 +355,7 @@
                 "uci": "e4c3",
                 "san": "Nc3",
                 "lan": "Ne4-c3",
-                "fen": "4k3/8/8/8/8/2N5/8/4K3 b - - 1 1"
+                "fen": "4k3/8/8/8/8/2N5/8/4K3 b - - 3 2"
             },
             {
                 "move": {
@@ -369,7 +369,7 @@
                 "uci": "e4f2",
                 "san": "Nf2",
                 "lan": "Ne4-f2",
-                "fen": "4k3/8/8/8/8/8/5N2/4K3 b - - 1 1"
+                "fen": "4k3/8/8/8/8/8/5N2/4K3 b - - 3 2"
             },
             {
                 "move": {
@@ -383,7 +383,7 @@
                 "uci": "e4d2",
                 "san": "Nd2",
                 "lan": "Ne4-d2",
-                "fen": "4k3/8/8/8/8/8/3N4/4K3 b - - 1 1"
+                "fen": "4k3/8/8/8/8/8/3N4/4K3 b - - 3 2"
             },
             {
                 "move": {
@@ -397,7 +397,7 @@
                 "uci": "e1f2",
                 "san": "Kf2",
                 "lan": "Ke1-f2",
-                "fen": "4k3/8/8/8/4N3/8/5K2/8 b - - 1 1"
+                "fen": "4k3/8/8/8/4N3/8/5K2/8 b - - 3 2"
             },
             {
                 "move": {
@@ -411,7 +411,7 @@
                 "uci": "e1e2",
                 "san": "Ke2",
                 "lan": "Ke1-e2",
-                "fen": "4k3/8/8/8/4N3/8/4K3/8 b - - 1 1"
+                "fen": "4k3/8/8/8/4N3/8/4K3/8 b - - 3 2"
             },
             {
                 "move": {
@@ -425,7 +425,7 @@
                 "uci": "e1d2",
                 "san": "Kd2",
                 "lan": "Ke1-d2",
-                "fen": "4k3/8/8/8/4N3/8/3K4/8 b - - 1 1"
+                "fen": "4k3/8/8/8/4N3/8/3K4/8 b - - 3 2"
             },
             {
                 "move": {
@@ -439,7 +439,7 @@
                 "uci": "e1f1",
                 "san": "Kf1",
                 "lan": "Ke1-f1",
-                "fen": "4k3/8/8/8/4N3/8/8/5K2 b - - 1 1"
+                "fen": "4k3/8/8/8/4N3/8/8/5K2 b - - 3 2"
             },
             {
                 "move": {
@@ -453,12 +453,12 @@
                 "uci": "e1d1",
                 "san": "Kd1",
                 "lan": "Ke1-d1",
-                "fen": "4k3/8/8/8/4N3/8/8/3K4 b - - 1 1"
+                "fen": "4k3/8/8/8/4N3/8/8/3K4 b - - 3 2"
             }
         ]
     },
     {
-        "fen": "4k3/8/8/8/8/8/8/4K2n b - - 0 1",
+        "fen": "4k3/8/8/8/8/8/8/4K2n b - - 2 2",
         "description": "Black knight on a corner square",
         "moves": [
             {
@@ -473,7 +473,7 @@
                 "uci": "e8f8",
                 "san": "Kf8",
                 "lan": "Ke8-f8",
-                "fen": "5k2/8/8/8/8/8/8/4K2n w - - 1 2"
+                "fen": "5k2/8/8/8/8/8/8/4K2n w - - 3 3"
             },
             {
                 "move": {
@@ -487,7 +487,7 @@
                 "uci": "e8d8",
                 "san": "Kd8",
                 "lan": "Ke8-d8",
-                "fen": "3k4/8/8/8/8/8/8/4K2n w - - 1 2"
+                "fen": "3k4/8/8/8/8/8/8/4K2n w - - 3 3"
             },
             {
                 "move": {
@@ -501,7 +501,7 @@
                 "uci": "e8f7",
                 "san": "Kf7",
                 "lan": "Ke8-f7",
-                "fen": "8/5k2/8/8/8/8/8/4K2n w - - 1 2"
+                "fen": "8/5k2/8/8/8/8/8/4K2n w - - 3 3"
             },
             {
                 "move": {
@@ -515,7 +515,7 @@
                 "uci": "e8e7",
                 "san": "Ke7",
                 "lan": "Ke8-e7",
-                "fen": "8/4k3/8/8/8/8/8/4K2n w - - 1 2"
+                "fen": "8/4k3/8/8/8/8/8/4K2n w - - 3 3"
             },
             {
                 "move": {
@@ -529,7 +529,7 @@
                 "uci": "e8d7",
                 "san": "Kd7",
                 "lan": "Ke8-d7",
-                "fen": "8/3k4/8/8/8/8/8/4K2n w - - 1 2"
+                "fen": "8/3k4/8/8/8/8/8/4K2n w - - 3 3"
             },
             {
                 "move": {
@@ -543,7 +543,7 @@
                 "uci": "h1g3",
                 "san": "Ng3",
                 "lan": "Nh1-g3",
-                "fen": "4k3/8/8/8/8/6n1/8/4K3 w - - 1 2"
+                "fen": "4k3/8/8/8/8/6n1/8/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -557,12 +557,12 @@
                 "uci": "h1f2",
                 "san": "Nf2",
                 "lan": "Nh1-f2",
-                "fen": "4k3/8/8/8/8/8/5n2/4K3 w - - 1 2"
+                "fen": "4k3/8/8/8/8/8/5n2/4K3 w - - 3 3"
             }
         ]
     },
     {
-        "fen": "4k3/4n3/8/8/8/8/8/4K3 b - - 0 1",
+        "fen": "4k3/4n3/8/8/8/8/8/4K3 b - - 2 2",
         "description": "Black king, one move blocked by own knight",
         "moves": [
             {
@@ -577,7 +577,7 @@
                 "uci": "e8f8",
                 "san": "Kf8",
                 "lan": "Ke8-f8",
-                "fen": "5k2/4n3/8/8/8/8/8/4K3 w - - 1 2"
+                "fen": "5k2/4n3/8/8/8/8/8/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -591,7 +591,7 @@
                 "uci": "e8d8",
                 "san": "Kd8",
                 "lan": "Ke8-d8",
-                "fen": "3k4/4n3/8/8/8/8/8/4K3 w - - 1 2"
+                "fen": "3k4/4n3/8/8/8/8/8/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -605,7 +605,7 @@
                 "uci": "e8f7",
                 "san": "Kf7",
                 "lan": "Ke8-f7",
-                "fen": "8/4nk2/8/8/8/8/8/4K3 w - - 1 2"
+                "fen": "8/4nk2/8/8/8/8/8/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -619,7 +619,7 @@
                 "uci": "e8d7",
                 "san": "Kd7",
                 "lan": "Ke8-d7",
-                "fen": "8/3kn3/8/8/8/8/8/4K3 w - - 1 2"
+                "fen": "8/3kn3/8/8/8/8/8/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -633,7 +633,7 @@
                 "uci": "e7g8",
                 "san": "Ng8",
                 "lan": "Ne7-g8",
-                "fen": "4k1n1/8/8/8/8/8/8/4K3 w - - 1 2"
+                "fen": "4k1n1/8/8/8/8/8/8/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -647,7 +647,7 @@
                 "uci": "e7c8",
                 "san": "Nc8",
                 "lan": "Ne7-c8",
-                "fen": "2n1k3/8/8/8/8/8/8/4K3 w - - 1 2"
+                "fen": "2n1k3/8/8/8/8/8/8/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -661,7 +661,7 @@
                 "uci": "e7g6",
                 "san": "Ng6",
                 "lan": "Ne7-g6",
-                "fen": "4k3/8/6n1/8/8/8/8/4K3 w - - 1 2"
+                "fen": "4k3/8/6n1/8/8/8/8/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -675,7 +675,7 @@
                 "uci": "e7c6",
                 "san": "Nc6",
                 "lan": "Ne7-c6",
-                "fen": "4k3/8/2n5/8/8/8/8/4K3 w - - 1 2"
+                "fen": "4k3/8/2n5/8/8/8/8/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -689,7 +689,7 @@
                 "uci": "e7f5",
                 "san": "Nf5",
                 "lan": "Ne7-f5",
-                "fen": "4k3/8/8/5n2/8/8/8/4K3 w - - 1 2"
+                "fen": "4k3/8/8/5n2/8/8/8/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -703,12 +703,12 @@
                 "uci": "e7d5",
                 "san": "Nd5",
                 "lan": "Ne7-d5",
-                "fen": "4k3/8/8/3n4/8/8/8/4K3 w - - 1 2"
+                "fen": "4k3/8/8/3n4/8/8/8/4K3 w - - 3 3"
             }
         ]
     },
     {
-        "fen": "4k3/1r1r4/r3r3/2N5/r3r3/1r1r4/8/6K1 w - - 0 1",
+        "fen": "4k3/1r1r4/r3r3/2N5/r3r3/1r1r4/8/6K1 w - - 2 2",
         "description": "White knight capturing 8 black rooks",
         "moves": [
             {
@@ -723,7 +723,7 @@
                 "uci": "c5d7",
                 "san": "Nxd7",
                 "lan": "Nc5xd7",
-                "fen": "4k3/1r1N4/r3r3/8/r3r3/1r1r4/8/6K1 b - - 0 1"
+                "fen": "4k3/1r1N4/r3r3/8/r3r3/1r1r4/8/6K1 b - - 0 2"
             },
             {
                 "move": {
@@ -737,7 +737,7 @@
                 "uci": "c5b7",
                 "san": "Nxb7",
                 "lan": "Nc5xb7",
-                "fen": "4k3/1N1r4/r3r3/8/r3r3/1r1r4/8/6K1 b - - 0 1"
+                "fen": "4k3/1N1r4/r3r3/8/r3r3/1r1r4/8/6K1 b - - 0 2"
             },
             {
                 "move": {
@@ -751,7 +751,7 @@
                 "uci": "c5e6",
                 "san": "Nxe6",
                 "lan": "Nc5xe6",
-                "fen": "4k3/1r1r4/r3N3/8/r3r3/1r1r4/8/6K1 b - - 0 1"
+                "fen": "4k3/1r1r4/r3N3/8/r3r3/1r1r4/8/6K1 b - - 0 2"
             },
             {
                 "move": {
@@ -765,7 +765,7 @@
                 "uci": "c5a6",
                 "san": "Nxa6",
                 "lan": "Nc5xa6",
-                "fen": "4k3/1r1r4/N3r3/8/r3r3/1r1r4/8/6K1 b - - 0 1"
+                "fen": "4k3/1r1r4/N3r3/8/r3r3/1r1r4/8/6K1 b - - 0 2"
             },
             {
                 "move": {
@@ -779,7 +779,7 @@
                 "uci": "c5e4",
                 "san": "Nxe4",
                 "lan": "Nc5xe4",
-                "fen": "4k3/1r1r4/r3r3/8/r3N3/1r1r4/8/6K1 b - - 0 1"
+                "fen": "4k3/1r1r4/r3r3/8/r3N3/1r1r4/8/6K1 b - - 0 2"
             },
             {
                 "move": {
@@ -793,7 +793,7 @@
                 "uci": "c5a4",
                 "san": "Nxa4",
                 "lan": "Nc5xa4",
-                "fen": "4k3/1r1r4/r3r3/8/N3r3/1r1r4/8/6K1 b - - 0 1"
+                "fen": "4k3/1r1r4/r3r3/8/N3r3/1r1r4/8/6K1 b - - 0 2"
             },
             {
                 "move": {
@@ -807,7 +807,7 @@
                 "uci": "c5d3",
                 "san": "Nxd3",
                 "lan": "Nc5xd3",
-                "fen": "4k3/1r1r4/r3r3/8/r3r3/1r1N4/8/6K1 b - - 0 1"
+                "fen": "4k3/1r1r4/r3r3/8/r3r3/1r1N4/8/6K1 b - - 0 2"
             },
             {
                 "move": {
@@ -821,7 +821,7 @@
                 "uci": "c5b3",
                 "san": "Nxb3",
                 "lan": "Nc5xb3",
-                "fen": "4k3/1r1r4/r3r3/8/r3r3/1N1r4/8/6K1 b - - 0 1"
+                "fen": "4k3/1r1r4/r3r3/8/r3r3/1N1r4/8/6K1 b - - 0 2"
             },
             {
                 "move": {
@@ -835,7 +835,7 @@
                 "uci": "g1h2",
                 "san": "Kh2",
                 "lan": "Kg1-h2",
-                "fen": "4k3/1r1r4/r3r3/2N5/r3r3/1r1r4/7K/8 b - - 1 1"
+                "fen": "4k3/1r1r4/r3r3/2N5/r3r3/1r1r4/7K/8 b - - 3 2"
             },
             {
                 "move": {
@@ -849,7 +849,7 @@
                 "uci": "g1g2",
                 "san": "Kg2",
                 "lan": "Kg1-g2",
-                "fen": "4k3/1r1r4/r3r3/2N5/r3r3/1r1r4/6K1/8 b - - 1 1"
+                "fen": "4k3/1r1r4/r3r3/2N5/r3r3/1r1r4/6K1/8 b - - 3 2"
             },
             {
                 "move": {
@@ -863,7 +863,7 @@
                 "uci": "g1f2",
                 "san": "Kf2",
                 "lan": "Kg1-f2",
-                "fen": "4k3/1r1r4/r3r3/2N5/r3r3/1r1r4/5K2/8 b - - 1 1"
+                "fen": "4k3/1r1r4/r3r3/2N5/r3r3/1r1r4/5K2/8 b - - 3 2"
             },
             {
                 "move": {
@@ -877,7 +877,7 @@
                 "uci": "g1h1",
                 "san": "Kh1",
                 "lan": "Kg1-h1",
-                "fen": "4k3/1r1r4/r3r3/2N5/r3r3/1r1r4/8/7K b - - 1 1"
+                "fen": "4k3/1r1r4/r3r3/2N5/r3r3/1r1r4/8/7K b - - 3 2"
             },
             {
                 "move": {
@@ -891,12 +891,12 @@
                 "uci": "g1f1",
                 "san": "Kf1",
                 "lan": "Kg1-f1",
-                "fen": "4k3/1r1r4/r3r3/2N5/r3r3/1r1r4/8/5K2 b - - 1 1"
+                "fen": "4k3/1r1r4/r3r3/2N5/r3r3/1r1r4/8/5K2 b - - 3 2"
             }
         ]
     },
     {
-        "fen": "4k3/8/8/8/4P3/8/8/4K3 w - - 0 1",
+        "fen": "4k3/8/8/8/4P3/8/8/4K3 w - - 2 2",
         "description": "Single white pawn on a middle square",
         "moves": [
             {
@@ -911,7 +911,7 @@
                 "uci": "e1f2",
                 "san": "Kf2",
                 "lan": "Ke1-f2",
-                "fen": "4k3/8/8/8/4P3/8/5K2/8 b - - 1 1"
+                "fen": "4k3/8/8/8/4P3/8/5K2/8 b - - 3 2"
             },
             {
                 "move": {
@@ -925,7 +925,7 @@
                 "uci": "e1e2",
                 "san": "Ke2",
                 "lan": "Ke1-e2",
-                "fen": "4k3/8/8/8/4P3/8/4K3/8 b - - 1 1"
+                "fen": "4k3/8/8/8/4P3/8/4K3/8 b - - 3 2"
             },
             {
                 "move": {
@@ -939,7 +939,7 @@
                 "uci": "e1d2",
                 "san": "Kd2",
                 "lan": "Ke1-d2",
-                "fen": "4k3/8/8/8/4P3/8/3K4/8 b - - 1 1"
+                "fen": "4k3/8/8/8/4P3/8/3K4/8 b - - 3 2"
             },
             {
                 "move": {
@@ -953,7 +953,7 @@
                 "uci": "e1f1",
                 "san": "Kf1",
                 "lan": "Ke1-f1",
-                "fen": "4k3/8/8/8/4P3/8/8/5K2 b - - 1 1"
+                "fen": "4k3/8/8/8/4P3/8/8/5K2 b - - 3 2"
             },
             {
                 "move": {
@@ -967,7 +967,7 @@
                 "uci": "e1d1",
                 "san": "Kd1",
                 "lan": "Ke1-d1",
-                "fen": "4k3/8/8/8/4P3/8/8/3K4 b - - 1 1"
+                "fen": "4k3/8/8/8/4P3/8/8/3K4 b - - 3 2"
             },
             {
                 "move": {
@@ -981,12 +981,12 @@
                 "uci": "e4e5",
                 "san": "e5",
                 "lan": "e4-e5",
-                "fen": "4k3/8/8/4P3/8/8/8/4K3 b - - 0 1"
+                "fen": "4k3/8/8/4P3/8/8/8/4K3 b - - 0 2"
             }
         ]
     },
     {
-        "fen": "4k3/8/8/8/8/8/4P3/4K3 w - - 0 1",
+        "fen": "4k3/8/8/8/8/8/4P3/4K3 w - - 2 2",
         "description": "Single white pawn on it's starting rank",
         "moves": [
             {
@@ -1001,7 +1001,7 @@
                 "uci": "e1f2",
                 "san": "Kf2",
                 "lan": "Ke1-f2",
-                "fen": "4k3/8/8/8/8/8/4PK2/8 b - - 1 1"
+                "fen": "4k3/8/8/8/8/8/4PK2/8 b - - 3 2"
             },
             {
                 "move": {
@@ -1015,7 +1015,7 @@
                 "uci": "e1d2",
                 "san": "Kd2",
                 "lan": "Ke1-d2",
-                "fen": "4k3/8/8/8/8/8/3KP3/8 b - - 1 1"
+                "fen": "4k3/8/8/8/8/8/3KP3/8 b - - 3 2"
             },
             {
                 "move": {
@@ -1029,7 +1029,7 @@
                 "uci": "e1f1",
                 "san": "Kf1",
                 "lan": "Ke1-f1",
-                "fen": "4k3/8/8/8/8/8/4P3/5K2 b - - 1 1"
+                "fen": "4k3/8/8/8/8/8/4P3/5K2 b - - 3 2"
             },
             {
                 "move": {
@@ -1043,7 +1043,7 @@
                 "uci": "e1d1",
                 "san": "Kd1",
                 "lan": "Ke1-d1",
-                "fen": "4k3/8/8/8/8/8/4P3/3K4 b - - 1 1"
+                "fen": "4k3/8/8/8/8/8/4P3/3K4 b - - 3 2"
             },
             {
                 "move": {
@@ -1057,7 +1057,7 @@
                 "uci": "e2e3",
                 "san": "e3",
                 "lan": "e2-e3",
-                "fen": "4k3/8/8/8/8/4P3/8/4K3 b - - 0 1"
+                "fen": "4k3/8/8/8/8/4P3/8/4K3 b - - 0 2"
             },
             {
                 "move": {
@@ -1071,12 +1071,12 @@
                 "uci": "e2e4",
                 "san": "e4",
                 "lan": "e2-e4",
-                "fen": "4k3/8/8/8/4P3/8/8/4K3 b - - 0 1"
+                "fen": "4k3/8/8/8/4P3/8/8/4K3 b - - 0 2"
             }
         ]
     },
     {
-        "fen": "4k3/4p3/8/4p3/8/8/8/4K3 b - - 0 1",
+        "fen": "4k3/4p3/8/4p3/8/8/8/4K3 b - - 2 2",
         "description": "Double pawn push block on target square by own piece",
         "moves": [
             {
@@ -1091,7 +1091,7 @@
                 "uci": "e8f8",
                 "san": "Kf8",
                 "lan": "Ke8-f8",
-                "fen": "5k2/4p3/8/4p3/8/8/8/4K3 w - - 1 2"
+                "fen": "5k2/4p3/8/4p3/8/8/8/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -1105,7 +1105,7 @@
                 "uci": "e8d8",
                 "san": "Kd8",
                 "lan": "Ke8-d8",
-                "fen": "3k4/4p3/8/4p3/8/8/8/4K3 w - - 1 2"
+                "fen": "3k4/4p3/8/4p3/8/8/8/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -1119,7 +1119,7 @@
                 "uci": "e8f7",
                 "san": "Kf7",
                 "lan": "Ke8-f7",
-                "fen": "8/4pk2/8/4p3/8/8/8/4K3 w - - 1 2"
+                "fen": "8/4pk2/8/4p3/8/8/8/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -1133,7 +1133,7 @@
                 "uci": "e8d7",
                 "san": "Kd7",
                 "lan": "Ke8-d7",
-                "fen": "8/3kp3/8/4p3/8/8/8/4K3 w - - 1 2"
+                "fen": "8/3kp3/8/4p3/8/8/8/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -1147,7 +1147,7 @@
                 "uci": "e7e6",
                 "san": "e6",
                 "lan": "e7-e6",
-                "fen": "4k3/8/4p3/4p3/8/8/8/4K3 w - - 0 2"
+                "fen": "4k3/8/4p3/4p3/8/8/8/4K3 w - - 0 3"
             },
             {
                 "move": {
@@ -1161,12 +1161,12 @@
                 "uci": "e5e4",
                 "san": "e4",
                 "lan": "e5-e4",
-                "fen": "4k3/4p3/8/8/4p3/8/8/4K3 w - - 0 2"
+                "fen": "4k3/4p3/8/8/4p3/8/8/4K3 w - - 0 3"
             }
         ]
     },
     {
-        "fen": "4k3/4p3/8/4p3/8/8/8/4K3 b - - 0 1",
+        "fen": "4k3/4p3/8/4p3/8/8/8/4K3 b - - 2 2",
         "description": "Double pawn push block in front square by opponent piece",
         "moves": [
             {
@@ -1181,7 +1181,7 @@
                 "uci": "e8f8",
                 "san": "Kf8",
                 "lan": "Ke8-f8",
-                "fen": "5k2/4p3/8/4p3/8/8/8/4K3 w - - 1 2"
+                "fen": "5k2/4p3/8/4p3/8/8/8/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -1195,7 +1195,7 @@
                 "uci": "e8d8",
                 "san": "Kd8",
                 "lan": "Ke8-d8",
-                "fen": "3k4/4p3/8/4p3/8/8/8/4K3 w - - 1 2"
+                "fen": "3k4/4p3/8/4p3/8/8/8/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -1209,7 +1209,7 @@
                 "uci": "e8f7",
                 "san": "Kf7",
                 "lan": "Ke8-f7",
-                "fen": "8/4pk2/8/4p3/8/8/8/4K3 w - - 1 2"
+                "fen": "8/4pk2/8/4p3/8/8/8/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -1223,7 +1223,7 @@
                 "uci": "e8d7",
                 "san": "Kd7",
                 "lan": "Ke8-d7",
-                "fen": "8/3kp3/8/4p3/8/8/8/4K3 w - - 1 2"
+                "fen": "8/3kp3/8/4p3/8/8/8/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -1237,7 +1237,7 @@
                 "uci": "e7e6",
                 "san": "e6",
                 "lan": "e7-e6",
-                "fen": "4k3/8/4p3/4p3/8/8/8/4K3 w - - 0 2"
+                "fen": "4k3/8/4p3/4p3/8/8/8/4K3 w - - 0 3"
             },
             {
                 "move": {
@@ -1251,12 +1251,12 @@
                 "uci": "e5e4",
                 "san": "e4",
                 "lan": "e5-e4",
-                "fen": "4k3/4p3/8/8/4p3/8/8/4K3 w - - 0 2"
+                "fen": "4k3/4p3/8/8/4p3/8/8/4K3 w - - 0 3"
             }
         ]
     },
     {
-        "fen": "4k3/8/8/pppppppp/PPPPPPPP/8/8/4K3 b - - 0 1",
+        "fen": "4k3/8/8/pppppppp/PPPPPPPP/8/8/4K3 b - - 2 2",
         "description": "Lots of pawn captures on all files, black to move",
         "moves": [
             {
@@ -1271,7 +1271,7 @@
                 "uci": "e8f8",
                 "san": "Kf8",
                 "lan": "Ke8-f8",
-                "fen": "5k2/8/8/pppppppp/PPPPPPPP/8/8/4K3 w - - 1 2"
+                "fen": "5k2/8/8/pppppppp/PPPPPPPP/8/8/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -1285,7 +1285,7 @@
                 "uci": "e8d8",
                 "san": "Kd8",
                 "lan": "Ke8-d8",
-                "fen": "3k4/8/8/pppppppp/PPPPPPPP/8/8/4K3 w - - 1 2"
+                "fen": "3k4/8/8/pppppppp/PPPPPPPP/8/8/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -1299,7 +1299,7 @@
                 "uci": "e8f7",
                 "san": "Kf7",
                 "lan": "Ke8-f7",
-                "fen": "8/5k2/8/pppppppp/PPPPPPPP/8/8/4K3 w - - 1 2"
+                "fen": "8/5k2/8/pppppppp/PPPPPPPP/8/8/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -1313,7 +1313,7 @@
                 "uci": "e8e7",
                 "san": "Ke7",
                 "lan": "Ke8-e7",
-                "fen": "8/4k3/8/pppppppp/PPPPPPPP/8/8/4K3 w - - 1 2"
+                "fen": "8/4k3/8/pppppppp/PPPPPPPP/8/8/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -1327,7 +1327,7 @@
                 "uci": "e8d7",
                 "san": "Kd7",
                 "lan": "Ke8-d7",
-                "fen": "8/3k4/8/pppppppp/PPPPPPPP/8/8/4K3 w - - 1 2"
+                "fen": "8/3k4/8/pppppppp/PPPPPPPP/8/8/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -1341,7 +1341,7 @@
                 "uci": "h5g4",
                 "san": "hxg4",
                 "lan": "h5xg4",
-                "fen": "4k3/8/8/ppppppp1/PPPPPPpP/8/8/4K3 w - - 0 2"
+                "fen": "4k3/8/8/ppppppp1/PPPPPPpP/8/8/4K3 w - - 0 3"
             },
             {
                 "move": {
@@ -1355,7 +1355,7 @@
                 "uci": "g5h4",
                 "san": "gxh4",
                 "lan": "g5xh4",
-                "fen": "4k3/8/8/pppppp1p/PPPPPPPp/8/8/4K3 w - - 0 2"
+                "fen": "4k3/8/8/pppppp1p/PPPPPPPp/8/8/4K3 w - - 0 3"
             },
             {
                 "move": {
@@ -1369,7 +1369,7 @@
                 "uci": "g5f4",
                 "san": "gxf4",
                 "lan": "g5xf4",
-                "fen": "4k3/8/8/pppppp1p/PPPPPpPP/8/8/4K3 w - - 0 2"
+                "fen": "4k3/8/8/pppppp1p/PPPPPpPP/8/8/4K3 w - - 0 3"
             },
             {
                 "move": {
@@ -1383,7 +1383,7 @@
                 "uci": "f5g4",
                 "san": "fxg4",
                 "lan": "f5xg4",
-                "fen": "4k3/8/8/ppppp1pp/PPPPPPpP/8/8/4K3 w - - 0 2"
+                "fen": "4k3/8/8/ppppp1pp/PPPPPPpP/8/8/4K3 w - - 0 3"
             },
             {
                 "move": {
@@ -1397,7 +1397,7 @@
                 "uci": "f5e4",
                 "san": "fxe4",
                 "lan": "f5xe4",
-                "fen": "4k3/8/8/ppppp1pp/PPPPpPPP/8/8/4K3 w - - 0 2"
+                "fen": "4k3/8/8/ppppp1pp/PPPPpPPP/8/8/4K3 w - - 0 3"
             },
             {
                 "move": {
@@ -1411,7 +1411,7 @@
                 "uci": "e5f4",
                 "san": "exf4",
                 "lan": "e5xf4",
-                "fen": "4k3/8/8/pppp1ppp/PPPPPpPP/8/8/4K3 w - - 0 2"
+                "fen": "4k3/8/8/pppp1ppp/PPPPPpPP/8/8/4K3 w - - 0 3"
             },
             {
                 "move": {
@@ -1425,7 +1425,7 @@
                 "uci": "e5d4",
                 "san": "exd4",
                 "lan": "e5xd4",
-                "fen": "4k3/8/8/pppp1ppp/PPPpPPPP/8/8/4K3 w - - 0 2"
+                "fen": "4k3/8/8/pppp1ppp/PPPpPPPP/8/8/4K3 w - - 0 3"
             },
             {
                 "move": {
@@ -1439,7 +1439,7 @@
                 "uci": "d5e4",
                 "san": "dxe4",
                 "lan": "d5xe4",
-                "fen": "4k3/8/8/ppp1pppp/PPPPpPPP/8/8/4K3 w - - 0 2"
+                "fen": "4k3/8/8/ppp1pppp/PPPPpPPP/8/8/4K3 w - - 0 3"
             },
             {
                 "move": {
@@ -1453,7 +1453,7 @@
                 "uci": "d5c4",
                 "san": "dxc4",
                 "lan": "d5xc4",
-                "fen": "4k3/8/8/ppp1pppp/PPpPPPPP/8/8/4K3 w - - 0 2"
+                "fen": "4k3/8/8/ppp1pppp/PPpPPPPP/8/8/4K3 w - - 0 3"
             },
             {
                 "move": {
@@ -1467,7 +1467,7 @@
                 "uci": "c5d4",
                 "san": "cxd4",
                 "lan": "c5xd4",
-                "fen": "4k3/8/8/pp1ppppp/PPPpPPPP/8/8/4K3 w - - 0 2"
+                "fen": "4k3/8/8/pp1ppppp/PPPpPPPP/8/8/4K3 w - - 0 3"
             },
             {
                 "move": {
@@ -1481,7 +1481,7 @@
                 "uci": "c5b4",
                 "san": "cxb4",
                 "lan": "c5xb4",
-                "fen": "4k3/8/8/pp1ppppp/PpPPPPPP/8/8/4K3 w - - 0 2"
+                "fen": "4k3/8/8/pp1ppppp/PpPPPPPP/8/8/4K3 w - - 0 3"
             },
             {
                 "move": {
@@ -1495,7 +1495,7 @@
                 "uci": "b5c4",
                 "san": "bxc4",
                 "lan": "b5xc4",
-                "fen": "4k3/8/8/p1pppppp/PPpPPPPP/8/8/4K3 w - - 0 2"
+                "fen": "4k3/8/8/p1pppppp/PPpPPPPP/8/8/4K3 w - - 0 3"
             },
             {
                 "move": {
@@ -1509,7 +1509,7 @@
                 "uci": "b5a4",
                 "san": "bxa4",
                 "lan": "b5xa4",
-                "fen": "4k3/8/8/p1pppppp/pPPPPPPP/8/8/4K3 w - - 0 2"
+                "fen": "4k3/8/8/p1pppppp/pPPPPPPP/8/8/4K3 w - - 0 3"
             },
             {
                 "move": {
@@ -1523,12 +1523,12 @@
                 "uci": "a5b4",
                 "san": "axb4",
                 "lan": "a5xb4",
-                "fen": "4k3/8/8/1ppppppp/PpPPPPPP/8/8/4K3 w - - 0 2"
+                "fen": "4k3/8/8/1ppppppp/PpPPPPPP/8/8/4K3 w - - 0 3"
             }
         ]
     },
     {
-        "fen": "4k3/8/8/pppppppp/PPPPPPPP/8/8/4K3 w - - 0 1",
+        "fen": "4k3/8/8/pppppppp/PPPPPPPP/8/8/4K3 w - - 2 2",
         "description": "Lots of pawn captures on all files, white to move",
         "moves": [
             {
@@ -1543,7 +1543,7 @@
                 "uci": "e1f2",
                 "san": "Kf2",
                 "lan": "Ke1-f2",
-                "fen": "4k3/8/8/pppppppp/PPPPPPPP/8/5K2/8 b - - 1 1"
+                "fen": "4k3/8/8/pppppppp/PPPPPPPP/8/5K2/8 b - - 3 2"
             },
             {
                 "move": {
@@ -1557,7 +1557,7 @@
                 "uci": "e1e2",
                 "san": "Ke2",
                 "lan": "Ke1-e2",
-                "fen": "4k3/8/8/pppppppp/PPPPPPPP/8/4K3/8 b - - 1 1"
+                "fen": "4k3/8/8/pppppppp/PPPPPPPP/8/4K3/8 b - - 3 2"
             },
             {
                 "move": {
@@ -1571,7 +1571,7 @@
                 "uci": "e1d2",
                 "san": "Kd2",
                 "lan": "Ke1-d2",
-                "fen": "4k3/8/8/pppppppp/PPPPPPPP/8/3K4/8 b - - 1 1"
+                "fen": "4k3/8/8/pppppppp/PPPPPPPP/8/3K4/8 b - - 3 2"
             },
             {
                 "move": {
@@ -1585,7 +1585,7 @@
                 "uci": "e1f1",
                 "san": "Kf1",
                 "lan": "Ke1-f1",
-                "fen": "4k3/8/8/pppppppp/PPPPPPPP/8/8/5K2 b - - 1 1"
+                "fen": "4k3/8/8/pppppppp/PPPPPPPP/8/8/5K2 b - - 3 2"
             },
             {
                 "move": {
@@ -1599,7 +1599,7 @@
                 "uci": "e1d1",
                 "san": "Kd1",
                 "lan": "Ke1-d1",
-                "fen": "4k3/8/8/pppppppp/PPPPPPPP/8/8/3K4 b - - 1 1"
+                "fen": "4k3/8/8/pppppppp/PPPPPPPP/8/8/3K4 b - - 3 2"
             },
             {
                 "move": {
@@ -1613,7 +1613,7 @@
                 "uci": "h4g5",
                 "san": "hxg5",
                 "lan": "h4xg5",
-                "fen": "4k3/8/8/ppppppPp/PPPPPPP1/8/8/4K3 b - - 0 1"
+                "fen": "4k3/8/8/ppppppPp/PPPPPPP1/8/8/4K3 b - - 0 2"
             },
             {
                 "move": {
@@ -1627,7 +1627,7 @@
                 "uci": "g4h5",
                 "san": "gxh5",
                 "lan": "g4xh5",
-                "fen": "4k3/8/8/pppppppP/PPPPPP1P/8/8/4K3 b - - 0 1"
+                "fen": "4k3/8/8/pppppppP/PPPPPP1P/8/8/4K3 b - - 0 2"
             },
             {
                 "move": {
@@ -1641,7 +1641,7 @@
                 "uci": "g4f5",
                 "san": "gxf5",
                 "lan": "g4xf5",
-                "fen": "4k3/8/8/pppppPpp/PPPPPP1P/8/8/4K3 b - - 0 1"
+                "fen": "4k3/8/8/pppppPpp/PPPPPP1P/8/8/4K3 b - - 0 2"
             },
             {
                 "move": {
@@ -1655,7 +1655,7 @@
                 "uci": "f4g5",
                 "san": "fxg5",
                 "lan": "f4xg5",
-                "fen": "4k3/8/8/ppppppPp/PPPPP1PP/8/8/4K3 b - - 0 1"
+                "fen": "4k3/8/8/ppppppPp/PPPPP1PP/8/8/4K3 b - - 0 2"
             },
             {
                 "move": {
@@ -1669,7 +1669,7 @@
                 "uci": "f4e5",
                 "san": "fxe5",
                 "lan": "f4xe5",
-                "fen": "4k3/8/8/ppppPppp/PPPPP1PP/8/8/4K3 b - - 0 1"
+                "fen": "4k3/8/8/ppppPppp/PPPPP1PP/8/8/4K3 b - - 0 2"
             },
             {
                 "move": {
@@ -1683,7 +1683,7 @@
                 "uci": "e4f5",
                 "san": "exf5",
                 "lan": "e4xf5",
-                "fen": "4k3/8/8/pppppPpp/PPPP1PPP/8/8/4K3 b - - 0 1"
+                "fen": "4k3/8/8/pppppPpp/PPPP1PPP/8/8/4K3 b - - 0 2"
             },
             {
                 "move": {
@@ -1697,7 +1697,7 @@
                 "uci": "e4d5",
                 "san": "exd5",
                 "lan": "e4xd5",
-                "fen": "4k3/8/8/pppPpppp/PPPP1PPP/8/8/4K3 b - - 0 1"
+                "fen": "4k3/8/8/pppPpppp/PPPP1PPP/8/8/4K3 b - - 0 2"
             },
             {
                 "move": {
@@ -1711,7 +1711,7 @@
                 "uci": "d4e5",
                 "san": "dxe5",
                 "lan": "d4xe5",
-                "fen": "4k3/8/8/ppppPppp/PPP1PPPP/8/8/4K3 b - - 0 1"
+                "fen": "4k3/8/8/ppppPppp/PPP1PPPP/8/8/4K3 b - - 0 2"
             },
             {
                 "move": {
@@ -1725,7 +1725,7 @@
                 "uci": "d4c5",
                 "san": "dxc5",
                 "lan": "d4xc5",
-                "fen": "4k3/8/8/ppPppppp/PPP1PPPP/8/8/4K3 b - - 0 1"
+                "fen": "4k3/8/8/ppPppppp/PPP1PPPP/8/8/4K3 b - - 0 2"
             },
             {
                 "move": {
@@ -1739,7 +1739,7 @@
                 "uci": "c4d5",
                 "san": "cxd5",
                 "lan": "c4xd5",
-                "fen": "4k3/8/8/pppPpppp/PP1PPPPP/8/8/4K3 b - - 0 1"
+                "fen": "4k3/8/8/pppPpppp/PP1PPPPP/8/8/4K3 b - - 0 2"
             },
             {
                 "move": {
@@ -1753,7 +1753,7 @@
                 "uci": "c4b5",
                 "san": "cxb5",
                 "lan": "c4xb5",
-                "fen": "4k3/8/8/pPpppppp/PP1PPPPP/8/8/4K3 b - - 0 1"
+                "fen": "4k3/8/8/pPpppppp/PP1PPPPP/8/8/4K3 b - - 0 2"
             },
             {
                 "move": {
@@ -1767,7 +1767,7 @@
                 "uci": "b4c5",
                 "san": "bxc5",
                 "lan": "b4xc5",
-                "fen": "4k3/8/8/ppPppppp/P1PPPPPP/8/8/4K3 b - - 0 1"
+                "fen": "4k3/8/8/ppPppppp/P1PPPPPP/8/8/4K3 b - - 0 2"
             },
             {
                 "move": {
@@ -1781,7 +1781,7 @@
                 "uci": "b4a5",
                 "san": "bxa5",
                 "lan": "b4xa5",
-                "fen": "4k3/8/8/Pppppppp/P1PPPPPP/8/8/4K3 b - - 0 1"
+                "fen": "4k3/8/8/Pppppppp/P1PPPPPP/8/8/4K3 b - - 0 2"
             },
             {
                 "move": {
@@ -1795,12 +1795,12 @@
                 "uci": "a4b5",
                 "san": "axb5",
                 "lan": "a4xb5",
-                "fen": "4k3/8/8/pPpppppp/1PPPPPPP/8/8/4K3 b - - 0 1"
+                "fen": "4k3/8/8/pPpppppp/1PPPPPPP/8/8/4K3 b - - 0 2"
             }
         ]
     },
     {
-        "fen": "4k3/2P5/8/8/8/8/8/4K3 w - - 0 1",
+        "fen": "4k3/2P5/8/8/8/8/8/4K3 w - - 2 2",
         "description": "Single white pawn about to promote",
         "moves": [
             {
@@ -1815,7 +1815,7 @@
                 "uci": "e1f2",
                 "san": "Kf2",
                 "lan": "Ke1-f2",
-                "fen": "4k3/2P5/8/8/8/8/5K2/8 b - - 1 1"
+                "fen": "4k3/2P5/8/8/8/8/5K2/8 b - - 3 2"
             },
             {
                 "move": {
@@ -1829,7 +1829,7 @@
                 "uci": "e1e2",
                 "san": "Ke2",
                 "lan": "Ke1-e2",
-                "fen": "4k3/2P5/8/8/8/8/4K3/8 b - - 1 1"
+                "fen": "4k3/2P5/8/8/8/8/4K3/8 b - - 3 2"
             },
             {
                 "move": {
@@ -1843,7 +1843,7 @@
                 "uci": "e1d2",
                 "san": "Kd2",
                 "lan": "Ke1-d2",
-                "fen": "4k3/2P5/8/8/8/8/3K4/8 b - - 1 1"
+                "fen": "4k3/2P5/8/8/8/8/3K4/8 b - - 3 2"
             },
             {
                 "move": {
@@ -1857,7 +1857,7 @@
                 "uci": "e1f1",
                 "san": "Kf1",
                 "lan": "Ke1-f1",
-                "fen": "4k3/2P5/8/8/8/8/8/5K2 b - - 1 1"
+                "fen": "4k3/2P5/8/8/8/8/8/5K2 b - - 3 2"
             },
             {
                 "move": {
@@ -1871,7 +1871,7 @@
                 "uci": "e1d1",
                 "san": "Kd1",
                 "lan": "Ke1-d1",
-                "fen": "4k3/2P5/8/8/8/8/8/3K4 b - - 1 1"
+                "fen": "4k3/2P5/8/8/8/8/8/3K4 b - - 3 2"
             },
             {
                 "move": {
@@ -1885,7 +1885,7 @@
                 "uci": "c7c8q",
                 "san": "c8=Q+",
                 "lan": "c7-c8=Q+",
-                "fen": "2Q1k3/8/8/8/8/8/8/4K3 b - - 0 1"
+                "fen": "2Q1k3/8/8/8/8/8/8/4K3 b - - 0 2"
             },
             {
                 "move": {
@@ -1899,7 +1899,7 @@
                 "uci": "c7c8r",
                 "san": "c8=R+",
                 "lan": "c7-c8=R+",
-                "fen": "2R1k3/8/8/8/8/8/8/4K3 b - - 0 1"
+                "fen": "2R1k3/8/8/8/8/8/8/4K3 b - - 0 2"
             },
             {
                 "move": {
@@ -1913,7 +1913,7 @@
                 "uci": "c7c8b",
                 "san": "c8=B",
                 "lan": "c7-c8=B",
-                "fen": "2B1k3/8/8/8/8/8/8/4K3 b - - 0 1"
+                "fen": "2B1k3/8/8/8/8/8/8/4K3 b - - 0 2"
             },
             {
                 "move": {
@@ -1927,12 +1927,12 @@
                 "uci": "c7c8n",
                 "san": "c8=N",
                 "lan": "c7-c8=N",
-                "fen": "2N1k3/8/8/8/8/8/8/4K3 b - - 0 1"
+                "fen": "2N1k3/8/8/8/8/8/8/4K3 b - - 0 2"
             }
         ]
     },
     {
-        "fen": "4k3/8/8/8/8/8/p1p4p/1R1BK1R1 b - - 0 1",
+        "fen": "4k3/8/8/8/8/8/p1p4p/1R1BK1R1 b - - 2 2",
         "description": "Multiple black pawns with capture-promotion opportunities",
         "moves": [
             {
@@ -1947,7 +1947,7 @@
                 "uci": "e8f8",
                 "san": "Kf8",
                 "lan": "Ke8-f8",
-                "fen": "5k2/8/8/8/8/8/p1p4p/1R1BK1R1 w - - 1 2"
+                "fen": "5k2/8/8/8/8/8/p1p4p/1R1BK1R1 w - - 3 3"
             },
             {
                 "move": {
@@ -1961,7 +1961,7 @@
                 "uci": "e8d8",
                 "san": "Kd8",
                 "lan": "Ke8-d8",
-                "fen": "3k4/8/8/8/8/8/p1p4p/1R1BK1R1 w - - 1 2"
+                "fen": "3k4/8/8/8/8/8/p1p4p/1R1BK1R1 w - - 3 3"
             },
             {
                 "move": {
@@ -1975,7 +1975,7 @@
                 "uci": "e8f7",
                 "san": "Kf7",
                 "lan": "Ke8-f7",
-                "fen": "8/5k2/8/8/8/8/p1p4p/1R1BK1R1 w - - 1 2"
+                "fen": "8/5k2/8/8/8/8/p1p4p/1R1BK1R1 w - - 3 3"
             },
             {
                 "move": {
@@ -1989,7 +1989,7 @@
                 "uci": "e8e7",
                 "san": "Ke7",
                 "lan": "Ke8-e7",
-                "fen": "8/4k3/8/8/8/8/p1p4p/1R1BK1R1 w - - 1 2"
+                "fen": "8/4k3/8/8/8/8/p1p4p/1R1BK1R1 w - - 3 3"
             },
             {
                 "move": {
@@ -2003,7 +2003,7 @@
                 "uci": "e8d7",
                 "san": "Kd7",
                 "lan": "Ke8-d7",
-                "fen": "8/3k4/8/8/8/8/p1p4p/1R1BK1R1 w - - 1 2"
+                "fen": "8/3k4/8/8/8/8/p1p4p/1R1BK1R1 w - - 3 3"
             },
             {
                 "move": {
@@ -2017,7 +2017,7 @@
                 "uci": "h2g1q",
                 "san": "hxg1=Q+",
                 "lan": "h2xg1=Q+",
-                "fen": "4k3/8/8/8/8/8/p1p5/1R1BK1q1 w - - 0 2"
+                "fen": "4k3/8/8/8/8/8/p1p5/1R1BK1q1 w - - 0 3"
             },
             {
                 "move": {
@@ -2031,7 +2031,7 @@
                 "uci": "h2g1r",
                 "san": "hxg1=R+",
                 "lan": "h2xg1=R+",
-                "fen": "4k3/8/8/8/8/8/p1p5/1R1BK1r1 w - - 0 2"
+                "fen": "4k3/8/8/8/8/8/p1p5/1R1BK1r1 w - - 0 3"
             },
             {
                 "move": {
@@ -2045,7 +2045,7 @@
                 "uci": "h2g1b",
                 "san": "hxg1=B",
                 "lan": "h2xg1=B",
-                "fen": "4k3/8/8/8/8/8/p1p5/1R1BK1b1 w - - 0 2"
+                "fen": "4k3/8/8/8/8/8/p1p5/1R1BK1b1 w - - 0 3"
             },
             {
                 "move": {
@@ -2059,7 +2059,7 @@
                 "uci": "h2g1n",
                 "san": "hxg1=N",
                 "lan": "h2xg1=N",
-                "fen": "4k3/8/8/8/8/8/p1p5/1R1BK1n1 w - - 0 2"
+                "fen": "4k3/8/8/8/8/8/p1p5/1R1BK1n1 w - - 0 3"
             },
             {
                 "move": {
@@ -2073,7 +2073,7 @@
                 "uci": "c2d1q",
                 "san": "cxd1=Q+",
                 "lan": "c2xd1=Q+",
-                "fen": "4k3/8/8/8/8/8/p6p/1R1qK1R1 w - - 0 2"
+                "fen": "4k3/8/8/8/8/8/p6p/1R1qK1R1 w - - 0 3"
             },
             {
                 "move": {
@@ -2087,7 +2087,7 @@
                 "uci": "c2d1r",
                 "san": "cxd1=R+",
                 "lan": "c2xd1=R+",
-                "fen": "4k3/8/8/8/8/8/p6p/1R1rK1R1 w - - 0 2"
+                "fen": "4k3/8/8/8/8/8/p6p/1R1rK1R1 w - - 0 3"
             },
             {
                 "move": {
@@ -2101,7 +2101,7 @@
                 "uci": "c2d1b",
                 "san": "cxd1=B",
                 "lan": "c2xd1=B",
-                "fen": "4k3/8/8/8/8/8/p6p/1R1bK1R1 w - - 0 2"
+                "fen": "4k3/8/8/8/8/8/p6p/1R1bK1R1 w - - 0 3"
             },
             {
                 "move": {
@@ -2115,7 +2115,7 @@
                 "uci": "c2d1n",
                 "san": "cxd1=N",
                 "lan": "c2xd1=N",
-                "fen": "4k3/8/8/8/8/8/p6p/1R1nK1R1 w - - 0 2"
+                "fen": "4k3/8/8/8/8/8/p6p/1R1nK1R1 w - - 0 3"
             },
             {
                 "move": {
@@ -2129,7 +2129,7 @@
                 "uci": "c2b1q",
                 "san": "cxb1=Q",
                 "lan": "c2xb1=Q",
-                "fen": "4k3/8/8/8/8/8/p6p/1q1BK1R1 w - - 0 2"
+                "fen": "4k3/8/8/8/8/8/p6p/1q1BK1R1 w - - 0 3"
             },
             {
                 "move": {
@@ -2143,7 +2143,7 @@
                 "uci": "c2b1r",
                 "san": "cxb1=R",
                 "lan": "c2xb1=R",
-                "fen": "4k3/8/8/8/8/8/p6p/1r1BK1R1 w - - 0 2"
+                "fen": "4k3/8/8/8/8/8/p6p/1r1BK1R1 w - - 0 3"
             },
             {
                 "move": {
@@ -2157,7 +2157,7 @@
                 "uci": "c2b1b",
                 "san": "cxb1=B",
                 "lan": "c2xb1=B",
-                "fen": "4k3/8/8/8/8/8/p6p/1b1BK1R1 w - - 0 2"
+                "fen": "4k3/8/8/8/8/8/p6p/1b1BK1R1 w - - 0 3"
             },
             {
                 "move": {
@@ -2171,7 +2171,7 @@
                 "uci": "c2b1n",
                 "san": "cxb1=N",
                 "lan": "c2xb1=N",
-                "fen": "4k3/8/8/8/8/8/p6p/1n1BK1R1 w - - 0 2"
+                "fen": "4k3/8/8/8/8/8/p6p/1n1BK1R1 w - - 0 3"
             },
             {
                 "move": {
@@ -2185,7 +2185,7 @@
                 "uci": "a2b1q",
                 "san": "axb1=Q",
                 "lan": "a2xb1=Q",
-                "fen": "4k3/8/8/8/8/8/2p4p/1q1BK1R1 w - - 0 2"
+                "fen": "4k3/8/8/8/8/8/2p4p/1q1BK1R1 w - - 0 3"
             },
             {
                 "move": {
@@ -2199,7 +2199,7 @@
                 "uci": "a2b1r",
                 "san": "axb1=R",
                 "lan": "a2xb1=R",
-                "fen": "4k3/8/8/8/8/8/2p4p/1r1BK1R1 w - - 0 2"
+                "fen": "4k3/8/8/8/8/8/2p4p/1r1BK1R1 w - - 0 3"
             },
             {
                 "move": {
@@ -2213,7 +2213,7 @@
                 "uci": "a2b1b",
                 "san": "axb1=B",
                 "lan": "a2xb1=B",
-                "fen": "4k3/8/8/8/8/8/2p4p/1b1BK1R1 w - - 0 2"
+                "fen": "4k3/8/8/8/8/8/2p4p/1b1BK1R1 w - - 0 3"
             },
             {
                 "move": {
@@ -2227,7 +2227,7 @@
                 "uci": "a2b1n",
                 "san": "axb1=N",
                 "lan": "a2xb1=N",
-                "fen": "4k3/8/8/8/8/8/2p4p/1n1BK1R1 w - - 0 2"
+                "fen": "4k3/8/8/8/8/8/2p4p/1n1BK1R1 w - - 0 3"
             },
             {
                 "move": {
@@ -2241,7 +2241,7 @@
                 "uci": "h2h1q",
                 "san": "h1=Q",
                 "lan": "h2-h1=Q",
-                "fen": "4k3/8/8/8/8/8/p1p5/1R1BK1Rq w - - 0 2"
+                "fen": "4k3/8/8/8/8/8/p1p5/1R1BK1Rq w - - 0 3"
             },
             {
                 "move": {
@@ -2255,7 +2255,7 @@
                 "uci": "h2h1r",
                 "san": "h1=R",
                 "lan": "h2-h1=R",
-                "fen": "4k3/8/8/8/8/8/p1p5/1R1BK1Rr w - - 0 2"
+                "fen": "4k3/8/8/8/8/8/p1p5/1R1BK1Rr w - - 0 3"
             },
             {
                 "move": {
@@ -2269,7 +2269,7 @@
                 "uci": "h2h1b",
                 "san": "h1=B",
                 "lan": "h2-h1=B",
-                "fen": "4k3/8/8/8/8/8/p1p5/1R1BK1Rb w - - 0 2"
+                "fen": "4k3/8/8/8/8/8/p1p5/1R1BK1Rb w - - 0 3"
             },
             {
                 "move": {
@@ -2283,7 +2283,7 @@
                 "uci": "h2h1n",
                 "san": "h1=N",
                 "lan": "h2-h1=N",
-                "fen": "4k3/8/8/8/8/8/p1p5/1R1BK1Rn w - - 0 2"
+                "fen": "4k3/8/8/8/8/8/p1p5/1R1BK1Rn w - - 0 3"
             },
             {
                 "move": {
@@ -2297,7 +2297,7 @@
                 "uci": "c2c1q",
                 "san": "c1=Q",
                 "lan": "c2-c1=Q",
-                "fen": "4k3/8/8/8/8/8/p6p/1RqBK1R1 w - - 0 2"
+                "fen": "4k3/8/8/8/8/8/p6p/1RqBK1R1 w - - 0 3"
             },
             {
                 "move": {
@@ -2311,7 +2311,7 @@
                 "uci": "c2c1r",
                 "san": "c1=R",
                 "lan": "c2-c1=R",
-                "fen": "4k3/8/8/8/8/8/p6p/1RrBK1R1 w - - 0 2"
+                "fen": "4k3/8/8/8/8/8/p6p/1RrBK1R1 w - - 0 3"
             },
             {
                 "move": {
@@ -2325,7 +2325,7 @@
                 "uci": "c2c1b",
                 "san": "c1=B",
                 "lan": "c2-c1=B",
-                "fen": "4k3/8/8/8/8/8/p6p/1RbBK1R1 w - - 0 2"
+                "fen": "4k3/8/8/8/8/8/p6p/1RbBK1R1 w - - 0 3"
             },
             {
                 "move": {
@@ -2339,7 +2339,7 @@
                 "uci": "c2c1n",
                 "san": "c1=N",
                 "lan": "c2-c1=N",
-                "fen": "4k3/8/8/8/8/8/p6p/1RnBK1R1 w - - 0 2"
+                "fen": "4k3/8/8/8/8/8/p6p/1RnBK1R1 w - - 0 3"
             },
             {
                 "move": {
@@ -2353,7 +2353,7 @@
                 "uci": "a2a1q",
                 "san": "a1=Q",
                 "lan": "a2-a1=Q",
-                "fen": "4k3/8/8/8/8/8/2p4p/qR1BK1R1 w - - 0 2"
+                "fen": "4k3/8/8/8/8/8/2p4p/qR1BK1R1 w - - 0 3"
             },
             {
                 "move": {
@@ -2367,7 +2367,7 @@
                 "uci": "a2a1r",
                 "san": "a1=R",
                 "lan": "a2-a1=R",
-                "fen": "4k3/8/8/8/8/8/2p4p/rR1BK1R1 w - - 0 2"
+                "fen": "4k3/8/8/8/8/8/2p4p/rR1BK1R1 w - - 0 3"
             },
             {
                 "move": {
@@ -2381,7 +2381,7 @@
                 "uci": "a2a1b",
                 "san": "a1=B",
                 "lan": "a2-a1=B",
-                "fen": "4k3/8/8/8/8/8/2p4p/bR1BK1R1 w - - 0 2"
+                "fen": "4k3/8/8/8/8/8/2p4p/bR1BK1R1 w - - 0 3"
             },
             {
                 "move": {
@@ -2395,12 +2395,12 @@
                 "uci": "a2a1n",
                 "san": "a1=N",
                 "lan": "a2-a1=N",
-                "fen": "4k3/8/8/8/8/8/2p4p/nR1BK1R1 w - - 0 2"
+                "fen": "4k3/8/8/8/8/8/2p4p/nR1BK1R1 w - - 0 3"
             }
         ]
     },
     {
-        "fen": "4k3/8/8/8/4Pp2/8/8/4K3 b - e3 0 1",
+        "fen": "4k3/8/8/8/4Pp2/8/8/4K3 b - e3 2 2",
         "description": "Prise en passant available for black on e3 from right",
         "moves": [
             {
@@ -2415,7 +2415,7 @@
                 "uci": "e8f8",
                 "san": "Kf8",
                 "lan": "Ke8-f8",
-                "fen": "5k2/8/8/8/4Pp2/8/8/4K3 w - - 1 2"
+                "fen": "5k2/8/8/8/4Pp2/8/8/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -2429,7 +2429,7 @@
                 "uci": "e8d8",
                 "san": "Kd8",
                 "lan": "Ke8-d8",
-                "fen": "3k4/8/8/8/4Pp2/8/8/4K3 w - - 1 2"
+                "fen": "3k4/8/8/8/4Pp2/8/8/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -2443,7 +2443,7 @@
                 "uci": "e8f7",
                 "san": "Kf7",
                 "lan": "Ke8-f7",
-                "fen": "8/5k2/8/8/4Pp2/8/8/4K3 w - - 1 2"
+                "fen": "8/5k2/8/8/4Pp2/8/8/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -2457,7 +2457,7 @@
                 "uci": "e8e7",
                 "san": "Ke7",
                 "lan": "Ke8-e7",
-                "fen": "8/4k3/8/8/4Pp2/8/8/4K3 w - - 1 2"
+                "fen": "8/4k3/8/8/4Pp2/8/8/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -2471,7 +2471,7 @@
                 "uci": "e8d7",
                 "san": "Kd7",
                 "lan": "Ke8-d7",
-                "fen": "8/3k4/8/8/4Pp2/8/8/4K3 w - - 1 2"
+                "fen": "8/3k4/8/8/4Pp2/8/8/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -2485,7 +2485,7 @@
                 "uci": "f4f3",
                 "san": "f3",
                 "lan": "f4-f3",
-                "fen": "4k3/8/8/8/4P3/5p2/8/4K3 w - - 0 2"
+                "fen": "4k3/8/8/8/4P3/5p2/8/4K3 w - - 0 3"
             },
             {
                 "move": {
@@ -2499,12 +2499,12 @@
                 "uci": "f4e3",
                 "san": "fxe3",
                 "lan": "f4xe3",
-                "fen": "4k3/8/8/8/8/4p3/8/4K3 w - - 0 2"
+                "fen": "4k3/8/8/8/8/4p3/8/4K3 w - - 0 3"
             }
         ]
     },
     {
-        "fen": "4k3/8/8/8/3pP3/8/8/4K3 b - e3 0 1",
+        "fen": "4k3/8/8/8/3pP3/8/8/4K3 b - e3 2 2",
         "description": "Prise en passant available for black on e3 from left",
         "moves": [
             {
@@ -2519,7 +2519,7 @@
                 "uci": "e8f8",
                 "san": "Kf8",
                 "lan": "Ke8-f8",
-                "fen": "5k2/8/8/8/3pP3/8/8/4K3 w - - 1 2"
+                "fen": "5k2/8/8/8/3pP3/8/8/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -2533,7 +2533,7 @@
                 "uci": "e8d8",
                 "san": "Kd8",
                 "lan": "Ke8-d8",
-                "fen": "3k4/8/8/8/3pP3/8/8/4K3 w - - 1 2"
+                "fen": "3k4/8/8/8/3pP3/8/8/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -2547,7 +2547,7 @@
                 "uci": "e8f7",
                 "san": "Kf7",
                 "lan": "Ke8-f7",
-                "fen": "8/5k2/8/8/3pP3/8/8/4K3 w - - 1 2"
+                "fen": "8/5k2/8/8/3pP3/8/8/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -2561,7 +2561,7 @@
                 "uci": "e8e7",
                 "san": "Ke7",
                 "lan": "Ke8-e7",
-                "fen": "8/4k3/8/8/3pP3/8/8/4K3 w - - 1 2"
+                "fen": "8/4k3/8/8/3pP3/8/8/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -2575,7 +2575,7 @@
                 "uci": "e8d7",
                 "san": "Kd7",
                 "lan": "Ke8-d7",
-                "fen": "8/3k4/8/8/3pP3/8/8/4K3 w - - 1 2"
+                "fen": "8/3k4/8/8/3pP3/8/8/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -2589,7 +2589,7 @@
                 "uci": "d4d3",
                 "san": "d3",
                 "lan": "d4-d3",
-                "fen": "4k3/8/8/8/4P3/3p4/8/4K3 w - - 0 2"
+                "fen": "4k3/8/8/8/4P3/3p4/8/4K3 w - - 0 3"
             },
             {
                 "move": {
@@ -2603,12 +2603,12 @@
                 "uci": "d4e3",
                 "san": "dxe3",
                 "lan": "d4xe3",
-                "fen": "4k3/8/8/8/8/4p3/8/4K3 w - - 0 2"
+                "fen": "4k3/8/8/8/8/4p3/8/4K3 w - - 0 3"
             }
         ]
     },
     {
-        "fen": "4k3/8/8/1PpP4/8/8/8/4K3 w - c6 0 1",
+        "fen": "4k3/8/8/1PpP4/8/8/8/4K3 w - c6 2 2",
         "description": "Prise en passant available for white on c6 from both sides",
         "moves": [
             {
@@ -2623,7 +2623,7 @@
                 "uci": "e1f2",
                 "san": "Kf2",
                 "lan": "Ke1-f2",
-                "fen": "4k3/8/8/1PpP4/8/8/5K2/8 b - - 1 1"
+                "fen": "4k3/8/8/1PpP4/8/8/5K2/8 b - - 3 2"
             },
             {
                 "move": {
@@ -2637,7 +2637,7 @@
                 "uci": "e1e2",
                 "san": "Ke2",
                 "lan": "Ke1-e2",
-                "fen": "4k3/8/8/1PpP4/8/8/4K3/8 b - - 1 1"
+                "fen": "4k3/8/8/1PpP4/8/8/4K3/8 b - - 3 2"
             },
             {
                 "move": {
@@ -2651,7 +2651,7 @@
                 "uci": "e1d2",
                 "san": "Kd2",
                 "lan": "Ke1-d2",
-                "fen": "4k3/8/8/1PpP4/8/8/3K4/8 b - - 1 1"
+                "fen": "4k3/8/8/1PpP4/8/8/3K4/8 b - - 3 2"
             },
             {
                 "move": {
@@ -2665,7 +2665,7 @@
                 "uci": "e1f1",
                 "san": "Kf1",
                 "lan": "Ke1-f1",
-                "fen": "4k3/8/8/1PpP4/8/8/8/5K2 b - - 1 1"
+                "fen": "4k3/8/8/1PpP4/8/8/8/5K2 b - - 3 2"
             },
             {
                 "move": {
@@ -2679,7 +2679,7 @@
                 "uci": "e1d1",
                 "san": "Kd1",
                 "lan": "Ke1-d1",
-                "fen": "4k3/8/8/1PpP4/8/8/8/3K4 b - - 1 1"
+                "fen": "4k3/8/8/1PpP4/8/8/8/3K4 b - - 3 2"
             },
             {
                 "move": {
@@ -2693,7 +2693,7 @@
                 "uci": "d5d6",
                 "san": "d6",
                 "lan": "d5-d6",
-                "fen": "4k3/8/3P4/1Pp5/8/8/8/4K3 b - - 0 1"
+                "fen": "4k3/8/3P4/1Pp5/8/8/8/4K3 b - - 0 2"
             },
             {
                 "move": {
@@ -2707,7 +2707,7 @@
                 "uci": "b5b6",
                 "san": "b6",
                 "lan": "b5-b6",
-                "fen": "4k3/8/1P6/2pP4/8/8/8/4K3 b - - 0 1"
+                "fen": "4k3/8/1P6/2pP4/8/8/8/4K3 b - - 0 2"
             },
             {
                 "move": {
@@ -2721,7 +2721,7 @@
                 "uci": "d5c6",
                 "san": "dxc6",
                 "lan": "d5xc6",
-                "fen": "4k3/8/2P5/1P6/8/8/8/4K3 b - - 0 1"
+                "fen": "4k3/8/2P5/1P6/8/8/8/4K3 b - - 0 2"
             },
             {
                 "move": {
@@ -2735,12 +2735,12 @@
                 "uci": "b5c6",
                 "san": "bxc6",
                 "lan": "b5xc6",
-                "fen": "4k3/8/2P5/3P4/8/8/8/4K3 b - - 0 1"
+                "fen": "4k3/8/2P5/3P4/8/8/8/4K3 b - - 0 2"
             }
         ]
     },
     {
-        "fen": "4k3/8/8/2R5/8/8/8/4K3 w - - 0 1",
+        "fen": "4k3/8/8/2R5/8/8/8/4K3 w - - 2 2",
         "description": "Single white rook on a middle square without obstructions",
         "moves": [
             {
@@ -2755,7 +2755,7 @@
                 "uci": "c5c8",
                 "san": "Rc8+",
                 "lan": "Rc5-c8+",
-                "fen": "2R1k3/8/8/8/8/8/8/4K3 b - - 1 1"
+                "fen": "2R1k3/8/8/8/8/8/8/4K3 b - - 3 2"
             },
             {
                 "move": {
@@ -2769,7 +2769,7 @@
                 "uci": "c5c7",
                 "san": "Rc7",
                 "lan": "Rc5-c7",
-                "fen": "4k3/2R5/8/8/8/8/8/4K3 b - - 1 1"
+                "fen": "4k3/2R5/8/8/8/8/8/4K3 b - - 3 2"
             },
             {
                 "move": {
@@ -2783,7 +2783,7 @@
                 "uci": "c5c6",
                 "san": "Rc6",
                 "lan": "Rc5-c6",
-                "fen": "4k3/8/2R5/8/8/8/8/4K3 b - - 1 1"
+                "fen": "4k3/8/2R5/8/8/8/8/4K3 b - - 3 2"
             },
             {
                 "move": {
@@ -2797,7 +2797,7 @@
                 "uci": "c5h5",
                 "san": "Rh5",
                 "lan": "Rc5-h5",
-                "fen": "4k3/8/8/7R/8/8/8/4K3 b - - 1 1"
+                "fen": "4k3/8/8/7R/8/8/8/4K3 b - - 3 2"
             },
             {
                 "move": {
@@ -2811,7 +2811,7 @@
                 "uci": "c5g5",
                 "san": "Rg5",
                 "lan": "Rc5-g5",
-                "fen": "4k3/8/8/6R1/8/8/8/4K3 b - - 1 1"
+                "fen": "4k3/8/8/6R1/8/8/8/4K3 b - - 3 2"
             },
             {
                 "move": {
@@ -2825,7 +2825,7 @@
                 "uci": "c5f5",
                 "san": "Rf5",
                 "lan": "Rc5-f5",
-                "fen": "4k3/8/8/5R2/8/8/8/4K3 b - - 1 1"
+                "fen": "4k3/8/8/5R2/8/8/8/4K3 b - - 3 2"
             },
             {
                 "move": {
@@ -2839,7 +2839,7 @@
                 "uci": "c5e5",
                 "san": "Re5+",
                 "lan": "Rc5-e5+",
-                "fen": "4k3/8/8/4R3/8/8/8/4K3 b - - 1 1"
+                "fen": "4k3/8/8/4R3/8/8/8/4K3 b - - 3 2"
             },
             {
                 "move": {
@@ -2853,7 +2853,7 @@
                 "uci": "c5d5",
                 "san": "Rd5",
                 "lan": "Rc5-d5",
-                "fen": "4k3/8/8/3R4/8/8/8/4K3 b - - 1 1"
+                "fen": "4k3/8/8/3R4/8/8/8/4K3 b - - 3 2"
             },
             {
                 "move": {
@@ -2867,7 +2867,7 @@
                 "uci": "c5b5",
                 "san": "Rb5",
                 "lan": "Rc5-b5",
-                "fen": "4k3/8/8/1R6/8/8/8/4K3 b - - 1 1"
+                "fen": "4k3/8/8/1R6/8/8/8/4K3 b - - 3 2"
             },
             {
                 "move": {
@@ -2881,7 +2881,7 @@
                 "uci": "c5a5",
                 "san": "Ra5",
                 "lan": "Rc5-a5",
-                "fen": "4k3/8/8/R7/8/8/8/4K3 b - - 1 1"
+                "fen": "4k3/8/8/R7/8/8/8/4K3 b - - 3 2"
             },
             {
                 "move": {
@@ -2895,7 +2895,7 @@
                 "uci": "c5c4",
                 "san": "Rc4",
                 "lan": "Rc5-c4",
-                "fen": "4k3/8/8/8/2R5/8/8/4K3 b - - 1 1"
+                "fen": "4k3/8/8/8/2R5/8/8/4K3 b - - 3 2"
             },
             {
                 "move": {
@@ -2909,7 +2909,7 @@
                 "uci": "c5c3",
                 "san": "Rc3",
                 "lan": "Rc5-c3",
-                "fen": "4k3/8/8/8/8/2R5/8/4K3 b - - 1 1"
+                "fen": "4k3/8/8/8/8/2R5/8/4K3 b - - 3 2"
             },
             {
                 "move": {
@@ -2923,7 +2923,7 @@
                 "uci": "c5c2",
                 "san": "Rc2",
                 "lan": "Rc5-c2",
-                "fen": "4k3/8/8/8/8/8/2R5/4K3 b - - 1 1"
+                "fen": "4k3/8/8/8/8/8/2R5/4K3 b - - 3 2"
             },
             {
                 "move": {
@@ -2937,7 +2937,7 @@
                 "uci": "c5c1",
                 "san": "Rc1",
                 "lan": "Rc5-c1",
-                "fen": "4k3/8/8/8/8/8/8/2R1K3 b - - 1 1"
+                "fen": "4k3/8/8/8/8/8/8/2R1K3 b - - 3 2"
             },
             {
                 "move": {
@@ -2951,7 +2951,7 @@
                 "uci": "e1f2",
                 "san": "Kf2",
                 "lan": "Ke1-f2",
-                "fen": "4k3/8/8/2R5/8/8/5K2/8 b - - 1 1"
+                "fen": "4k3/8/8/2R5/8/8/5K2/8 b - - 3 2"
             },
             {
                 "move": {
@@ -2965,7 +2965,7 @@
                 "uci": "e1e2",
                 "san": "Ke2",
                 "lan": "Ke1-e2",
-                "fen": "4k3/8/8/2R5/8/8/4K3/8 b - - 1 1"
+                "fen": "4k3/8/8/2R5/8/8/4K3/8 b - - 3 2"
             },
             {
                 "move": {
@@ -2979,7 +2979,7 @@
                 "uci": "e1d2",
                 "san": "Kd2",
                 "lan": "Ke1-d2",
-                "fen": "4k3/8/8/2R5/8/8/3K4/8 b - - 1 1"
+                "fen": "4k3/8/8/2R5/8/8/3K4/8 b - - 3 2"
             },
             {
                 "move": {
@@ -2993,7 +2993,7 @@
                 "uci": "e1f1",
                 "san": "Kf1",
                 "lan": "Ke1-f1",
-                "fen": "4k3/8/8/2R5/8/8/8/5K2 b - - 1 1"
+                "fen": "4k3/8/8/2R5/8/8/8/5K2 b - - 3 2"
             },
             {
                 "move": {
@@ -3007,12 +3007,12 @@
                 "uci": "e1d1",
                 "san": "Kd1",
                 "lan": "Ke1-d1",
-                "fen": "4k3/8/8/2R5/8/8/8/3K4 b - - 1 1"
+                "fen": "4k3/8/8/2R5/8/8/8/3K4 b - - 3 2"
             }
         ]
     },
     {
-        "fen": "4k3/8/8/3b4/8/8/8/4K3 b - - 0 1",
+        "fen": "4k3/8/8/3b4/8/8/8/4K3 b - - 2 2",
         "description": "Single black bishop on a middle square without obstructions",
         "moves": [
             {
@@ -3027,7 +3027,7 @@
                 "uci": "e8f8",
                 "san": "Kf8",
                 "lan": "Ke8-f8",
-                "fen": "5k2/8/8/3b4/8/8/8/4K3 w - - 1 2"
+                "fen": "5k2/8/8/3b4/8/8/8/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -3041,7 +3041,7 @@
                 "uci": "e8d8",
                 "san": "Kd8",
                 "lan": "Ke8-d8",
-                "fen": "3k4/8/8/3b4/8/8/8/4K3 w - - 1 2"
+                "fen": "3k4/8/8/3b4/8/8/8/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -3055,7 +3055,7 @@
                 "uci": "e8f7",
                 "san": "Kf7",
                 "lan": "Ke8-f7",
-                "fen": "8/5k2/8/3b4/8/8/8/4K3 w - - 1 2"
+                "fen": "8/5k2/8/3b4/8/8/8/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -3069,7 +3069,7 @@
                 "uci": "e8e7",
                 "san": "Ke7",
                 "lan": "Ke8-e7",
-                "fen": "8/4k3/8/3b4/8/8/8/4K3 w - - 1 2"
+                "fen": "8/4k3/8/3b4/8/8/8/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -3083,7 +3083,7 @@
                 "uci": "e8d7",
                 "san": "Kd7",
                 "lan": "Ke8-d7",
-                "fen": "8/3k4/8/3b4/8/8/8/4K3 w - - 1 2"
+                "fen": "8/3k4/8/3b4/8/8/8/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -3097,7 +3097,7 @@
                 "uci": "d5g8",
                 "san": "Bg8",
                 "lan": "Bd5-g8",
-                "fen": "4k1b1/8/8/8/8/8/8/4K3 w - - 1 2"
+                "fen": "4k1b1/8/8/8/8/8/8/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -3111,7 +3111,7 @@
                 "uci": "d5a8",
                 "san": "Ba8",
                 "lan": "Bd5-a8",
-                "fen": "b3k3/8/8/8/8/8/8/4K3 w - - 1 2"
+                "fen": "b3k3/8/8/8/8/8/8/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -3125,7 +3125,7 @@
                 "uci": "d5f7",
                 "san": "Bf7",
                 "lan": "Bd5-f7",
-                "fen": "4k3/5b2/8/8/8/8/8/4K3 w - - 1 2"
+                "fen": "4k3/5b2/8/8/8/8/8/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -3139,7 +3139,7 @@
                 "uci": "d5b7",
                 "san": "Bb7",
                 "lan": "Bd5-b7",
-                "fen": "4k3/1b6/8/8/8/8/8/4K3 w - - 1 2"
+                "fen": "4k3/1b6/8/8/8/8/8/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -3153,7 +3153,7 @@
                 "uci": "d5e6",
                 "san": "Be6",
                 "lan": "Bd5-e6",
-                "fen": "4k3/8/4b3/8/8/8/8/4K3 w - - 1 2"
+                "fen": "4k3/8/4b3/8/8/8/8/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -3167,7 +3167,7 @@
                 "uci": "d5c6",
                 "san": "Bc6",
                 "lan": "Bd5-c6",
-                "fen": "4k3/8/2b5/8/8/8/8/4K3 w - - 1 2"
+                "fen": "4k3/8/2b5/8/8/8/8/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -3181,7 +3181,7 @@
                 "uci": "d5e4",
                 "san": "Be4",
                 "lan": "Bd5-e4",
-                "fen": "4k3/8/8/8/4b3/8/8/4K3 w - - 1 2"
+                "fen": "4k3/8/8/8/4b3/8/8/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -3195,7 +3195,7 @@
                 "uci": "d5c4",
                 "san": "Bc4",
                 "lan": "Bd5-c4",
-                "fen": "4k3/8/8/8/2b5/8/8/4K3 w - - 1 2"
+                "fen": "4k3/8/8/8/2b5/8/8/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -3209,7 +3209,7 @@
                 "uci": "d5f3",
                 "san": "Bf3",
                 "lan": "Bd5-f3",
-                "fen": "4k3/8/8/8/8/5b2/8/4K3 w - - 1 2"
+                "fen": "4k3/8/8/8/8/5b2/8/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -3223,7 +3223,7 @@
                 "uci": "d5b3",
                 "san": "Bb3",
                 "lan": "Bd5-b3",
-                "fen": "4k3/8/8/8/8/1b6/8/4K3 w - - 1 2"
+                "fen": "4k3/8/8/8/8/1b6/8/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -3237,7 +3237,7 @@
                 "uci": "d5g2",
                 "san": "Bg2",
                 "lan": "Bd5-g2",
-                "fen": "4k3/8/8/8/8/8/6b1/4K3 w - - 1 2"
+                "fen": "4k3/8/8/8/8/8/6b1/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -3251,7 +3251,7 @@
                 "uci": "d5a2",
                 "san": "Ba2",
                 "lan": "Bd5-a2",
-                "fen": "4k3/8/8/8/8/8/b7/4K3 w - - 1 2"
+                "fen": "4k3/8/8/8/8/8/b7/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -3265,12 +3265,12 @@
                 "uci": "d5h1",
                 "san": "Bh1",
                 "lan": "Bd5-h1",
-                "fen": "4k3/8/8/8/8/8/8/4K2b w - - 1 2"
+                "fen": "4k3/8/8/8/8/8/8/4K2b w - - 3 3"
             }
         ]
     },
     {
-        "fen": "4k3/8/8/8/8/5Q2/8/4K3 w - - 0 1",
+        "fen": "4k3/8/8/8/8/5Q2/8/4K3 w - - 2 2",
         "description": "Single white queen on a middle square without obstructions",
         "moves": [
             {
@@ -3285,7 +3285,7 @@
                 "uci": "f3f8",
                 "san": "Qf8+",
                 "lan": "Qf3-f8+",
-                "fen": "4kQ2/8/8/8/8/8/8/4K3 b - - 1 1"
+                "fen": "4kQ2/8/8/8/8/8/8/4K3 b - - 3 2"
             },
             {
                 "move": {
@@ -3299,7 +3299,7 @@
                 "uci": "f3a8",
                 "san": "Qa8+",
                 "lan": "Qf3-a8+",
-                "fen": "Q3k3/8/8/8/8/8/8/4K3 b - - 1 1"
+                "fen": "Q3k3/8/8/8/8/8/8/4K3 b - - 3 2"
             },
             {
                 "move": {
@@ -3313,7 +3313,7 @@
                 "uci": "f3f7",
                 "san": "Qf7+",
                 "lan": "Qf3-f7+",
-                "fen": "4k3/5Q2/8/8/8/8/8/4K3 b - - 1 1"
+                "fen": "4k3/5Q2/8/8/8/8/8/4K3 b - - 3 2"
             },
             {
                 "move": {
@@ -3327,7 +3327,7 @@
                 "uci": "f3b7",
                 "san": "Qb7",
                 "lan": "Qf3-b7",
-                "fen": "4k3/1Q6/8/8/8/8/8/4K3 b - - 1 1"
+                "fen": "4k3/1Q6/8/8/8/8/8/4K3 b - - 3 2"
             },
             {
                 "move": {
@@ -3341,7 +3341,7 @@
                 "uci": "f3f6",
                 "san": "Qf6",
                 "lan": "Qf3-f6",
-                "fen": "4k3/8/5Q2/8/8/8/8/4K3 b - - 1 1"
+                "fen": "4k3/8/5Q2/8/8/8/8/4K3 b - - 3 2"
             },
             {
                 "move": {
@@ -3355,7 +3355,7 @@
                 "uci": "f3c6",
                 "san": "Qc6+",
                 "lan": "Qf3-c6+",
-                "fen": "4k3/8/2Q5/8/8/8/8/4K3 b - - 1 1"
+                "fen": "4k3/8/2Q5/8/8/8/8/4K3 b - - 3 2"
             },
             {
                 "move": {
@@ -3369,7 +3369,7 @@
                 "uci": "f3h5",
                 "san": "Qh5+",
                 "lan": "Qf3-h5+",
-                "fen": "4k3/8/8/7Q/8/8/8/4K3 b - - 1 1"
+                "fen": "4k3/8/8/7Q/8/8/8/4K3 b - - 3 2"
             },
             {
                 "move": {
@@ -3383,7 +3383,7 @@
                 "uci": "f3f5",
                 "san": "Qf5",
                 "lan": "Qf3-f5",
-                "fen": "4k3/8/8/5Q2/8/8/8/4K3 b - - 1 1"
+                "fen": "4k3/8/8/5Q2/8/8/8/4K3 b - - 3 2"
             },
             {
                 "move": {
@@ -3397,7 +3397,7 @@
                 "uci": "f3d5",
                 "san": "Qd5",
                 "lan": "Qf3-d5",
-                "fen": "4k3/8/8/3Q4/8/8/8/4K3 b - - 1 1"
+                "fen": "4k3/8/8/3Q4/8/8/8/4K3 b - - 3 2"
             },
             {
                 "move": {
@@ -3411,7 +3411,7 @@
                 "uci": "f3g4",
                 "san": "Qg4",
                 "lan": "Qf3-g4",
-                "fen": "4k3/8/8/8/6Q1/8/8/4K3 b - - 1 1"
+                "fen": "4k3/8/8/8/6Q1/8/8/4K3 b - - 3 2"
             },
             {
                 "move": {
@@ -3425,7 +3425,7 @@
                 "uci": "f3f4",
                 "san": "Qf4",
                 "lan": "Qf3-f4",
-                "fen": "4k3/8/8/8/5Q2/8/8/4K3 b - - 1 1"
+                "fen": "4k3/8/8/8/5Q2/8/8/4K3 b - - 3 2"
             },
             {
                 "move": {
@@ -3439,7 +3439,7 @@
                 "uci": "f3e4",
                 "san": "Qe4+",
                 "lan": "Qf3-e4+",
-                "fen": "4k3/8/8/8/4Q3/8/8/4K3 b - - 1 1"
+                "fen": "4k3/8/8/8/4Q3/8/8/4K3 b - - 3 2"
             },
             {
                 "move": {
@@ -3453,7 +3453,7 @@
                 "uci": "f3h3",
                 "san": "Qh3",
                 "lan": "Qf3-h3",
-                "fen": "4k3/8/8/8/8/7Q/8/4K3 b - - 1 1"
+                "fen": "4k3/8/8/8/8/7Q/8/4K3 b - - 3 2"
             },
             {
                 "move": {
@@ -3467,7 +3467,7 @@
                 "uci": "f3g3",
                 "san": "Qg3",
                 "lan": "Qf3-g3",
-                "fen": "4k3/8/8/8/8/6Q1/8/4K3 b - - 1 1"
+                "fen": "4k3/8/8/8/8/6Q1/8/4K3 b - - 3 2"
             },
             {
                 "move": {
@@ -3481,7 +3481,7 @@
                 "uci": "f3e3",
                 "san": "Qe3+",
                 "lan": "Qf3-e3+",
-                "fen": "4k3/8/8/8/8/4Q3/8/4K3 b - - 1 1"
+                "fen": "4k3/8/8/8/8/4Q3/8/4K3 b - - 3 2"
             },
             {
                 "move": {
@@ -3495,7 +3495,7 @@
                 "uci": "f3d3",
                 "san": "Qd3",
                 "lan": "Qf3-d3",
-                "fen": "4k3/8/8/8/8/3Q4/8/4K3 b - - 1 1"
+                "fen": "4k3/8/8/8/8/3Q4/8/4K3 b - - 3 2"
             },
             {
                 "move": {
@@ -3509,7 +3509,7 @@
                 "uci": "f3c3",
                 "san": "Qc3",
                 "lan": "Qf3-c3",
-                "fen": "4k3/8/8/8/8/2Q5/8/4K3 b - - 1 1"
+                "fen": "4k3/8/8/8/8/2Q5/8/4K3 b - - 3 2"
             },
             {
                 "move": {
@@ -3523,7 +3523,7 @@
                 "uci": "f3b3",
                 "san": "Qb3",
                 "lan": "Qf3-b3",
-                "fen": "4k3/8/8/8/8/1Q6/8/4K3 b - - 1 1"
+                "fen": "4k3/8/8/8/8/1Q6/8/4K3 b - - 3 2"
             },
             {
                 "move": {
@@ -3537,7 +3537,7 @@
                 "uci": "f3a3",
                 "san": "Qa3",
                 "lan": "Qf3-a3",
-                "fen": "4k3/8/8/8/8/Q7/8/4K3 b - - 1 1"
+                "fen": "4k3/8/8/8/8/Q7/8/4K3 b - - 3 2"
             },
             {
                 "move": {
@@ -3551,7 +3551,7 @@
                 "uci": "f3g2",
                 "san": "Qg2",
                 "lan": "Qf3-g2",
-                "fen": "4k3/8/8/8/8/8/6Q1/4K3 b - - 1 1"
+                "fen": "4k3/8/8/8/8/8/6Q1/4K3 b - - 3 2"
             },
             {
                 "move": {
@@ -3565,7 +3565,7 @@
                 "uci": "f3f2",
                 "san": "Qf2",
                 "lan": "Qf3-f2",
-                "fen": "4k3/8/8/8/8/8/5Q2/4K3 b - - 1 1"
+                "fen": "4k3/8/8/8/8/8/5Q2/4K3 b - - 3 2"
             },
             {
                 "move": {
@@ -3579,7 +3579,7 @@
                 "uci": "f3e2",
                 "san": "Qe2+",
                 "lan": "Qf3-e2+",
-                "fen": "4k3/8/8/8/8/8/4Q3/4K3 b - - 1 1"
+                "fen": "4k3/8/8/8/8/8/4Q3/4K3 b - - 3 2"
             },
             {
                 "move": {
@@ -3593,7 +3593,7 @@
                 "uci": "f3h1",
                 "san": "Qh1",
                 "lan": "Qf3-h1",
-                "fen": "4k3/8/8/8/8/8/8/4K2Q b - - 1 1"
+                "fen": "4k3/8/8/8/8/8/8/4K2Q b - - 3 2"
             },
             {
                 "move": {
@@ -3607,7 +3607,7 @@
                 "uci": "f3f1",
                 "san": "Qf1",
                 "lan": "Qf3-f1",
-                "fen": "4k3/8/8/8/8/8/8/4KQ2 b - - 1 1"
+                "fen": "4k3/8/8/8/8/8/8/4KQ2 b - - 3 2"
             },
             {
                 "move": {
@@ -3621,7 +3621,7 @@
                 "uci": "f3d1",
                 "san": "Qd1",
                 "lan": "Qf3-d1",
-                "fen": "4k3/8/8/8/8/8/8/3QK3 b - - 1 1"
+                "fen": "4k3/8/8/8/8/8/8/3QK3 b - - 3 2"
             },
             {
                 "move": {
@@ -3635,7 +3635,7 @@
                 "uci": "e1f2",
                 "san": "Kf2",
                 "lan": "Ke1-f2",
-                "fen": "4k3/8/8/8/8/5Q2/5K2/8 b - - 1 1"
+                "fen": "4k3/8/8/8/8/5Q2/5K2/8 b - - 3 2"
             },
             {
                 "move": {
@@ -3649,7 +3649,7 @@
                 "uci": "e1e2",
                 "san": "Ke2",
                 "lan": "Ke1-e2",
-                "fen": "4k3/8/8/8/8/5Q2/4K3/8 b - - 1 1"
+                "fen": "4k3/8/8/8/8/5Q2/4K3/8 b - - 3 2"
             },
             {
                 "move": {
@@ -3663,7 +3663,7 @@
                 "uci": "e1d2",
                 "san": "Kd2",
                 "lan": "Ke1-d2",
-                "fen": "4k3/8/8/8/8/5Q2/3K4/8 b - - 1 1"
+                "fen": "4k3/8/8/8/8/5Q2/3K4/8 b - - 3 2"
             },
             {
                 "move": {
@@ -3677,7 +3677,7 @@
                 "uci": "e1f1",
                 "san": "Kf1",
                 "lan": "Ke1-f1",
-                "fen": "4k3/8/8/8/8/5Q2/8/5K2 b - - 1 1"
+                "fen": "4k3/8/8/8/8/5Q2/8/5K2 b - - 3 2"
             },
             {
                 "move": {
@@ -3691,12 +3691,12 @@
                 "uci": "e1d1",
                 "san": "Kd1",
                 "lan": "Ke1-d1",
-                "fen": "4k3/8/8/8/8/5Q2/8/3K4 b - - 1 1"
+                "fen": "4k3/8/8/8/8/5Q2/8/3K4 b - - 3 2"
             }
         ]
     },
     {
-        "fen": "4k3/8/2P2P2/3P1P1P/5P2/1P1P1Q2/4P3/4K2N w - - 0 1",
+        "fen": "4k3/8/2P2P2/3P1P1P/5P2/1P1P1Q2/4P3/4K2N w - - 2 2",
         "description": "White queen blocked by own pieces",
         "moves": [
             {
@@ -3711,7 +3711,7 @@
                 "uci": "f3g4",
                 "san": "Qg4",
                 "lan": "Qf3-g4",
-                "fen": "4k3/8/2P2P2/3P1P1P/5PQ1/1P1P4/4P3/4K2N b - - 1 1"
+                "fen": "4k3/8/2P2P2/3P1P1P/5PQ1/1P1P4/4P3/4K2N b - - 3 2"
             },
             {
                 "move": {
@@ -3725,7 +3725,7 @@
                 "uci": "f3e4",
                 "san": "Qe4+",
                 "lan": "Qf3-e4+",
-                "fen": "4k3/8/2P2P2/3P1P1P/4QP2/1P1P4/4P3/4K2N b - - 1 1"
+                "fen": "4k3/8/2P2P2/3P1P1P/4QP2/1P1P4/4P3/4K2N b - - 3 2"
             },
             {
                 "move": {
@@ -3739,7 +3739,7 @@
                 "uci": "f3h3",
                 "san": "Qh3",
                 "lan": "Qf3-h3",
-                "fen": "4k3/8/2P2P2/3P1P1P/5P2/1P1P3Q/4P3/4K2N b - - 1 1"
+                "fen": "4k3/8/2P2P2/3P1P1P/5P2/1P1P3Q/4P3/4K2N b - - 3 2"
             },
             {
                 "move": {
@@ -3753,7 +3753,7 @@
                 "uci": "f3g3",
                 "san": "Qg3",
                 "lan": "Qf3-g3",
-                "fen": "4k3/8/2P2P2/3P1P1P/5P2/1P1P2Q1/4P3/4K2N b - - 1 1"
+                "fen": "4k3/8/2P2P2/3P1P1P/5P2/1P1P2Q1/4P3/4K2N b - - 3 2"
             },
             {
                 "move": {
@@ -3767,7 +3767,7 @@
                 "uci": "f3e3",
                 "san": "Qe3+",
                 "lan": "Qf3-e3+",
-                "fen": "4k3/8/2P2P2/3P1P1P/5P2/1P1PQ3/4P3/4K2N b - - 1 1"
+                "fen": "4k3/8/2P2P2/3P1P1P/5P2/1P1PQ3/4P3/4K2N b - - 3 2"
             },
             {
                 "move": {
@@ -3781,7 +3781,7 @@
                 "uci": "f3g2",
                 "san": "Qg2",
                 "lan": "Qf3-g2",
-                "fen": "4k3/8/2P2P2/3P1P1P/5P2/1P1P4/4P1Q1/4K2N b - - 1 1"
+                "fen": "4k3/8/2P2P2/3P1P1P/5P2/1P1P4/4P1Q1/4K2N b - - 3 2"
             },
             {
                 "move": {
@@ -3795,7 +3795,7 @@
                 "uci": "f3f2",
                 "san": "Qf2",
                 "lan": "Qf3-f2",
-                "fen": "4k3/8/2P2P2/3P1P1P/5P2/1P1P4/4PQ2/4K2N b - - 1 1"
+                "fen": "4k3/8/2P2P2/3P1P1P/5P2/1P1P4/4PQ2/4K2N b - - 3 2"
             },
             {
                 "move": {
@@ -3809,7 +3809,7 @@
                 "uci": "f3f1",
                 "san": "Qf1",
                 "lan": "Qf3-f1",
-                "fen": "4k3/8/2P2P2/3P1P1P/5P2/1P1P4/4P3/4KQ1N b - - 1 1"
+                "fen": "4k3/8/2P2P2/3P1P1P/5P2/1P1P4/4P3/4KQ1N b - - 3 2"
             },
             {
                 "move": {
@@ -3823,7 +3823,7 @@
                 "uci": "h1g3",
                 "san": "Ng3",
                 "lan": "Nh1-g3",
-                "fen": "4k3/8/2P2P2/3P1P1P/5P2/1P1P1QN1/4P3/4K3 b - - 1 1"
+                "fen": "4k3/8/2P2P2/3P1P1P/5P2/1P1P1QN1/4P3/4K3 b - - 3 2"
             },
             {
                 "move": {
@@ -3837,7 +3837,7 @@
                 "uci": "h1f2",
                 "san": "Nf2",
                 "lan": "Nh1-f2",
-                "fen": "4k3/8/2P2P2/3P1P1P/5P2/1P1P1Q2/4PN2/4K3 b - - 1 1"
+                "fen": "4k3/8/2P2P2/3P1P1P/5P2/1P1P1Q2/4PN2/4K3 b - - 3 2"
             },
             {
                 "move": {
@@ -3851,7 +3851,7 @@
                 "uci": "e1f2",
                 "san": "Kf2",
                 "lan": "Ke1-f2",
-                "fen": "4k3/8/2P2P2/3P1P1P/5P2/1P1P1Q2/4PK2/7N b - - 1 1"
+                "fen": "4k3/8/2P2P2/3P1P1P/5P2/1P1P1Q2/4PK2/7N b - - 3 2"
             },
             {
                 "move": {
@@ -3865,7 +3865,7 @@
                 "uci": "e1d2",
                 "san": "Kd2",
                 "lan": "Ke1-d2",
-                "fen": "4k3/8/2P2P2/3P1P1P/5P2/1P1P1Q2/3KP3/7N b - - 1 1"
+                "fen": "4k3/8/2P2P2/3P1P1P/5P2/1P1P1Q2/3KP3/7N b - - 3 2"
             },
             {
                 "move": {
@@ -3879,7 +3879,7 @@
                 "uci": "e1f1",
                 "san": "Kf1",
                 "lan": "Ke1-f1",
-                "fen": "4k3/8/2P2P2/3P1P1P/5P2/1P1P1Q2/4P3/5K1N b - - 1 1"
+                "fen": "4k3/8/2P2P2/3P1P1P/5P2/1P1P1Q2/4P3/5K1N b - - 3 2"
             },
             {
                 "move": {
@@ -3893,7 +3893,7 @@
                 "uci": "e1d1",
                 "san": "Kd1",
                 "lan": "Ke1-d1",
-                "fen": "4k3/8/2P2P2/3P1P1P/5P2/1P1P1Q2/4P3/3K3N b - - 1 1"
+                "fen": "4k3/8/2P2P2/3P1P1P/5P2/1P1P1Q2/4P3/3K3N b - - 3 2"
             },
             {
                 "move": {
@@ -3907,7 +3907,7 @@
                 "uci": "f6f7",
                 "san": "f7+",
                 "lan": "f6-f7+",
-                "fen": "4k3/5P2/2P5/3P1P1P/5P2/1P1P1Q2/4P3/4K2N b - - 0 1"
+                "fen": "4k3/5P2/2P5/3P1P1P/5P2/1P1P1Q2/4P3/4K2N b - - 0 2"
             },
             {
                 "move": {
@@ -3921,7 +3921,7 @@
                 "uci": "c6c7",
                 "san": "c7",
                 "lan": "c6-c7",
-                "fen": "4k3/2P5/5P2/3P1P1P/5P2/1P1P1Q2/4P3/4K2N b - - 0 1"
+                "fen": "4k3/2P5/5P2/3P1P1P/5P2/1P1P1Q2/4P3/4K2N b - - 0 2"
             },
             {
                 "move": {
@@ -3935,7 +3935,7 @@
                 "uci": "h5h6",
                 "san": "h6",
                 "lan": "h5-h6",
-                "fen": "4k3/8/2P2P1P/3P1P2/5P2/1P1P1Q2/4P3/4K2N b - - 0 1"
+                "fen": "4k3/8/2P2P1P/3P1P2/5P2/1P1P1Q2/4P3/4K2N b - - 0 2"
             },
             {
                 "move": {
@@ -3949,7 +3949,7 @@
                 "uci": "d5d6",
                 "san": "d6",
                 "lan": "d5-d6",
-                "fen": "4k3/8/2PP1P2/5P1P/5P2/1P1P1Q2/4P3/4K2N b - - 0 1"
+                "fen": "4k3/8/2PP1P2/5P1P/5P2/1P1P1Q2/4P3/4K2N b - - 0 2"
             },
             {
                 "move": {
@@ -3963,7 +3963,7 @@
                 "uci": "d3d4",
                 "san": "d4",
                 "lan": "d3-d4",
-                "fen": "4k3/8/2P2P2/3P1P1P/3P1P2/1P3Q2/4P3/4K2N b - - 0 1"
+                "fen": "4k3/8/2P2P2/3P1P1P/3P1P2/1P3Q2/4P3/4K2N b - - 0 2"
             },
             {
                 "move": {
@@ -3977,7 +3977,7 @@
                 "uci": "b3b4",
                 "san": "b4",
                 "lan": "b3-b4",
-                "fen": "4k3/8/2P2P2/3P1P1P/1P3P2/3P1Q2/4P3/4K2N b - - 0 1"
+                "fen": "4k3/8/2P2P2/3P1P1P/1P3P2/3P1Q2/4P3/4K2N b - - 0 2"
             },
             {
                 "move": {
@@ -3991,7 +3991,7 @@
                 "uci": "e2e3",
                 "san": "e3",
                 "lan": "e2-e3",
-                "fen": "4k3/8/2P2P2/3P1P1P/5P2/1P1PPQ2/8/4K2N b - - 0 1"
+                "fen": "4k3/8/2P2P2/3P1P1P/5P2/1P1PPQ2/8/4K2N b - - 0 2"
             },
             {
                 "move": {
@@ -4005,12 +4005,12 @@
                 "uci": "e2e4",
                 "san": "e4",
                 "lan": "e2-e4",
-                "fen": "4k3/8/2P2P2/3P1P1P/4PP2/1P1P1Q2/8/4K2N b - - 0 1"
+                "fen": "4k3/8/2P2P2/3P1P1P/4PP2/1P1P1Q2/8/4K2N b - - 0 2"
             }
         ]
     },
     {
-        "fen": "2N4k/2P5/P1rNP3/2P3P1/5b2/2P3N1/3P4/2N1K3 b - - 0 1",
+        "fen": "2N4k/2P5/P1rNP3/2P3P1/5b2/2P3N1/3P4/2N1K3 b - - 2 2",
         "description": "Black sliders (rook and queen) blocked by white pieces",
         "moves": [
             {
@@ -4025,7 +4025,7 @@
                 "uci": "h8g8",
                 "san": "Kg8",
                 "lan": "Kh8-g8",
-                "fen": "2N3k1/2P5/P1rNP3/2P3P1/5b2/2P3N1/3P4/2N1K3 w - - 1 2"
+                "fen": "2N3k1/2P5/P1rNP3/2P3P1/5b2/2P3N1/3P4/2N1K3 w - - 3 3"
             },
             {
                 "move": {
@@ -4039,7 +4039,7 @@
                 "uci": "h8h7",
                 "san": "Kh7",
                 "lan": "Kh8-h7",
-                "fen": "2N5/2P4k/P1rNP3/2P3P1/5b2/2P3N1/3P4/2N1K3 w - - 1 2"
+                "fen": "2N5/2P4k/P1rNP3/2P3P1/5b2/2P3N1/3P4/2N1K3 w - - 3 3"
             },
             {
                 "move": {
@@ -4053,7 +4053,7 @@
                 "uci": "h8g7",
                 "san": "Kg7",
                 "lan": "Kh8-g7",
-                "fen": "2N5/2P3k1/P1rNP3/2P3P1/5b2/2P3N1/3P4/2N1K3 w - - 1 2"
+                "fen": "2N5/2P3k1/P1rNP3/2P3P1/5b2/2P3N1/3P4/2N1K3 w - - 3 3"
             },
             {
                 "move": {
@@ -4067,7 +4067,7 @@
                 "uci": "c6c7",
                 "san": "Rxc7",
                 "lan": "Rc6xc7",
-                "fen": "2N4k/2r5/P2NP3/2P3P1/5b2/2P3N1/3P4/2N1K3 w - - 0 2"
+                "fen": "2N4k/2r5/P2NP3/2P3P1/5b2/2P3N1/3P4/2N1K3 w - - 0 3"
             },
             {
                 "move": {
@@ -4081,7 +4081,7 @@
                 "uci": "c6d6",
                 "san": "Rxd6",
                 "lan": "Rc6xd6",
-                "fen": "2N4k/2P5/P2rP3/2P3P1/5b2/2P3N1/3P4/2N1K3 w - - 0 2"
+                "fen": "2N4k/2P5/P2rP3/2P3P1/5b2/2P3N1/3P4/2N1K3 w - - 0 3"
             },
             {
                 "move": {
@@ -4095,7 +4095,7 @@
                 "uci": "c6b6",
                 "san": "Rb6",
                 "lan": "Rc6-b6",
-                "fen": "2N4k/2P5/Pr1NP3/2P3P1/5b2/2P3N1/3P4/2N1K3 w - - 1 2"
+                "fen": "2N4k/2P5/Pr1NP3/2P3P1/5b2/2P3N1/3P4/2N1K3 w - - 3 3"
             },
             {
                 "move": {
@@ -4109,7 +4109,7 @@
                 "uci": "c6a6",
                 "san": "Rxa6",
                 "lan": "Rc6xa6",
-                "fen": "2N4k/2P5/r2NP3/2P3P1/5b2/2P3N1/3P4/2N1K3 w - - 0 2"
+                "fen": "2N4k/2P5/r2NP3/2P3P1/5b2/2P3N1/3P4/2N1K3 w - - 0 3"
             },
             {
                 "move": {
@@ -4123,7 +4123,7 @@
                 "uci": "c6c5",
                 "san": "Rxc5",
                 "lan": "Rc6xc5",
-                "fen": "2N4k/2P5/P2NP3/2r3P1/5b2/2P3N1/3P4/2N1K3 w - - 0 2"
+                "fen": "2N4k/2P5/P2NP3/2r3P1/5b2/2P3N1/3P4/2N1K3 w - - 0 3"
             },
             {
                 "move": {
@@ -4137,7 +4137,7 @@
                 "uci": "f4d6",
                 "san": "Bxd6",
                 "lan": "Bf4xd6",
-                "fen": "2N4k/2P5/P1rbP3/2P3P1/8/2P3N1/3P4/2N1K3 w - - 0 2"
+                "fen": "2N4k/2P5/P1rbP3/2P3P1/8/2P3N1/3P4/2N1K3 w - - 0 3"
             },
             {
                 "move": {
@@ -4151,7 +4151,7 @@
                 "uci": "f4g5",
                 "san": "Bxg5",
                 "lan": "Bf4xg5",
-                "fen": "2N4k/2P5/P1rNP3/2P3b1/8/2P3N1/3P4/2N1K3 w - - 0 2"
+                "fen": "2N4k/2P5/P1rNP3/2P3b1/8/2P3N1/3P4/2N1K3 w - - 0 3"
             },
             {
                 "move": {
@@ -4165,7 +4165,7 @@
                 "uci": "f4e5",
                 "san": "Be5",
                 "lan": "Bf4-e5",
-                "fen": "2N4k/2P5/P1rNP3/2P1b1P1/8/2P3N1/3P4/2N1K3 w - - 1 2"
+                "fen": "2N4k/2P5/P1rNP3/2P1b1P1/8/2P3N1/3P4/2N1K3 w - - 3 3"
             },
             {
                 "move": {
@@ -4179,7 +4179,7 @@
                 "uci": "f4g3",
                 "san": "Bxg3+",
                 "lan": "Bf4xg3+",
-                "fen": "2N4k/2P5/P1rNP3/2P3P1/8/2P3b1/3P4/2N1K3 w - - 0 2"
+                "fen": "2N4k/2P5/P1rNP3/2P3P1/8/2P3b1/3P4/2N1K3 w - - 0 3"
             },
             {
                 "move": {
@@ -4193,7 +4193,7 @@
                 "uci": "f4e3",
                 "san": "Be3",
                 "lan": "Bf4-e3",
-                "fen": "2N4k/2P5/P1rNP3/2P3P1/8/2P1b1N1/3P4/2N1K3 w - - 1 2"
+                "fen": "2N4k/2P5/P1rNP3/2P3P1/8/2P1b1N1/3P4/2N1K3 w - - 3 3"
             },
             {
                 "move": {
@@ -4207,12 +4207,12 @@
                 "uci": "f4d2",
                 "san": "Bxd2+",
                 "lan": "Bf4xd2+",
-                "fen": "2N4k/2P5/P1rNP3/2P3P1/8/2P3N1/3b4/2N1K3 w - - 0 2"
+                "fen": "2N4k/2P5/P1rNP3/2P3P1/8/2P3N1/3b4/2N1K3 w - - 0 3"
             }
         ]
     },
     {
-        "fen": "r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1",
+        "fen": "r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 2 2",
         "description": "White king can castle both sides",
         "moves": [
             {
@@ -4227,7 +4227,7 @@
                 "uci": "h1h8",
                 "san": "Rxh8+",
                 "lan": "Rh1xh8+",
-                "fen": "r3k2R/8/8/8/8/8/8/R3K3 b Qq - 0 1"
+                "fen": "r3k2R/8/8/8/8/8/8/R3K3 b Qq - 0 2"
             },
             {
                 "move": {
@@ -4241,7 +4241,7 @@
                 "uci": "h1h7",
                 "san": "Rh7",
                 "lan": "Rh1-h7",
-                "fen": "r3k2r/7R/8/8/8/8/8/R3K3 b Qkq - 1 1"
+                "fen": "r3k2r/7R/8/8/8/8/8/R3K3 b Qkq - 3 2"
             },
             {
                 "move": {
@@ -4255,7 +4255,7 @@
                 "uci": "h1h6",
                 "san": "Rh6",
                 "lan": "Rh1-h6",
-                "fen": "r3k2r/8/7R/8/8/8/8/R3K3 b Qkq - 1 1"
+                "fen": "r3k2r/8/7R/8/8/8/8/R3K3 b Qkq - 3 2"
             },
             {
                 "move": {
@@ -4269,7 +4269,7 @@
                 "uci": "h1h5",
                 "san": "Rh5",
                 "lan": "Rh1-h5",
-                "fen": "r3k2r/8/8/7R/8/8/8/R3K3 b Qkq - 1 1"
+                "fen": "r3k2r/8/8/7R/8/8/8/R3K3 b Qkq - 3 2"
             },
             {
                 "move": {
@@ -4283,7 +4283,7 @@
                 "uci": "h1h4",
                 "san": "Rh4",
                 "lan": "Rh1-h4",
-                "fen": "r3k2r/8/8/8/7R/8/8/R3K3 b Qkq - 1 1"
+                "fen": "r3k2r/8/8/8/7R/8/8/R3K3 b Qkq - 3 2"
             },
             {
                 "move": {
@@ -4297,7 +4297,7 @@
                 "uci": "h1h3",
                 "san": "Rh3",
                 "lan": "Rh1-h3",
-                "fen": "r3k2r/8/8/8/8/7R/8/R3K3 b Qkq - 1 1"
+                "fen": "r3k2r/8/8/8/8/7R/8/R3K3 b Qkq - 3 2"
             },
             {
                 "move": {
@@ -4311,7 +4311,7 @@
                 "uci": "h1h2",
                 "san": "Rh2",
                 "lan": "Rh1-h2",
-                "fen": "r3k2r/8/8/8/8/8/7R/R3K3 b Qkq - 1 1"
+                "fen": "r3k2r/8/8/8/8/8/7R/R3K3 b Qkq - 3 2"
             },
             {
                 "move": {
@@ -4325,7 +4325,7 @@
                 "uci": "h1g1",
                 "san": "Rg1",
                 "lan": "Rh1-g1",
-                "fen": "r3k2r/8/8/8/8/8/8/R3K1R1 b Qkq - 1 1"
+                "fen": "r3k2r/8/8/8/8/8/8/R3K1R1 b Qkq - 3 2"
             },
             {
                 "move": {
@@ -4339,7 +4339,7 @@
                 "uci": "h1f1",
                 "san": "Rf1",
                 "lan": "Rh1-f1",
-                "fen": "r3k2r/8/8/8/8/8/8/R3KR2 b Qkq - 1 1"
+                "fen": "r3k2r/8/8/8/8/8/8/R3KR2 b Qkq - 3 2"
             },
             {
                 "move": {
@@ -4353,7 +4353,7 @@
                 "uci": "e1f2",
                 "san": "Kf2",
                 "lan": "Ke1-f2",
-                "fen": "r3k2r/8/8/8/8/8/5K2/R6R b kq - 1 1"
+                "fen": "r3k2r/8/8/8/8/8/5K2/R6R b kq - 3 2"
             },
             {
                 "move": {
@@ -4367,7 +4367,7 @@
                 "uci": "e1e2",
                 "san": "Ke2",
                 "lan": "Ke1-e2",
-                "fen": "r3k2r/8/8/8/8/8/4K3/R6R b kq - 1 1"
+                "fen": "r3k2r/8/8/8/8/8/4K3/R6R b kq - 3 2"
             },
             {
                 "move": {
@@ -4381,7 +4381,7 @@
                 "uci": "e1d2",
                 "san": "Kd2",
                 "lan": "Ke1-d2",
-                "fen": "r3k2r/8/8/8/8/8/3K4/R6R b kq - 1 1"
+                "fen": "r3k2r/8/8/8/8/8/3K4/R6R b kq - 3 2"
             },
             {
                 "move": {
@@ -4395,7 +4395,7 @@
                 "uci": "e1f1",
                 "san": "Kf1",
                 "lan": "Ke1-f1",
-                "fen": "r3k2r/8/8/8/8/8/8/R4K1R b kq - 1 1"
+                "fen": "r3k2r/8/8/8/8/8/8/R4K1R b kq - 3 2"
             },
             {
                 "move": {
@@ -4409,7 +4409,7 @@
                 "uci": "e1d1",
                 "san": "Kd1",
                 "lan": "Ke1-d1",
-                "fen": "r3k2r/8/8/8/8/8/8/R2K3R b kq - 1 1"
+                "fen": "r3k2r/8/8/8/8/8/8/R2K3R b kq - 3 2"
             },
             {
                 "move": {
@@ -4423,7 +4423,7 @@
                 "uci": "a1a8",
                 "san": "Rxa8+",
                 "lan": "Ra1xa8+",
-                "fen": "R3k2r/8/8/8/8/8/8/4K2R b Kk - 0 1"
+                "fen": "R3k2r/8/8/8/8/8/8/4K2R b Kk - 0 2"
             },
             {
                 "move": {
@@ -4437,7 +4437,7 @@
                 "uci": "a1a7",
                 "san": "Ra7",
                 "lan": "Ra1-a7",
-                "fen": "r3k2r/R7/8/8/8/8/8/4K2R b Kkq - 1 1"
+                "fen": "r3k2r/R7/8/8/8/8/8/4K2R b Kkq - 3 2"
             },
             {
                 "move": {
@@ -4451,7 +4451,7 @@
                 "uci": "a1a6",
                 "san": "Ra6",
                 "lan": "Ra1-a6",
-                "fen": "r3k2r/8/R7/8/8/8/8/4K2R b Kkq - 1 1"
+                "fen": "r3k2r/8/R7/8/8/8/8/4K2R b Kkq - 3 2"
             },
             {
                 "move": {
@@ -4465,7 +4465,7 @@
                 "uci": "a1a5",
                 "san": "Ra5",
                 "lan": "Ra1-a5",
-                "fen": "r3k2r/8/8/R7/8/8/8/4K2R b Kkq - 1 1"
+                "fen": "r3k2r/8/8/R7/8/8/8/4K2R b Kkq - 3 2"
             },
             {
                 "move": {
@@ -4479,7 +4479,7 @@
                 "uci": "a1a4",
                 "san": "Ra4",
                 "lan": "Ra1-a4",
-                "fen": "r3k2r/8/8/8/R7/8/8/4K2R b Kkq - 1 1"
+                "fen": "r3k2r/8/8/8/R7/8/8/4K2R b Kkq - 3 2"
             },
             {
                 "move": {
@@ -4493,7 +4493,7 @@
                 "uci": "a1a3",
                 "san": "Ra3",
                 "lan": "Ra1-a3",
-                "fen": "r3k2r/8/8/8/8/R7/8/4K2R b Kkq - 1 1"
+                "fen": "r3k2r/8/8/8/8/R7/8/4K2R b Kkq - 3 2"
             },
             {
                 "move": {
@@ -4507,7 +4507,7 @@
                 "uci": "a1a2",
                 "san": "Ra2",
                 "lan": "Ra1-a2",
-                "fen": "r3k2r/8/8/8/8/8/R7/4K2R b Kkq - 1 1"
+                "fen": "r3k2r/8/8/8/8/8/R7/4K2R b Kkq - 3 2"
             },
             {
                 "move": {
@@ -4521,7 +4521,7 @@
                 "uci": "a1d1",
                 "san": "Rd1",
                 "lan": "Ra1-d1",
-                "fen": "r3k2r/8/8/8/8/8/8/3RK2R b Kkq - 1 1"
+                "fen": "r3k2r/8/8/8/8/8/8/3RK2R b Kkq - 3 2"
             },
             {
                 "move": {
@@ -4535,7 +4535,7 @@
                 "uci": "a1c1",
                 "san": "Rc1",
                 "lan": "Ra1-c1",
-                "fen": "r3k2r/8/8/8/8/8/8/2R1K2R b Kkq - 1 1"
+                "fen": "r3k2r/8/8/8/8/8/8/2R1K2R b Kkq - 3 2"
             },
             {
                 "move": {
@@ -4549,7 +4549,7 @@
                 "uci": "a1b1",
                 "san": "Rb1",
                 "lan": "Ra1-b1",
-                "fen": "r3k2r/8/8/8/8/8/8/1R2K2R b Kkq - 1 1"
+                "fen": "r3k2r/8/8/8/8/8/8/1R2K2R b Kkq - 3 2"
             },
             {
                 "move": {
@@ -4563,7 +4563,7 @@
                 "uci": "e1g1",
                 "san": "O-O",
                 "lan": "O-O",
-                "fen": "r3k2r/8/8/8/8/8/8/R4RK1 b kq - 1 1"
+                "fen": "r3k2r/8/8/8/8/8/8/R4RK1 b kq - 3 2"
             },
             {
                 "move": {
@@ -4577,12 +4577,12 @@
                 "uci": "e1c1",
                 "san": "O-O-O",
                 "lan": "O-O-O",
-                "fen": "r3k2r/8/8/8/8/8/8/2KR3R b kq - 1 1"
+                "fen": "r3k2r/8/8/8/8/8/8/2KR3R b kq - 3 2"
             }
         ]
     },
     {
-        "fen": "r3k2r/8/8/8/8/8/8/R3K2R b KQkq - 0 1",
+        "fen": "r3k2r/8/8/8/8/8/8/R3K2R b KQkq - 2 2",
         "description": "Black king can castle both sides",
         "moves": [
             {
@@ -4597,7 +4597,7 @@
                 "uci": "h8g8",
                 "san": "Rg8",
                 "lan": "Rh8-g8",
-                "fen": "r3k1r1/8/8/8/8/8/8/R3K2R w KQq - 1 2"
+                "fen": "r3k1r1/8/8/8/8/8/8/R3K2R w KQq - 3 3"
             },
             {
                 "move": {
@@ -4611,7 +4611,7 @@
                 "uci": "h8f8",
                 "san": "Rf8",
                 "lan": "Rh8-f8",
-                "fen": "r3kr2/8/8/8/8/8/8/R3K2R w KQq - 1 2"
+                "fen": "r3kr2/8/8/8/8/8/8/R3K2R w KQq - 3 3"
             },
             {
                 "move": {
@@ -4625,7 +4625,7 @@
                 "uci": "h8h7",
                 "san": "Rh7",
                 "lan": "Rh8-h7",
-                "fen": "r3k3/7r/8/8/8/8/8/R3K2R w KQq - 1 2"
+                "fen": "r3k3/7r/8/8/8/8/8/R3K2R w KQq - 3 3"
             },
             {
                 "move": {
@@ -4639,7 +4639,7 @@
                 "uci": "h8h6",
                 "san": "Rh6",
                 "lan": "Rh8-h6",
-                "fen": "r3k3/8/7r/8/8/8/8/R3K2R w KQq - 1 2"
+                "fen": "r3k3/8/7r/8/8/8/8/R3K2R w KQq - 3 3"
             },
             {
                 "move": {
@@ -4653,7 +4653,7 @@
                 "uci": "h8h5",
                 "san": "Rh5",
                 "lan": "Rh8-h5",
-                "fen": "r3k3/8/8/7r/8/8/8/R3K2R w KQq - 1 2"
+                "fen": "r3k3/8/8/7r/8/8/8/R3K2R w KQq - 3 3"
             },
             {
                 "move": {
@@ -4667,7 +4667,7 @@
                 "uci": "h8h4",
                 "san": "Rh4",
                 "lan": "Rh8-h4",
-                "fen": "r3k3/8/8/8/7r/8/8/R3K2R w KQq - 1 2"
+                "fen": "r3k3/8/8/8/7r/8/8/R3K2R w KQq - 3 3"
             },
             {
                 "move": {
@@ -4681,7 +4681,7 @@
                 "uci": "h8h3",
                 "san": "Rh3",
                 "lan": "Rh8-h3",
-                "fen": "r3k3/8/8/8/8/7r/8/R3K2R w KQq - 1 2"
+                "fen": "r3k3/8/8/8/8/7r/8/R3K2R w KQq - 3 3"
             },
             {
                 "move": {
@@ -4695,7 +4695,7 @@
                 "uci": "h8h2",
                 "san": "Rh2",
                 "lan": "Rh8-h2",
-                "fen": "r3k3/8/8/8/8/8/7r/R3K2R w KQq - 1 2"
+                "fen": "r3k3/8/8/8/8/8/7r/R3K2R w KQq - 3 3"
             },
             {
                 "move": {
@@ -4709,7 +4709,7 @@
                 "uci": "h8h1",
                 "san": "Rxh1+",
                 "lan": "Rh8xh1+",
-                "fen": "r3k3/8/8/8/8/8/8/R3K2r w Qq - 0 2"
+                "fen": "r3k3/8/8/8/8/8/8/R3K2r w Qq - 0 3"
             },
             {
                 "move": {
@@ -4723,7 +4723,7 @@
                 "uci": "e8f8",
                 "san": "Kf8",
                 "lan": "Ke8-f8",
-                "fen": "r4k1r/8/8/8/8/8/8/R3K2R w KQ - 1 2"
+                "fen": "r4k1r/8/8/8/8/8/8/R3K2R w KQ - 3 3"
             },
             {
                 "move": {
@@ -4737,7 +4737,7 @@
                 "uci": "e8d8",
                 "san": "Kd8",
                 "lan": "Ke8-d8",
-                "fen": "r2k3r/8/8/8/8/8/8/R3K2R w KQ - 1 2"
+                "fen": "r2k3r/8/8/8/8/8/8/R3K2R w KQ - 3 3"
             },
             {
                 "move": {
@@ -4751,7 +4751,7 @@
                 "uci": "e8f7",
                 "san": "Kf7",
                 "lan": "Ke8-f7",
-                "fen": "r6r/5k2/8/8/8/8/8/R3K2R w KQ - 1 2"
+                "fen": "r6r/5k2/8/8/8/8/8/R3K2R w KQ - 3 3"
             },
             {
                 "move": {
@@ -4765,7 +4765,7 @@
                 "uci": "e8e7",
                 "san": "Ke7",
                 "lan": "Ke8-e7",
-                "fen": "r6r/4k3/8/8/8/8/8/R3K2R w KQ - 1 2"
+                "fen": "r6r/4k3/8/8/8/8/8/R3K2R w KQ - 3 3"
             },
             {
                 "move": {
@@ -4779,7 +4779,7 @@
                 "uci": "e8d7",
                 "san": "Kd7",
                 "lan": "Ke8-d7",
-                "fen": "r6r/3k4/8/8/8/8/8/R3K2R w KQ - 1 2"
+                "fen": "r6r/3k4/8/8/8/8/8/R3K2R w KQ - 3 3"
             },
             {
                 "move": {
@@ -4793,7 +4793,7 @@
                 "uci": "a8d8",
                 "san": "Rd8",
                 "lan": "Ra8-d8",
-                "fen": "3rk2r/8/8/8/8/8/8/R3K2R w KQk - 1 2"
+                "fen": "3rk2r/8/8/8/8/8/8/R3K2R w KQk - 3 3"
             },
             {
                 "move": {
@@ -4807,7 +4807,7 @@
                 "uci": "a8c8",
                 "san": "Rc8",
                 "lan": "Ra8-c8",
-                "fen": "2r1k2r/8/8/8/8/8/8/R3K2R w KQk - 1 2"
+                "fen": "2r1k2r/8/8/8/8/8/8/R3K2R w KQk - 3 3"
             },
             {
                 "move": {
@@ -4821,7 +4821,7 @@
                 "uci": "a8b8",
                 "san": "Rb8",
                 "lan": "Ra8-b8",
-                "fen": "1r2k2r/8/8/8/8/8/8/R3K2R w KQk - 1 2"
+                "fen": "1r2k2r/8/8/8/8/8/8/R3K2R w KQk - 3 3"
             },
             {
                 "move": {
@@ -4835,7 +4835,7 @@
                 "uci": "a8a7",
                 "san": "Ra7",
                 "lan": "Ra8-a7",
-                "fen": "4k2r/r7/8/8/8/8/8/R3K2R w KQk - 1 2"
+                "fen": "4k2r/r7/8/8/8/8/8/R3K2R w KQk - 3 3"
             },
             {
                 "move": {
@@ -4849,7 +4849,7 @@
                 "uci": "a8a6",
                 "san": "Ra6",
                 "lan": "Ra8-a6",
-                "fen": "4k2r/8/r7/8/8/8/8/R3K2R w KQk - 1 2"
+                "fen": "4k2r/8/r7/8/8/8/8/R3K2R w KQk - 3 3"
             },
             {
                 "move": {
@@ -4863,7 +4863,7 @@
                 "uci": "a8a5",
                 "san": "Ra5",
                 "lan": "Ra8-a5",
-                "fen": "4k2r/8/8/r7/8/8/8/R3K2R w KQk - 1 2"
+                "fen": "4k2r/8/8/r7/8/8/8/R3K2R w KQk - 3 3"
             },
             {
                 "move": {
@@ -4877,7 +4877,7 @@
                 "uci": "a8a4",
                 "san": "Ra4",
                 "lan": "Ra8-a4",
-                "fen": "4k2r/8/8/8/r7/8/8/R3K2R w KQk - 1 2"
+                "fen": "4k2r/8/8/8/r7/8/8/R3K2R w KQk - 3 3"
             },
             {
                 "move": {
@@ -4891,7 +4891,7 @@
                 "uci": "a8a3",
                 "san": "Ra3",
                 "lan": "Ra8-a3",
-                "fen": "4k2r/8/8/8/8/r7/8/R3K2R w KQk - 1 2"
+                "fen": "4k2r/8/8/8/8/r7/8/R3K2R w KQk - 3 3"
             },
             {
                 "move": {
@@ -4905,7 +4905,7 @@
                 "uci": "a8a2",
                 "san": "Ra2",
                 "lan": "Ra8-a2",
-                "fen": "4k2r/8/8/8/8/8/r7/R3K2R w KQk - 1 2"
+                "fen": "4k2r/8/8/8/8/8/r7/R3K2R w KQk - 3 3"
             },
             {
                 "move": {
@@ -4919,7 +4919,7 @@
                 "uci": "a8a1",
                 "san": "Rxa1+",
                 "lan": "Ra8xa1+",
-                "fen": "4k2r/8/8/8/8/8/8/r3K2R w Kk - 0 2"
+                "fen": "4k2r/8/8/8/8/8/8/r3K2R w Kk - 0 3"
             },
             {
                 "move": {
@@ -4933,7 +4933,7 @@
                 "uci": "e8g8",
                 "san": "O-O",
                 "lan": "O-O",
-                "fen": "r4rk1/8/8/8/8/8/8/R3K2R w KQ - 1 2"
+                "fen": "r4rk1/8/8/8/8/8/8/R3K2R w KQ - 3 3"
             },
             {
                 "move": {
@@ -4947,12 +4947,12 @@
                 "uci": "e8c8",
                 "san": "O-O-O",
                 "lan": "O-O-O",
-                "fen": "2kr3r/8/8/8/8/8/8/R3K2R w KQ - 1 2"
+                "fen": "2kr3r/8/8/8/8/8/8/R3K2R w KQ - 3 3"
             }
         ]
     },
     {
-        "fen": "r3k2r/8/8/8/8/8/8/R1B1KB1R w KQkq - 0 1",
+        "fen": "r3k2r/8/8/8/8/8/8/R1B1KB1R w KQkq - 2 2",
         "description": "White king castling blocked by own pieces",
         "moves": [
             {
@@ -4967,7 +4967,7 @@
                 "uci": "h1h8",
                 "san": "Rxh8+",
                 "lan": "Rh1xh8+",
-                "fen": "r3k2R/8/8/8/8/8/8/R1B1KB2 b Qq - 0 1"
+                "fen": "r3k2R/8/8/8/8/8/8/R1B1KB2 b Qq - 0 2"
             },
             {
                 "move": {
@@ -4981,7 +4981,7 @@
                 "uci": "h1h7",
                 "san": "Rh7",
                 "lan": "Rh1-h7",
-                "fen": "r3k2r/7R/8/8/8/8/8/R1B1KB2 b Qkq - 1 1"
+                "fen": "r3k2r/7R/8/8/8/8/8/R1B1KB2 b Qkq - 3 2"
             },
             {
                 "move": {
@@ -4995,7 +4995,7 @@
                 "uci": "h1h6",
                 "san": "Rh6",
                 "lan": "Rh1-h6",
-                "fen": "r3k2r/8/7R/8/8/8/8/R1B1KB2 b Qkq - 1 1"
+                "fen": "r3k2r/8/7R/8/8/8/8/R1B1KB2 b Qkq - 3 2"
             },
             {
                 "move": {
@@ -5009,7 +5009,7 @@
                 "uci": "h1h5",
                 "san": "Rh5",
                 "lan": "Rh1-h5",
-                "fen": "r3k2r/8/8/7R/8/8/8/R1B1KB2 b Qkq - 1 1"
+                "fen": "r3k2r/8/8/7R/8/8/8/R1B1KB2 b Qkq - 3 2"
             },
             {
                 "move": {
@@ -5023,7 +5023,7 @@
                 "uci": "h1h4",
                 "san": "Rh4",
                 "lan": "Rh1-h4",
-                "fen": "r3k2r/8/8/8/7R/8/8/R1B1KB2 b Qkq - 1 1"
+                "fen": "r3k2r/8/8/8/7R/8/8/R1B1KB2 b Qkq - 3 2"
             },
             {
                 "move": {
@@ -5037,7 +5037,7 @@
                 "uci": "h1h3",
                 "san": "Rh3",
                 "lan": "Rh1-h3",
-                "fen": "r3k2r/8/8/8/8/7R/8/R1B1KB2 b Qkq - 1 1"
+                "fen": "r3k2r/8/8/8/8/7R/8/R1B1KB2 b Qkq - 3 2"
             },
             {
                 "move": {
@@ -5051,7 +5051,7 @@
                 "uci": "h1h2",
                 "san": "Rh2",
                 "lan": "Rh1-h2",
-                "fen": "r3k2r/8/8/8/8/8/7R/R1B1KB2 b Qkq - 1 1"
+                "fen": "r3k2r/8/8/8/8/8/7R/R1B1KB2 b Qkq - 3 2"
             },
             {
                 "move": {
@@ -5065,7 +5065,7 @@
                 "uci": "h1g1",
                 "san": "Rg1",
                 "lan": "Rh1-g1",
-                "fen": "r3k2r/8/8/8/8/8/8/R1B1KBR1 b Qkq - 1 1"
+                "fen": "r3k2r/8/8/8/8/8/8/R1B1KBR1 b Qkq - 3 2"
             },
             {
                 "move": {
@@ -5079,7 +5079,7 @@
                 "uci": "f1a6",
                 "san": "Ba6",
                 "lan": "Bf1-a6",
-                "fen": "r3k2r/8/B7/8/8/8/8/R1B1K2R b KQkq - 1 1"
+                "fen": "r3k2r/8/B7/8/8/8/8/R1B1K2R b KQkq - 3 2"
             },
             {
                 "move": {
@@ -5093,7 +5093,7 @@
                 "uci": "f1b5",
                 "san": "Bb5+",
                 "lan": "Bf1-b5+",
-                "fen": "r3k2r/8/8/1B6/8/8/8/R1B1K2R b KQkq - 1 1"
+                "fen": "r3k2r/8/8/1B6/8/8/8/R1B1K2R b KQkq - 3 2"
             },
             {
                 "move": {
@@ -5107,7 +5107,7 @@
                 "uci": "f1c4",
                 "san": "Bc4",
                 "lan": "Bf1-c4",
-                "fen": "r3k2r/8/8/8/2B5/8/8/R1B1K2R b KQkq - 1 1"
+                "fen": "r3k2r/8/8/8/2B5/8/8/R1B1K2R b KQkq - 3 2"
             },
             {
                 "move": {
@@ -5121,7 +5121,7 @@
                 "uci": "f1h3",
                 "san": "Bh3",
                 "lan": "Bf1-h3",
-                "fen": "r3k2r/8/8/8/8/7B/8/R1B1K2R b KQkq - 1 1"
+                "fen": "r3k2r/8/8/8/8/7B/8/R1B1K2R b KQkq - 3 2"
             },
             {
                 "move": {
@@ -5135,7 +5135,7 @@
                 "uci": "f1d3",
                 "san": "Bd3",
                 "lan": "Bf1-d3",
-                "fen": "r3k2r/8/8/8/8/3B4/8/R1B1K2R b KQkq - 1 1"
+                "fen": "r3k2r/8/8/8/8/3B4/8/R1B1K2R b KQkq - 3 2"
             },
             {
                 "move": {
@@ -5149,7 +5149,7 @@
                 "uci": "f1g2",
                 "san": "Bg2",
                 "lan": "Bf1-g2",
-                "fen": "r3k2r/8/8/8/8/8/6B1/R1B1K2R b KQkq - 1 1"
+                "fen": "r3k2r/8/8/8/8/8/6B1/R1B1K2R b KQkq - 3 2"
             },
             {
                 "move": {
@@ -5163,7 +5163,7 @@
                 "uci": "f1e2",
                 "san": "Be2",
                 "lan": "Bf1-e2",
-                "fen": "r3k2r/8/8/8/8/8/4B3/R1B1K2R b KQkq - 1 1"
+                "fen": "r3k2r/8/8/8/8/8/4B3/R1B1K2R b KQkq - 3 2"
             },
             {
                 "move": {
@@ -5177,7 +5177,7 @@
                 "uci": "e1f2",
                 "san": "Kf2",
                 "lan": "Ke1-f2",
-                "fen": "r3k2r/8/8/8/8/8/5K2/R1B2B1R b kq - 1 1"
+                "fen": "r3k2r/8/8/8/8/8/5K2/R1B2B1R b kq - 3 2"
             },
             {
                 "move": {
@@ -5191,7 +5191,7 @@
                 "uci": "e1e2",
                 "san": "Ke2",
                 "lan": "Ke1-e2",
-                "fen": "r3k2r/8/8/8/8/8/4K3/R1B2B1R b kq - 1 1"
+                "fen": "r3k2r/8/8/8/8/8/4K3/R1B2B1R b kq - 3 2"
             },
             {
                 "move": {
@@ -5205,7 +5205,7 @@
                 "uci": "e1d2",
                 "san": "Kd2",
                 "lan": "Ke1-d2",
-                "fen": "r3k2r/8/8/8/8/8/3K4/R1B2B1R b kq - 1 1"
+                "fen": "r3k2r/8/8/8/8/8/3K4/R1B2B1R b kq - 3 2"
             },
             {
                 "move": {
@@ -5219,7 +5219,7 @@
                 "uci": "e1d1",
                 "san": "Kd1",
                 "lan": "Ke1-d1",
-                "fen": "r3k2r/8/8/8/8/8/8/R1BK1B1R b kq - 1 1"
+                "fen": "r3k2r/8/8/8/8/8/8/R1BK1B1R b kq - 3 2"
             },
             {
                 "move": {
@@ -5233,7 +5233,7 @@
                 "uci": "c1h6",
                 "san": "Bh6",
                 "lan": "Bc1-h6",
-                "fen": "r3k2r/8/7B/8/8/8/8/R3KB1R b KQkq - 1 1"
+                "fen": "r3k2r/8/7B/8/8/8/8/R3KB1R b KQkq - 3 2"
             },
             {
                 "move": {
@@ -5247,7 +5247,7 @@
                 "uci": "c1g5",
                 "san": "Bg5",
                 "lan": "Bc1-g5",
-                "fen": "r3k2r/8/8/6B1/8/8/8/R3KB1R b KQkq - 1 1"
+                "fen": "r3k2r/8/8/6B1/8/8/8/R3KB1R b KQkq - 3 2"
             },
             {
                 "move": {
@@ -5261,7 +5261,7 @@
                 "uci": "c1f4",
                 "san": "Bf4",
                 "lan": "Bc1-f4",
-                "fen": "r3k2r/8/8/8/5B2/8/8/R3KB1R b KQkq - 1 1"
+                "fen": "r3k2r/8/8/8/5B2/8/8/R3KB1R b KQkq - 3 2"
             },
             {
                 "move": {
@@ -5275,7 +5275,7 @@
                 "uci": "c1e3",
                 "san": "Be3",
                 "lan": "Bc1-e3",
-                "fen": "r3k2r/8/8/8/8/4B3/8/R3KB1R b KQkq - 1 1"
+                "fen": "r3k2r/8/8/8/8/4B3/8/R3KB1R b KQkq - 3 2"
             },
             {
                 "move": {
@@ -5289,7 +5289,7 @@
                 "uci": "c1a3",
                 "san": "Ba3",
                 "lan": "Bc1-a3",
-                "fen": "r3k2r/8/8/8/8/B7/8/R3KB1R b KQkq - 1 1"
+                "fen": "r3k2r/8/8/8/8/B7/8/R3KB1R b KQkq - 3 2"
             },
             {
                 "move": {
@@ -5303,7 +5303,7 @@
                 "uci": "c1d2",
                 "san": "Bd2",
                 "lan": "Bc1-d2",
-                "fen": "r3k2r/8/8/8/8/8/3B4/R3KB1R b KQkq - 1 1"
+                "fen": "r3k2r/8/8/8/8/8/3B4/R3KB1R b KQkq - 3 2"
             },
             {
                 "move": {
@@ -5317,7 +5317,7 @@
                 "uci": "c1b2",
                 "san": "Bb2",
                 "lan": "Bc1-b2",
-                "fen": "r3k2r/8/8/8/8/8/1B6/R3KB1R b KQkq - 1 1"
+                "fen": "r3k2r/8/8/8/8/8/1B6/R3KB1R b KQkq - 3 2"
             },
             {
                 "move": {
@@ -5331,7 +5331,7 @@
                 "uci": "a1a8",
                 "san": "Rxa8+",
                 "lan": "Ra1xa8+",
-                "fen": "R3k2r/8/8/8/8/8/8/2B1KB1R b Kk - 0 1"
+                "fen": "R3k2r/8/8/8/8/8/8/2B1KB1R b Kk - 0 2"
             },
             {
                 "move": {
@@ -5345,7 +5345,7 @@
                 "uci": "a1a7",
                 "san": "Ra7",
                 "lan": "Ra1-a7",
-                "fen": "r3k2r/R7/8/8/8/8/8/2B1KB1R b Kkq - 1 1"
+                "fen": "r3k2r/R7/8/8/8/8/8/2B1KB1R b Kkq - 3 2"
             },
             {
                 "move": {
@@ -5359,7 +5359,7 @@
                 "uci": "a1a6",
                 "san": "Ra6",
                 "lan": "Ra1-a6",
-                "fen": "r3k2r/8/R7/8/8/8/8/2B1KB1R b Kkq - 1 1"
+                "fen": "r3k2r/8/R7/8/8/8/8/2B1KB1R b Kkq - 3 2"
             },
             {
                 "move": {
@@ -5373,7 +5373,7 @@
                 "uci": "a1a5",
                 "san": "Ra5",
                 "lan": "Ra1-a5",
-                "fen": "r3k2r/8/8/R7/8/8/8/2B1KB1R b Kkq - 1 1"
+                "fen": "r3k2r/8/8/R7/8/8/8/2B1KB1R b Kkq - 3 2"
             },
             {
                 "move": {
@@ -5387,7 +5387,7 @@
                 "uci": "a1a4",
                 "san": "Ra4",
                 "lan": "Ra1-a4",
-                "fen": "r3k2r/8/8/8/R7/8/8/2B1KB1R b Kkq - 1 1"
+                "fen": "r3k2r/8/8/8/R7/8/8/2B1KB1R b Kkq - 3 2"
             },
             {
                 "move": {
@@ -5401,7 +5401,7 @@
                 "uci": "a1a3",
                 "san": "Ra3",
                 "lan": "Ra1-a3",
-                "fen": "r3k2r/8/8/8/8/R7/8/2B1KB1R b Kkq - 1 1"
+                "fen": "r3k2r/8/8/8/8/R7/8/2B1KB1R b Kkq - 3 2"
             },
             {
                 "move": {
@@ -5415,7 +5415,7 @@
                 "uci": "a1a2",
                 "san": "Ra2",
                 "lan": "Ra1-a2",
-                "fen": "r3k2r/8/8/8/8/8/R7/2B1KB1R b Kkq - 1 1"
+                "fen": "r3k2r/8/8/8/8/8/R7/2B1KB1R b Kkq - 3 2"
             },
             {
                 "move": {
@@ -5429,12 +5429,12 @@
                 "uci": "a1b1",
                 "san": "Rb1",
                 "lan": "Ra1-b1",
-                "fen": "r3k2r/8/8/8/8/8/8/1RB1KB1R b Kkq - 1 1"
+                "fen": "r3k2r/8/8/8/8/8/8/1RB1KB1R b Kkq - 3 2"
             }
         ]
     },
     {
-        "fen": "r3k2r/8/8/8/8/8/8/R1B1KB1R w KQkq - 0 1",
+        "fen": "r3k2r/8/8/8/8/8/8/R1B1KB1R w KQkq - 2 2",
         "description": "Black king castling blocked by white pieces attacking king traveled squares",
         "moves": [
             {
@@ -5449,7 +5449,7 @@
                 "uci": "h1h8",
                 "san": "Rxh8+",
                 "lan": "Rh1xh8+",
-                "fen": "r3k2R/8/8/8/8/8/8/R1B1KB2 b Qq - 0 1"
+                "fen": "r3k2R/8/8/8/8/8/8/R1B1KB2 b Qq - 0 2"
             },
             {
                 "move": {
@@ -5463,7 +5463,7 @@
                 "uci": "h1h7",
                 "san": "Rh7",
                 "lan": "Rh1-h7",
-                "fen": "r3k2r/7R/8/8/8/8/8/R1B1KB2 b Qkq - 1 1"
+                "fen": "r3k2r/7R/8/8/8/8/8/R1B1KB2 b Qkq - 3 2"
             },
             {
                 "move": {
@@ -5477,7 +5477,7 @@
                 "uci": "h1h6",
                 "san": "Rh6",
                 "lan": "Rh1-h6",
-                "fen": "r3k2r/8/7R/8/8/8/8/R1B1KB2 b Qkq - 1 1"
+                "fen": "r3k2r/8/7R/8/8/8/8/R1B1KB2 b Qkq - 3 2"
             },
             {
                 "move": {
@@ -5491,7 +5491,7 @@
                 "uci": "h1h5",
                 "san": "Rh5",
                 "lan": "Rh1-h5",
-                "fen": "r3k2r/8/8/7R/8/8/8/R1B1KB2 b Qkq - 1 1"
+                "fen": "r3k2r/8/8/7R/8/8/8/R1B1KB2 b Qkq - 3 2"
             },
             {
                 "move": {
@@ -5505,7 +5505,7 @@
                 "uci": "h1h4",
                 "san": "Rh4",
                 "lan": "Rh1-h4",
-                "fen": "r3k2r/8/8/8/7R/8/8/R1B1KB2 b Qkq - 1 1"
+                "fen": "r3k2r/8/8/8/7R/8/8/R1B1KB2 b Qkq - 3 2"
             },
             {
                 "move": {
@@ -5519,7 +5519,7 @@
                 "uci": "h1h3",
                 "san": "Rh3",
                 "lan": "Rh1-h3",
-                "fen": "r3k2r/8/8/8/8/7R/8/R1B1KB2 b Qkq - 1 1"
+                "fen": "r3k2r/8/8/8/8/7R/8/R1B1KB2 b Qkq - 3 2"
             },
             {
                 "move": {
@@ -5533,7 +5533,7 @@
                 "uci": "h1h2",
                 "san": "Rh2",
                 "lan": "Rh1-h2",
-                "fen": "r3k2r/8/8/8/8/8/7R/R1B1KB2 b Qkq - 1 1"
+                "fen": "r3k2r/8/8/8/8/8/7R/R1B1KB2 b Qkq - 3 2"
             },
             {
                 "move": {
@@ -5547,7 +5547,7 @@
                 "uci": "h1g1",
                 "san": "Rg1",
                 "lan": "Rh1-g1",
-                "fen": "r3k2r/8/8/8/8/8/8/R1B1KBR1 b Qkq - 1 1"
+                "fen": "r3k2r/8/8/8/8/8/8/R1B1KBR1 b Qkq - 3 2"
             },
             {
                 "move": {
@@ -5561,7 +5561,7 @@
                 "uci": "f1a6",
                 "san": "Ba6",
                 "lan": "Bf1-a6",
-                "fen": "r3k2r/8/B7/8/8/8/8/R1B1K2R b KQkq - 1 1"
+                "fen": "r3k2r/8/B7/8/8/8/8/R1B1K2R b KQkq - 3 2"
             },
             {
                 "move": {
@@ -5575,7 +5575,7 @@
                 "uci": "f1b5",
                 "san": "Bb5+",
                 "lan": "Bf1-b5+",
-                "fen": "r3k2r/8/8/1B6/8/8/8/R1B1K2R b KQkq - 1 1"
+                "fen": "r3k2r/8/8/1B6/8/8/8/R1B1K2R b KQkq - 3 2"
             },
             {
                 "move": {
@@ -5589,7 +5589,7 @@
                 "uci": "f1c4",
                 "san": "Bc4",
                 "lan": "Bf1-c4",
-                "fen": "r3k2r/8/8/8/2B5/8/8/R1B1K2R b KQkq - 1 1"
+                "fen": "r3k2r/8/8/8/2B5/8/8/R1B1K2R b KQkq - 3 2"
             },
             {
                 "move": {
@@ -5603,7 +5603,7 @@
                 "uci": "f1h3",
                 "san": "Bh3",
                 "lan": "Bf1-h3",
-                "fen": "r3k2r/8/8/8/8/7B/8/R1B1K2R b KQkq - 1 1"
+                "fen": "r3k2r/8/8/8/8/7B/8/R1B1K2R b KQkq - 3 2"
             },
             {
                 "move": {
@@ -5617,7 +5617,7 @@
                 "uci": "f1d3",
                 "san": "Bd3",
                 "lan": "Bf1-d3",
-                "fen": "r3k2r/8/8/8/8/3B4/8/R1B1K2R b KQkq - 1 1"
+                "fen": "r3k2r/8/8/8/8/3B4/8/R1B1K2R b KQkq - 3 2"
             },
             {
                 "move": {
@@ -5631,7 +5631,7 @@
                 "uci": "f1g2",
                 "san": "Bg2",
                 "lan": "Bf1-g2",
-                "fen": "r3k2r/8/8/8/8/8/6B1/R1B1K2R b KQkq - 1 1"
+                "fen": "r3k2r/8/8/8/8/8/6B1/R1B1K2R b KQkq - 3 2"
             },
             {
                 "move": {
@@ -5645,7 +5645,7 @@
                 "uci": "f1e2",
                 "san": "Be2",
                 "lan": "Bf1-e2",
-                "fen": "r3k2r/8/8/8/8/8/4B3/R1B1K2R b KQkq - 1 1"
+                "fen": "r3k2r/8/8/8/8/8/4B3/R1B1K2R b KQkq - 3 2"
             },
             {
                 "move": {
@@ -5659,7 +5659,7 @@
                 "uci": "e1f2",
                 "san": "Kf2",
                 "lan": "Ke1-f2",
-                "fen": "r3k2r/8/8/8/8/8/5K2/R1B2B1R b kq - 1 1"
+                "fen": "r3k2r/8/8/8/8/8/5K2/R1B2B1R b kq - 3 2"
             },
             {
                 "move": {
@@ -5673,7 +5673,7 @@
                 "uci": "e1e2",
                 "san": "Ke2",
                 "lan": "Ke1-e2",
-                "fen": "r3k2r/8/8/8/8/8/4K3/R1B2B1R b kq - 1 1"
+                "fen": "r3k2r/8/8/8/8/8/4K3/R1B2B1R b kq - 3 2"
             },
             {
                 "move": {
@@ -5687,7 +5687,7 @@
                 "uci": "e1d2",
                 "san": "Kd2",
                 "lan": "Ke1-d2",
-                "fen": "r3k2r/8/8/8/8/8/3K4/R1B2B1R b kq - 1 1"
+                "fen": "r3k2r/8/8/8/8/8/3K4/R1B2B1R b kq - 3 2"
             },
             {
                 "move": {
@@ -5701,7 +5701,7 @@
                 "uci": "e1d1",
                 "san": "Kd1",
                 "lan": "Ke1-d1",
-                "fen": "r3k2r/8/8/8/8/8/8/R1BK1B1R b kq - 1 1"
+                "fen": "r3k2r/8/8/8/8/8/8/R1BK1B1R b kq - 3 2"
             },
             {
                 "move": {
@@ -5715,7 +5715,7 @@
                 "uci": "c1h6",
                 "san": "Bh6",
                 "lan": "Bc1-h6",
-                "fen": "r3k2r/8/7B/8/8/8/8/R3KB1R b KQkq - 1 1"
+                "fen": "r3k2r/8/7B/8/8/8/8/R3KB1R b KQkq - 3 2"
             },
             {
                 "move": {
@@ -5729,7 +5729,7 @@
                 "uci": "c1g5",
                 "san": "Bg5",
                 "lan": "Bc1-g5",
-                "fen": "r3k2r/8/8/6B1/8/8/8/R3KB1R b KQkq - 1 1"
+                "fen": "r3k2r/8/8/6B1/8/8/8/R3KB1R b KQkq - 3 2"
             },
             {
                 "move": {
@@ -5743,7 +5743,7 @@
                 "uci": "c1f4",
                 "san": "Bf4",
                 "lan": "Bc1-f4",
-                "fen": "r3k2r/8/8/8/5B2/8/8/R3KB1R b KQkq - 1 1"
+                "fen": "r3k2r/8/8/8/5B2/8/8/R3KB1R b KQkq - 3 2"
             },
             {
                 "move": {
@@ -5757,7 +5757,7 @@
                 "uci": "c1e3",
                 "san": "Be3",
                 "lan": "Bc1-e3",
-                "fen": "r3k2r/8/8/8/8/4B3/8/R3KB1R b KQkq - 1 1"
+                "fen": "r3k2r/8/8/8/8/4B3/8/R3KB1R b KQkq - 3 2"
             },
             {
                 "move": {
@@ -5771,7 +5771,7 @@
                 "uci": "c1a3",
                 "san": "Ba3",
                 "lan": "Bc1-a3",
-                "fen": "r3k2r/8/8/8/8/B7/8/R3KB1R b KQkq - 1 1"
+                "fen": "r3k2r/8/8/8/8/B7/8/R3KB1R b KQkq - 3 2"
             },
             {
                 "move": {
@@ -5785,7 +5785,7 @@
                 "uci": "c1d2",
                 "san": "Bd2",
                 "lan": "Bc1-d2",
-                "fen": "r3k2r/8/8/8/8/8/3B4/R3KB1R b KQkq - 1 1"
+                "fen": "r3k2r/8/8/8/8/8/3B4/R3KB1R b KQkq - 3 2"
             },
             {
                 "move": {
@@ -5799,7 +5799,7 @@
                 "uci": "c1b2",
                 "san": "Bb2",
                 "lan": "Bc1-b2",
-                "fen": "r3k2r/8/8/8/8/8/1B6/R3KB1R b KQkq - 1 1"
+                "fen": "r3k2r/8/8/8/8/8/1B6/R3KB1R b KQkq - 3 2"
             },
             {
                 "move": {
@@ -5813,7 +5813,7 @@
                 "uci": "a1a8",
                 "san": "Rxa8+",
                 "lan": "Ra1xa8+",
-                "fen": "R3k2r/8/8/8/8/8/8/2B1KB1R b Kk - 0 1"
+                "fen": "R3k2r/8/8/8/8/8/8/2B1KB1R b Kk - 0 2"
             },
             {
                 "move": {
@@ -5827,7 +5827,7 @@
                 "uci": "a1a7",
                 "san": "Ra7",
                 "lan": "Ra1-a7",
-                "fen": "r3k2r/R7/8/8/8/8/8/2B1KB1R b Kkq - 1 1"
+                "fen": "r3k2r/R7/8/8/8/8/8/2B1KB1R b Kkq - 3 2"
             },
             {
                 "move": {
@@ -5841,7 +5841,7 @@
                 "uci": "a1a6",
                 "san": "Ra6",
                 "lan": "Ra1-a6",
-                "fen": "r3k2r/8/R7/8/8/8/8/2B1KB1R b Kkq - 1 1"
+                "fen": "r3k2r/8/R7/8/8/8/8/2B1KB1R b Kkq - 3 2"
             },
             {
                 "move": {
@@ -5855,7 +5855,7 @@
                 "uci": "a1a5",
                 "san": "Ra5",
                 "lan": "Ra1-a5",
-                "fen": "r3k2r/8/8/R7/8/8/8/2B1KB1R b Kkq - 1 1"
+                "fen": "r3k2r/8/8/R7/8/8/8/2B1KB1R b Kkq - 3 2"
             },
             {
                 "move": {
@@ -5869,7 +5869,7 @@
                 "uci": "a1a4",
                 "san": "Ra4",
                 "lan": "Ra1-a4",
-                "fen": "r3k2r/8/8/8/R7/8/8/2B1KB1R b Kkq - 1 1"
+                "fen": "r3k2r/8/8/8/R7/8/8/2B1KB1R b Kkq - 3 2"
             },
             {
                 "move": {
@@ -5883,7 +5883,7 @@
                 "uci": "a1a3",
                 "san": "Ra3",
                 "lan": "Ra1-a3",
-                "fen": "r3k2r/8/8/8/8/R7/8/2B1KB1R b Kkq - 1 1"
+                "fen": "r3k2r/8/8/8/8/R7/8/2B1KB1R b Kkq - 3 2"
             },
             {
                 "move": {
@@ -5897,7 +5897,7 @@
                 "uci": "a1a2",
                 "san": "Ra2",
                 "lan": "Ra1-a2",
-                "fen": "r3k2r/8/8/8/8/8/R7/2B1KB1R b Kkq - 1 1"
+                "fen": "r3k2r/8/8/8/8/8/R7/2B1KB1R b Kkq - 3 2"
             },
             {
                 "move": {
@@ -5911,12 +5911,12 @@
                 "uci": "a1b1",
                 "san": "Rb1",
                 "lan": "Ra1-b1",
-                "fen": "r3k2r/8/8/8/8/8/8/1RB1KB1R b Kkq - 1 1"
+                "fen": "r3k2r/8/8/8/8/8/8/1RB1KB1R b Kkq - 3 2"
             }
         ]
     },
     {
-        "fen": "4k3/8/8/8/8/7B/8/4K3 b - - 0 1",
+        "fen": "4k3/8/8/8/8/7B/8/4K3 b - - 2 2",
         "description": "Black king should not move into check",
         "moves": [
             {
@@ -5931,7 +5931,7 @@
                 "uci": "e8f8",
                 "san": "Kf8",
                 "lan": "Ke8-f8",
-                "fen": "5k2/8/8/8/8/7B/8/4K3 w - - 1 2"
+                "fen": "5k2/8/8/8/8/7B/8/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -5945,7 +5945,7 @@
                 "uci": "e8d8",
                 "san": "Kd8",
                 "lan": "Ke8-d8",
-                "fen": "3k4/8/8/8/8/7B/8/4K3 w - - 1 2"
+                "fen": "3k4/8/8/8/8/7B/8/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -5959,7 +5959,7 @@
                 "uci": "e8f7",
                 "san": "Kf7",
                 "lan": "Ke8-f7",
-                "fen": "8/5k2/8/8/8/7B/8/4K3 w - - 1 2"
+                "fen": "8/5k2/8/8/8/7B/8/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -5973,12 +5973,12 @@
                 "uci": "e8e7",
                 "san": "Ke7",
                 "lan": "Ke8-e7",
-                "fen": "8/4k3/8/8/8/7B/8/4K3 w - - 1 2"
+                "fen": "8/4k3/8/8/8/7B/8/4K3 w - - 3 3"
             }
         ]
     },
     {
-        "fen": "4k3/p7/8/8/4R3/8/8/4K3 b - - 0 1",
+        "fen": "4k3/p7/8/8/4R3/8/8/4K3 b - - 2 2",
         "description": "Black should not remains in check",
         "moves": [
             {
@@ -5993,7 +5993,7 @@
                 "uci": "e8f8",
                 "san": "Kf8",
                 "lan": "Ke8-f8",
-                "fen": "5k2/p7/8/8/4R3/8/8/4K3 w - - 1 2"
+                "fen": "5k2/p7/8/8/4R3/8/8/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -6007,7 +6007,7 @@
                 "uci": "e8d8",
                 "san": "Kd8",
                 "lan": "Ke8-d8",
-                "fen": "3k4/p7/8/8/4R3/8/8/4K3 w - - 1 2"
+                "fen": "3k4/p7/8/8/4R3/8/8/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -6021,7 +6021,7 @@
                 "uci": "e8f7",
                 "san": "Kf7",
                 "lan": "Ke8-f7",
-                "fen": "8/p4k2/8/8/4R3/8/8/4K3 w - - 1 2"
+                "fen": "8/p4k2/8/8/4R3/8/8/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -6035,12 +6035,12 @@
                 "uci": "e8d7",
                 "san": "Kd7",
                 "lan": "Ke8-d7",
-                "fen": "8/p2k4/8/8/4R3/8/8/4K3 w - - 1 2"
+                "fen": "8/p2k4/8/8/4R3/8/8/4K3 w - - 3 3"
             }
         ]
     },
     {
-        "fen": "1r2k3/8/p7/qB6/b7/n7/8/4K3 w - - 0 1",
+        "fen": "1r2k3/8/p7/qB6/b7/n7/8/4K3 w - - 2 2",
         "description": "Black should not remains in check, lots of options to capture",
         "moves": [
             {
@@ -6055,7 +6055,7 @@
                 "uci": "e1f2",
                 "san": "Kf2+",
                 "lan": "Ke1-f2+",
-                "fen": "1r2k3/8/p7/qB6/b7/n7/5K2/8 b - - 1 1"
+                "fen": "1r2k3/8/p7/qB6/b7/n7/5K2/8 b - - 3 2"
             },
             {
                 "move": {
@@ -6069,7 +6069,7 @@
                 "uci": "e1e2",
                 "san": "Ke2+",
                 "lan": "Ke1-e2+",
-                "fen": "1r2k3/8/p7/qB6/b7/n7/4K3/8 b - - 1 1"
+                "fen": "1r2k3/8/p7/qB6/b7/n7/4K3/8 b - - 3 2"
             },
             {
                 "move": {
@@ -6083,12 +6083,12 @@
                 "uci": "e1f1",
                 "san": "Kf1+",
                 "lan": "Ke1-f1+",
-                "fen": "1r2k3/8/p7/qB6/b7/n7/8/5K2 b - - 1 1"
+                "fen": "1r2k3/8/p7/qB6/b7/n7/8/5K2 b - - 3 2"
             }
         ]
     },
     {
-        "fen": "7k/2R5/8/1q2NB2/6Q1/8/2PP4/5K2 w - - 0 1",
+        "fen": "7k/2R5/8/1q2NB2/6Q1/8/2PP4/5K2 w - - 2 2",
         "description": "White should not remains in check, lots of options to block",
         "moves": [
             {
@@ -6103,7 +6103,7 @@
                 "uci": "f1g2",
                 "san": "Kg2",
                 "lan": "Kf1-g2",
-                "fen": "7k/2R5/8/1q2NB2/6Q1/8/2PP2K1/8 b - - 1 1"
+                "fen": "7k/2R5/8/1q2NB2/6Q1/8/2PP2K1/8 b - - 3 2"
             },
             {
                 "move": {
@@ -6117,7 +6117,7 @@
                 "uci": "f1f2",
                 "san": "Kf2",
                 "lan": "Kf1-f2",
-                "fen": "7k/2R5/8/1q2NB2/6Q1/8/2PP1K2/8 b - - 1 1"
+                "fen": "7k/2R5/8/1q2NB2/6Q1/8/2PP1K2/8 b - - 3 2"
             },
             {
                 "move": {
@@ -6131,7 +6131,7 @@
                 "uci": "f1g1",
                 "san": "Kg1",
                 "lan": "Kf1-g1",
-                "fen": "7k/2R5/8/1q2NB2/6Q1/8/2PP4/6K1 b - - 1 1"
+                "fen": "7k/2R5/8/1q2NB2/6Q1/8/2PP4/6K1 b - - 3 2"
             },
             {
                 "move": {
@@ -6145,7 +6145,7 @@
                 "uci": "f1e1",
                 "san": "Ke1",
                 "lan": "Kf1-e1",
-                "fen": "7k/2R5/8/1q2NB2/6Q1/8/2PP4/4K3 b - - 1 1"
+                "fen": "7k/2R5/8/1q2NB2/6Q1/8/2PP4/4K3 b - - 3 2"
             },
             {
                 "move": {
@@ -6159,7 +6159,7 @@
                 "uci": "c7c4",
                 "san": "Rc4",
                 "lan": "Rc7-c4",
-                "fen": "7k/8/8/1q2NB2/2R3Q1/8/2PP4/5K2 b - - 1 1"
+                "fen": "7k/8/8/1q2NB2/2R3Q1/8/2PP4/5K2 b - - 3 2"
             },
             {
                 "move": {
@@ -6173,7 +6173,7 @@
                 "uci": "f5d3",
                 "san": "Bd3",
                 "lan": "Bf5-d3",
-                "fen": "7k/2R5/8/1q2N3/6Q1/3B4/2PP4/5K2 b - - 1 1"
+                "fen": "7k/2R5/8/1q2N3/6Q1/3B4/2PP4/5K2 b - - 3 2"
             },
             {
                 "move": {
@@ -6187,7 +6187,7 @@
                 "uci": "e5c4",
                 "san": "Nc4",
                 "lan": "Ne5-c4",
-                "fen": "7k/2R5/8/1q3B2/2N3Q1/8/2PP4/5K2 b - - 1 1"
+                "fen": "7k/2R5/8/1q3B2/2N3Q1/8/2PP4/5K2 b - - 3 2"
             },
             {
                 "move": {
@@ -6201,7 +6201,7 @@
                 "uci": "e5d3",
                 "san": "Nd3",
                 "lan": "Ne5-d3",
-                "fen": "7k/2R5/8/1q3B2/6Q1/3N4/2PP4/5K2 b - - 1 1"
+                "fen": "7k/2R5/8/1q3B2/6Q1/3N4/2PP4/5K2 b - - 3 2"
             },
             {
                 "move": {
@@ -6215,7 +6215,7 @@
                 "uci": "g4c4",
                 "san": "Qc4",
                 "lan": "Qg4-c4",
-                "fen": "7k/2R5/8/1q2NB2/2Q5/8/2PP4/5K2 b - - 1 1"
+                "fen": "7k/2R5/8/1q2NB2/2Q5/8/2PP4/5K2 b - - 3 2"
             },
             {
                 "move": {
@@ -6229,7 +6229,7 @@
                 "uci": "g4e2",
                 "san": "Qe2",
                 "lan": "Qg4-e2",
-                "fen": "7k/2R5/8/1q2NB2/8/8/2PPQ3/5K2 b - - 1 1"
+                "fen": "7k/2R5/8/1q2NB2/8/8/2PPQ3/5K2 b - - 3 2"
             },
             {
                 "move": {
@@ -6243,7 +6243,7 @@
                 "uci": "d2d3",
                 "san": "d3",
                 "lan": "d2-d3",
-                "fen": "7k/2R5/8/1q2NB2/6Q1/3P4/2P5/5K2 b - - 0 1"
+                "fen": "7k/2R5/8/1q2NB2/6Q1/3P4/2P5/5K2 b - - 0 2"
             },
             {
                 "move": {
@@ -6257,12 +6257,12 @@
                 "uci": "c2c4",
                 "san": "c4",
                 "lan": "c2-c4",
-                "fen": "7k/2R5/8/1q2NB2/2P3Q1/8/3P4/5K2 b - - 0 1"
+                "fen": "7k/2R5/8/1q2NB2/2P3Q1/8/3P4/5K2 b - - 0 2"
             }
         ]
     },
     {
-        "fen": "4k3/8/8/4r3/8/8/4Q3/4K3 b - - 0 1",
+        "fen": "4k3/8/8/4r3/8/8/4Q3/4K3 b - - 2 2",
         "description": "Pinned piece should not move",
         "moves": [
             {
@@ -6277,7 +6277,7 @@
                 "uci": "e8f8",
                 "san": "Kf8",
                 "lan": "Ke8-f8",
-                "fen": "5k2/8/8/4r3/8/8/4Q3/4K3 w - - 1 2"
+                "fen": "5k2/8/8/4r3/8/8/4Q3/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -6291,7 +6291,7 @@
                 "uci": "e8d8",
                 "san": "Kd8",
                 "lan": "Ke8-d8",
-                "fen": "3k4/8/8/4r3/8/8/4Q3/4K3 w - - 1 2"
+                "fen": "3k4/8/8/4r3/8/8/4Q3/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -6305,7 +6305,7 @@
                 "uci": "e8f7",
                 "san": "Kf7",
                 "lan": "Ke8-f7",
-                "fen": "8/5k2/8/4r3/8/8/4Q3/4K3 w - - 1 2"
+                "fen": "8/5k2/8/4r3/8/8/4Q3/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -6319,7 +6319,7 @@
                 "uci": "e8e7",
                 "san": "Ke7",
                 "lan": "Ke8-e7",
-                "fen": "8/4k3/8/4r3/8/8/4Q3/4K3 w - - 1 2"
+                "fen": "8/4k3/8/4r3/8/8/4Q3/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -6333,7 +6333,7 @@
                 "uci": "e8d7",
                 "san": "Kd7",
                 "lan": "Ke8-d7",
-                "fen": "8/3k4/8/4r3/8/8/4Q3/4K3 w - - 1 2"
+                "fen": "8/3k4/8/4r3/8/8/4Q3/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -6347,7 +6347,7 @@
                 "uci": "e5e7",
                 "san": "Re7",
                 "lan": "Re5-e7",
-                "fen": "4k3/4r3/8/8/8/8/4Q3/4K3 w - - 1 2"
+                "fen": "4k3/4r3/8/8/8/8/4Q3/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -6361,7 +6361,7 @@
                 "uci": "e5e6",
                 "san": "Re6",
                 "lan": "Re5-e6",
-                "fen": "4k3/8/4r3/8/8/8/4Q3/4K3 w - - 1 2"
+                "fen": "4k3/8/4r3/8/8/8/4Q3/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -6375,7 +6375,7 @@
                 "uci": "e5e4",
                 "san": "Re4",
                 "lan": "Re5-e4",
-                "fen": "4k3/8/8/8/4r3/8/4Q3/4K3 w - - 1 2"
+                "fen": "4k3/8/8/8/4r3/8/4Q3/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -6389,7 +6389,7 @@
                 "uci": "e5e3",
                 "san": "Re3",
                 "lan": "Re5-e3",
-                "fen": "4k3/8/8/8/8/4r3/4Q3/4K3 w - - 1 2"
+                "fen": "4k3/8/8/8/8/4r3/4Q3/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -6403,12 +6403,12 @@
                 "uci": "e5e2",
                 "san": "Rxe2+",
                 "lan": "Re5xe2+",
-                "fen": "4k3/8/8/8/8/8/4r3/4K3 w - - 0 2"
+                "fen": "4k3/8/8/8/8/8/4r3/4K3 w - - 0 3"
             }
         ]
     },
     {
-        "fen": "4k3/8/8/4q3/8/8/4Q3/4K3 b - - 0 1",
+        "fen": "4k3/8/8/4q3/8/8/4Q3/4K3 b - - 2 2",
         "description": "Partially pinned piece should move along the pin",
         "moves": [
             {
@@ -6423,7 +6423,7 @@
                 "uci": "e8f8",
                 "san": "Kf8",
                 "lan": "Ke8-f8",
-                "fen": "5k2/8/8/4q3/8/8/4Q3/4K3 w - - 1 2"
+                "fen": "5k2/8/8/4q3/8/8/4Q3/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -6437,7 +6437,7 @@
                 "uci": "e8d8",
                 "san": "Kd8",
                 "lan": "Ke8-d8",
-                "fen": "3k4/8/8/4q3/8/8/4Q3/4K3 w - - 1 2"
+                "fen": "3k4/8/8/4q3/8/8/4Q3/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -6451,7 +6451,7 @@
                 "uci": "e8f7",
                 "san": "Kf7",
                 "lan": "Ke8-f7",
-                "fen": "8/5k2/8/4q3/8/8/4Q3/4K3 w - - 1 2"
+                "fen": "8/5k2/8/4q3/8/8/4Q3/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -6465,7 +6465,7 @@
                 "uci": "e8e7",
                 "san": "Ke7",
                 "lan": "Ke8-e7",
-                "fen": "8/4k3/8/4q3/8/8/4Q3/4K3 w - - 1 2"
+                "fen": "8/4k3/8/4q3/8/8/4Q3/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -6479,7 +6479,7 @@
                 "uci": "e8d7",
                 "san": "Kd7",
                 "lan": "Ke8-d7",
-                "fen": "8/3k4/8/4q3/8/8/4Q3/4K3 w - - 1 2"
+                "fen": "8/3k4/8/4q3/8/8/4Q3/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -6493,7 +6493,7 @@
                 "uci": "e5e7",
                 "san": "Qe7",
                 "lan": "Qe5-e7",
-                "fen": "4k3/4q3/8/8/8/8/4Q3/4K3 w - - 1 2"
+                "fen": "4k3/4q3/8/8/8/8/4Q3/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -6507,7 +6507,7 @@
                 "uci": "e5e6",
                 "san": "Qe6",
                 "lan": "Qe5-e6",
-                "fen": "4k3/8/4q3/8/8/8/4Q3/4K3 w - - 1 2"
+                "fen": "4k3/8/4q3/8/8/8/4Q3/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -6521,7 +6521,7 @@
                 "uci": "e5e4",
                 "san": "Qe4",
                 "lan": "Qe5-e4",
-                "fen": "4k3/8/8/8/4q3/8/4Q3/4K3 w - - 1 2"
+                "fen": "4k3/8/8/8/4q3/8/4Q3/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -6535,7 +6535,7 @@
                 "uci": "e5e3",
                 "san": "Qe3",
                 "lan": "Qe5-e3",
-                "fen": "4k3/8/8/8/8/4q3/4Q3/4K3 w - - 1 2"
+                "fen": "4k3/8/8/8/8/4q3/4Q3/4K3 w - - 3 3"
             },
             {
                 "move": {
@@ -6549,12 +6549,12 @@
                 "uci": "e5e2",
                 "san": "Qxe2+",
                 "lan": "Qe5xe2+",
-                "fen": "4k3/8/8/8/8/8/4q3/4K3 w - - 0 2"
+                "fen": "4k3/8/8/8/8/8/4q3/4K3 w - - 0 3"
             }
         ]
     },
     {
-        "fen": "4k3/8/8/8/8/2b1b3/3P4/4K3 w - - 0 1",
+        "fen": "4k3/8/8/8/8/2b1b3/3P4/4K3 w - - 2 2",
         "description": "Pinned pawn can takes the pinning piece, but no other moves",
         "moves": [
             {
@@ -6569,7 +6569,7 @@
                 "uci": "e1e2",
                 "san": "Ke2",
                 "lan": "Ke1-e2",
-                "fen": "4k3/8/8/8/8/2b1b3/3PK3/8 b - - 1 1"
+                "fen": "4k3/8/8/8/8/2b1b3/3PK3/8 b - - 3 2"
             },
             {
                 "move": {
@@ -6583,7 +6583,7 @@
                 "uci": "e1f1",
                 "san": "Kf1",
                 "lan": "Ke1-f1",
-                "fen": "4k3/8/8/8/8/2b1b3/3P4/5K2 b - - 1 1"
+                "fen": "4k3/8/8/8/8/2b1b3/3P4/5K2 b - - 3 2"
             },
             {
                 "move": {
@@ -6597,7 +6597,7 @@
                 "uci": "e1d1",
                 "san": "Kd1",
                 "lan": "Ke1-d1",
-                "fen": "4k3/8/8/8/8/2b1b3/3P4/3K4 b - - 1 1"
+                "fen": "4k3/8/8/8/8/2b1b3/3P4/3K4 b - - 3 2"
             },
             {
                 "move": {
@@ -6611,12 +6611,12 @@
                 "uci": "d2c3",
                 "san": "dxc3",
                 "lan": "d2xc3",
-                "fen": "4k3/8/8/8/8/2P1b3/8/4K3 b - - 0 1"
+                "fen": "4k3/8/8/8/8/2P1b3/8/4K3 b - - 0 2"
             }
         ]
     },
     {
-        "fen": "4k3/8/8/1K1pP1r1/8/8/8/8 w - d6 0 1",
+        "fen": "4k3/8/8/1K1pP1r1/8/8/8/8 w - d6 2 2",
         "description": "Prise en passant would discover check by moving a pawn and taking a pawn",
         "moves": [
             {
@@ -6631,7 +6631,7 @@
                 "uci": "b5c6",
                 "san": "Kc6",
                 "lan": "Kb5-c6",
-                "fen": "4k3/8/2K5/3pP1r1/8/8/8/8 b - - 1 1"
+                "fen": "4k3/8/2K5/3pP1r1/8/8/8/8 b - - 3 2"
             },
             {
                 "move": {
@@ -6645,7 +6645,7 @@
                 "uci": "b5b6",
                 "san": "Kb6",
                 "lan": "Kb5-b6",
-                "fen": "4k3/8/1K6/3pP1r1/8/8/8/8 b - - 1 1"
+                "fen": "4k3/8/1K6/3pP1r1/8/8/8/8 b - - 3 2"
             },
             {
                 "move": {
@@ -6659,7 +6659,7 @@
                 "uci": "b5a6",
                 "san": "Ka6",
                 "lan": "Kb5-a6",
-                "fen": "4k3/8/K7/3pP1r1/8/8/8/8 b - - 1 1"
+                "fen": "4k3/8/K7/3pP1r1/8/8/8/8 b - - 3 2"
             },
             {
                 "move": {
@@ -6673,7 +6673,7 @@
                 "uci": "b5c5",
                 "san": "Kc5",
                 "lan": "Kb5-c5",
-                "fen": "4k3/8/8/2KpP1r1/8/8/8/8 b - - 1 1"
+                "fen": "4k3/8/8/2KpP1r1/8/8/8/8 b - - 3 2"
             },
             {
                 "move": {
@@ -6687,7 +6687,7 @@
                 "uci": "b5a5",
                 "san": "Ka5",
                 "lan": "Kb5-a5",
-                "fen": "4k3/8/8/K2pP1r1/8/8/8/8 b - - 1 1"
+                "fen": "4k3/8/8/K2pP1r1/8/8/8/8 b - - 3 2"
             },
             {
                 "move": {
@@ -6701,7 +6701,7 @@
                 "uci": "b5b4",
                 "san": "Kb4",
                 "lan": "Kb5-b4",
-                "fen": "4k3/8/8/3pP1r1/1K6/8/8/8 b - - 1 1"
+                "fen": "4k3/8/8/3pP1r1/1K6/8/8/8 b - - 3 2"
             },
             {
                 "move": {
@@ -6715,7 +6715,7 @@
                 "uci": "b5a4",
                 "san": "Ka4",
                 "lan": "Kb5-a4",
-                "fen": "4k3/8/8/3pP1r1/K7/8/8/8 b - - 1 1"
+                "fen": "4k3/8/8/3pP1r1/K7/8/8/8 b - - 3 2"
             },
             {
                 "move": {
@@ -6729,7 +6729,97 @@
                 "uci": "e5e6",
                 "san": "e6",
                 "lan": "e5-e6",
-                "fen": "4k3/8/4P3/1K1p2r1/8/8/8/8 b - - 0 1"
+                "fen": "4k3/8/4P3/1K1p2r1/8/8/8/8 b - - 0 2"
+            }
+        ]
+    },
+    {
+        "fen": "4k3/8/8/8/5p2/8/4P3/4K3 w - - 2 2",
+        "description": "White to move with a possibility to move a pawn so that it can be taken en passant",
+        "moves": [
+            {
+                "move": {
+                    "from": "e1",
+                    "to": "f2",
+                    "piece": "K",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "e1f2",
+                "san": "Kf2",
+                "lan": "Ke1-f2",
+                "fen": "4k3/8/8/8/5p2/8/4PK2/8 b - - 3 2"
+            },
+            {
+                "move": {
+                    "from": "e1",
+                    "to": "d2",
+                    "piece": "K",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "e1d2",
+                "san": "Kd2",
+                "lan": "Ke1-d2",
+                "fen": "4k3/8/8/8/5p2/8/3KP3/8 b - - 3 2"
+            },
+            {
+                "move": {
+                    "from": "e1",
+                    "to": "f1",
+                    "piece": "K",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "e1f1",
+                "san": "Kf1",
+                "lan": "Ke1-f1",
+                "fen": "4k3/8/8/8/5p2/8/4P3/5K2 b - - 3 2"
+            },
+            {
+                "move": {
+                    "from": "e1",
+                    "to": "d1",
+                    "piece": "K",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "e1d1",
+                "san": "Kd1",
+                "lan": "Ke1-d1",
+                "fen": "4k3/8/8/8/5p2/8/4P3/3K4 b - - 3 2"
+            },
+            {
+                "move": {
+                    "from": "e2",
+                    "to": "e3",
+                    "piece": "P",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "e2e3",
+                "san": "e3",
+                "lan": "e2-e3",
+                "fen": "4k3/8/8/8/5p2/4P3/8/4K3 b - - 0 2"
+            },
+            {
+                "move": {
+                    "from": "e2",
+                    "to": "e4",
+                    "piece": "P",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "e2e4",
+                "san": "e4",
+                "lan": "e2-e4",
+                "fen": "4k3/8/8/8/4Pp2/8/8/4K3 b - e3 0 2"
             }
         ]
     }

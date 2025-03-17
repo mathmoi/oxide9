@@ -4,7 +4,7 @@ use oxide9::chess::{
     move_gen::generation::{generate_moves, MoveGenerationType},
     piece::{Piece, PieceType},
     position::Position,
-    r#move::{CastlingRight, CastlingSide, Move},
+    r#move::{CastlingSide, Move},
 };
 use serde::Deserialize;
 use std::{collections::HashSet, fs::File, io::BufReader, path::PathBuf, time::Instant};
@@ -12,6 +12,10 @@ use thiserror::Error;
 
 const EXIT_FAILURE: i32 = 1;
 const CARGO_MANIFEST_DIR_ENV_VARIABLE: &str = "CARGO_MANIFEST_DIR";
+
+//======================================================================================================================
+// Error handling
+//======================================================================================================================
 
 /// Errors that are related to the test harness.
 #[derive(Error, Debug)]
@@ -51,11 +55,14 @@ enum TestDataError {
 /// Errors used when tests fail.
 #[derive(Error, Debug)]
 enum TestFailureError {
-    #[error("Missing moves during move generation : {:?}", .0)]
+    #[error("Missing moves during move generation: {:?}", .0)]
     MissingMoves(HashSet<Move>),
 
-    #[error("Extra moves during move generation : {:?}", .0)]
+    #[error("Extra moves during move generation: {:?}", .0)]
     ExtraMoves(HashSet<Move>),
+
+    #[error("Unexpected position after making a move ({:?})\n\nOriginal:\n{}\n\nExpected:\n{}\n\nActual:\n{}\n", .mv, .original, .expected, .actual)]
+    UnexpectedPositionAfterMove { mv: Move, original: String, expected: String, actual: String },
 }
 
 /// Global errors for this module.
@@ -71,6 +78,10 @@ enum MoveGeneratorTestError {
     TestFailed { test_name: String, test_failure_error: TestFailureError },
 }
 
+//======================================================================================================================
+// Test data structures
+//======================================================================================================================
+
 /// A test case for the move generator.
 #[derive(Debug, Deserialize)]
 struct Test {
@@ -84,6 +95,7 @@ struct Test {
 struct TestMove {
     #[serde(rename = "move")]
     details: TestMoveDetails,
+    fen: String,
 }
 
 /// The type of move in the test data.
@@ -111,63 +123,9 @@ struct TestMoveDetails {
     move_type: MoveType,
 }
 
-/// Get the path to a resource file.
-fn get_resource_path(relative_path: &str) -> Result<PathBuf, TestHarnessError> {
-    let mut path = std::env::current_dir().map_err(|_| TestHarnessError::ManifestDirNotFound)?;
-    path.push(relative_path);
-
-    if !path.exists() {
-        return Err(TestHarnessError::ResourcePathNotFound(path));
-    }
-
-    Ok(path)
-}
-
-/// Compare two sets of moves and return the missing and extra moves.
-fn compare_moves_set(expected: &[Move], actual: &[Move]) -> (HashSet<Move>, HashSet<Move>) {
-    let expected_set: HashSet<_> = expected.iter().copied().collect();
-    let actual_set: HashSet<_> = actual.iter().copied().collect();
-
-    let missing: HashSet<_> = expected_set.difference(&actual_set).copied().collect();
-    let extra: HashSet<_> = actual_set.difference(&expected_set).copied().collect();
-
-    (missing, extra)
-}
-
-/// Run a single test case.
-fn run_test(test: Test) -> Result<(), MoveGeneratorTestError> {
-    let position = Position::new_from_fen(&test.fen).or(Err(TestDataError::UnableToParseFen(test.fen)))?;
-    let expected_moves: Result<Vec<Move>, MoveGeneratorTestError> =
-        test.moves.iter().map(|m| Move::try_from(&m.details)).collect();
-    let expected_moves = expected_moves?;
-
-    let mut pseudo_legal_moves: Vec<Move> = vec![];
-    if position.is_check() {
-        generate_moves::<{ MoveGenerationType::EVASIONS_VALUE }>(&position, &mut pseudo_legal_moves);
-    } else {
-        generate_moves::<{ MoveGenerationType::ALL_VALUE }>(&position, &mut pseudo_legal_moves);
-    }
-
-    let legal_moves: Vec<Move> = pseudo_legal_moves.iter().filter(|m| position.is_legal(**m)).copied().collect();
-
-    let (missing, extra) = compare_moves_set(&expected_moves, &legal_moves);
-
-    if !missing.is_empty() {
-        return Err(MoveGeneratorTestError::TestFailed {
-            test_name: test.description,
-            test_failure_error: TestFailureError::MissingMoves(missing),
-        });
-    }
-
-    if !extra.is_empty() {
-        return Err(MoveGeneratorTestError::TestFailed {
-            test_name: test.description,
-            test_failure_error: TestFailureError::ExtraMoves(extra),
-        });
-    }
-
-    Ok(())
-}
+//======================================================================================================================
+// Test data reading and parsing
+//======================================================================================================================
 
 fn parse_square(value: &str) -> Result<Square, TestDataError> {
     Square::try_from(value).map_err(|_| TestDataError::CannotParseSquare(value.to_string()))
@@ -207,18 +165,8 @@ impl TryFrom<&TestMoveDetails> for Move {
             MoveType::Capture => {
                 Move::new_capture(from_square, to_square, piece, capture.ok_or(TestDataError::MissingCapturedPiece)?)
             }
-            MoveType::KingSideCastle => Move::new_castling(
-                from_square,
-                to_square,
-                piece,
-                CastlingRight::new(piece.color(), CastlingSide::Kingside),
-            ),
-            MoveType::QueenSideCastle => Move::new_castling(
-                from_square,
-                to_square,
-                piece,
-                CastlingRight::new(piece.color(), CastlingSide::Queenside),
-            ),
+            MoveType::KingSideCastle => Move::new_castling(from_square, to_square, piece, CastlingSide::Kingside),
+            MoveType::QueenSideCastle => Move::new_castling(from_square, to_square, piece, CastlingSide::Queenside),
             MoveType::EnPassant => Move::new_en_passant(from_square, to_square, piece),
             MoveType::Promotion => Move::new_promotion(
                 from_square,
@@ -247,8 +195,92 @@ fn read_tests_data() -> Result<Vec<Test>, MoveGeneratorTestError> {
     Ok(tests)
 }
 
+//======================================================================================================================
+// Test harness
+//======================================================================================================================
+
+/// Compare two sets of moves and return the missing and extra moves.
+fn compare_moves_set(expected: &[Move], actual: &[Move]) -> (HashSet<Move>, HashSet<Move>) {
+    let expected_set: HashSet<_> = expected.iter().copied().collect();
+    let actual_set: HashSet<_> = actual.iter().copied().collect();
+
+    let missing: HashSet<_> = expected_set.difference(&actual_set).copied().collect();
+    let extra: HashSet<_> = actual_set.difference(&expected_set).copied().collect();
+
+    (missing, extra)
+}
+
+fn test_move_generation(test: &Test) -> Result<(), MoveGeneratorTestError> {
+    // Prepare the position and the expected moves.
+    let position = Position::new_from_fen(&test.fen).or(Err(TestDataError::UnableToParseFen(test.fen.clone())))?;
+    let expected_moves: Result<Vec<Move>, MoveGeneratorTestError> =
+        test.moves.iter().map(|m| Move::try_from(&m.details)).collect();
+    let expected_moves = expected_moves?;
+
+    // Generate the moves
+    let mut pseudo_legal_moves: Vec<Move> = vec![];
+    if position.is_check() {
+        generate_moves::<{ MoveGenerationType::EVASIONS_VALUE }>(&position, &mut pseudo_legal_moves);
+    } else {
+        generate_moves::<{ MoveGenerationType::ALL_VALUE }>(&position, &mut pseudo_legal_moves);
+    }
+    let legal_moves: Vec<Move> = pseudo_legal_moves.iter().filter(|m| position.is_legal(**m)).copied().collect();
+
+    // Compare the moves
+    let (missing, extra) = compare_moves_set(&expected_moves, &legal_moves);
+
+    if !missing.is_empty() {
+        return Err(MoveGeneratorTestError::TestFailed {
+            test_name: test.description.clone(),
+            test_failure_error: TestFailureError::MissingMoves(missing),
+        });
+    }
+
+    if !extra.is_empty() {
+        return Err(MoveGeneratorTestError::TestFailed {
+            test_name: test.description.clone(),
+            test_failure_error: TestFailureError::ExtraMoves(extra),
+        });
+    }
+
+    Ok(())
+}
+
+fn test_move_execution(test: &Test) -> Result<(), MoveGeneratorTestError> {
+    let test_position = Position::new_from_fen(&test.fen).or(Err(TestDataError::UnableToParseFen(test.fen.clone())))?;
+
+    for test_move in test.moves.iter() {
+        let mut position = test_position.clone();
+        let mv = Move::try_from(&test_move.details)?;
+        position.make(mv);
+        let actual_fen = position.to_fen();
+        if test_move.fen != actual_fen {
+            let expected_position = Position::new_from_fen(&test_move.fen)
+                .or(Err(TestDataError::UnableToParseFen(test_move.fen.clone())))?;
+            return Err(MoveGeneratorTestError::TestFailed {
+                test_name: test.description.clone(),
+                test_failure_error: TestFailureError::UnexpectedPositionAfterMove {
+                    mv,
+                    original: test_position.to_compact_string() + "\n" + &test_position.to_fen(),
+                    expected: expected_position.to_compact_string() + "\n" + &test_move.fen,
+                    actual: position.to_compact_string() + "\n" + &actual_fen,
+                },
+            });
+        }
+    }
+
+    Ok(())
+}
+
+/// Run a single test case.
+fn run_test(test: Test) -> Result<(), MoveGeneratorTestError> {
+    test_move_generation(&test)?;
+    test_move_execution(&test)?;
+    Ok(())
+}
+
 /// Run all the tests.
-fn run_all_tests() -> Result<(), MoveGeneratorTestError> {
+fn run_tests() -> Result<(), MoveGeneratorTestError> {
     let tests = read_tests_data()?;
 
     println!("\nrunning {} tests", tests.len());
@@ -295,9 +327,25 @@ fn run_all_tests() -> Result<(), MoveGeneratorTestError> {
     Ok(())
 }
 
+//======================================================================================================================
+// Main function and helpers
+//======================================================================================================================
+
+/// Get the path to a resource file.
+fn get_resource_path(relative_path: &str) -> Result<PathBuf, TestHarnessError> {
+    let mut path = std::env::current_dir().map_err(|_| TestHarnessError::ManifestDirNotFound)?;
+    path.push(relative_path);
+
+    if !path.exists() {
+        return Err(TestHarnessError::ResourcePathNotFound(path));
+    }
+
+    Ok(path)
+}
+
 /// The main function for the test harness. It will run the tests and print any unexpected errors.
 fn main() -> Result<(), MoveGeneratorTestError> {
-    if let Err(error) = run_all_tests() {
+    if let Err(error) = run_tests() {
         eprintln!("{}", error);
         std::process::exit(EXIT_FAILURE)
     }

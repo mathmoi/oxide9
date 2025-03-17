@@ -27,6 +27,24 @@ impl Color {
 
     pub const WHITE_VALUE: u8 = 0;
     pub const BLACK_VALUE: u8 = 1;
+
+    /// Returns the forward direction value for the color.
+    ///
+    /// Provides the directional offset value that represents "forward" for the given color:
+    /// * For White: Returns 1 (moving up the board)
+    /// * For Black: Returns -1 (moving down the board)
+    ///
+    /// This value is useful for calculating pawn movements and other directional operations that
+    /// depend on which side is moving.
+    ///
+    /// # Returns
+    /// An integer representing the forward direction: 1 for White, -1 for Black
+    pub fn forward(self) -> i8 {
+        match self {
+            Color::White => 1,
+            Color::Black => -1,
+        }
+    }
 }
 
 impl Display for Color {

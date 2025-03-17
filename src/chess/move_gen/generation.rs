@@ -291,7 +291,7 @@ fn generate_castlings<const COLOR: u8, const SIDE: u8>(position: &Position, list
     }
 
     let king = Piece::new(color, PieceType::King);
-    list.push(Move::new_castling(king_sq, king_final_sq, king, castling_right));
+    list.push(Move::new_castling(king_sq, king_final_sq, king, side));
 }
 
 fn generate_moves_color<const TYPE: u8, const COLOR: u8>(position: &Position, list: &mut Vec<Move>) {

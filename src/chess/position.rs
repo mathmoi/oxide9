@@ -19,6 +19,11 @@ pub enum FenError {
     InvalidFullmoveNumber,
     MissingField,
 }
+
+//======================================================================================================================
+// OccupancyFilter implementation (used as input parameter for the occupied method of the Position struct)
+//======================================================================================================================
+
 /// Defines filtering criteria for retrieving occupied squares from a chess position.
 ///
 /// This enum provides different ways to filter which occupied squares should be included when querying a position's
@@ -84,19 +89,47 @@ impl From<(Color, PieceType, PieceType)> for OccupancyFilter {
     }
 }
 
-/// A chess position.
-#[derive(Clone)]
-pub struct Position {
+//======================================================================================================================
+// Game State implementation
+//======================================================================================================================
+
+#[derive(Clone, Copy)]
+pub struct GameState {
     side_to_move: Color,
-    board: [Option<Piece>; Square::COUNT],
-    bb_color: [Bitboard; Color::COUNT],
-    bb_piece: [Bitboard; Piece::COUNT],
     castling_rights: CastlingRight,
-    castling_rook_file: [File; CastlingSide::COUNT],
-    castling_path: [Bitboard; CastlingSide::COUNT],
     en_passant_square: Option<Square>,
     halfmove_clock: u16,
     fullmove_number: u16,
+}
+
+/// Default implementation for the GameState struct.
+impl Default for GameState {
+    fn default() -> Self {
+        Self {
+            side_to_move: Color::White,
+            castling_rights: CastlingRight::empty(),
+            en_passant_square: None,
+            halfmove_clock: 0,
+            fullmove_number: 1,
+        }
+    }
+}
+
+//======================================================================================================================
+// Position implementation
+//======================================================================================================================
+
+/// A chess position.
+#[derive(Clone)]
+pub struct Position {
+    board: [Option<Piece>; Square::COUNT],
+    bb_color: [Bitboard; Color::COUNT],
+    bb_piece: [Bitboard; Piece::COUNT],
+    castling_rook_file: [File; CastlingSide::COUNT],
+    castling_path: [Bitboard; CastlingSide::COUNT],
+    castling_rights_mask: [CastlingRight; Square::COUNT],
+    state: GameState,
+    history: Vec<GameState>,
 }
 
 impl Position {
@@ -123,7 +156,7 @@ impl Position {
     }
 
     fn read_active_color(&mut self, active_color: &str) -> Result<(), FenError> {
-        self.side_to_move = match active_color {
+        self.state.side_to_move = match active_color {
             "w" => Color::White,
             "b" => Color::Black,
             _ => return Err(FenError::InvalidActiveColor),
@@ -182,7 +215,8 @@ impl Position {
                 }
             }
 
-            self.castling_rights |= CastlingRight::new(color, castling_side);
+            let right = CastlingRight::new(color, castling_side);
+            self.state.castling_rights |= right;
             self.castling_rook_file[usize::from(castling_side)] = castling_file;
 
             // Compute the mask of the path of the king and rook involved in castling.
@@ -195,6 +229,11 @@ impl Position {
             mask |= mask << 56;
             self.castling_path[usize::from(castling_side)] = mask;
 
+            // Update the castling rights mask for the squares involved in castling.
+            let rank = Rank::R1.relative_to_color(color);
+            self.castling_rights_mask[usize::from(Square::new(king_file, rank))] |= right;
+            self.castling_rights_mask[usize::from(Square::new(castling_file, rank))] |= right;
+
             file_set[usize::from(castling_side)] = Some(castling_file);
         }
 
@@ -202,7 +241,7 @@ impl Position {
     }
 
     fn read_en_passant_square(&mut self, en_passant_square: &str) -> Result<(), FenError> {
-        self.en_passant_square = match en_passant_square {
+        self.state.en_passant_square = match en_passant_square {
             "-" => None,
             _ => Some(Square::try_from(en_passant_square).map_err(|_| FenError::InvalidEnPassantSquare)?),
         };
@@ -250,10 +289,10 @@ impl Position {
         position.read_castling(fields.next().ok_or(FenError::MissingField)?)?;
         position.read_en_passant_square(fields.next().ok_or(FenError::MissingField)?)?;
 
-        position.halfmove_clock =
+        position.state.halfmove_clock =
             fields.next().ok_or(FenError::MissingField)?.parse().map_err(|_| FenError::InvalidHalfmoveClock)?;
 
-        position.fullmove_number =
+        position.state.fullmove_number =
             fields.next().ok_or(FenError::MissingField)?.parse().map_err(|_| FenError::InvalidFullmoveNumber)?;
 
         Ok(position)
@@ -340,7 +379,27 @@ impl Position {
     }
 
     fn write_en_passant(&self) -> String {
-        self.en_passant_square().map_or(String::from("-"), |square| format!("{}", square))
+        // We only add the en passant square if there is a pawn that can capture it.
+        if let Some(en_passant_sq) = self.en_passant_square() {
+            let pawn = Piece::new(self.side_to_move(), PieceType::Pawn);
+            let direction = match self.side_to_move() {
+                Color::White => 1,
+                Color::Black => -1,
+            };
+
+            if en_passant_sq
+                .down(direction)
+                .and_then(|sq| sq.left(1))
+                .is_ok_and(|sq| self[sq].is_some_and(|piece| piece == pawn))
+                | en_passant_sq
+                    .down(direction)
+                    .and_then(|sq| sq.right(1))
+                    .is_ok_and(|sq| self[sq].is_some_and(|piece| piece == pawn))
+            {
+                return format!("{}", en_passant_sq);
+            }
+        }
+        String::from("-")
     }
 
     /// Returns the FEN (Forsyth-Edwards Notation) representation of the position.
@@ -351,9 +410,55 @@ impl Position {
             char::from(self.side_to_move()),
             self.write_castling(),
             self.write_en_passant(),
-            self.halfmove_clock,
-            self.fullmove_number
+            self.state.halfmove_clock,
+            self.state.fullmove_number
         )
+    }
+
+    /// Generates a compact string representation of the current chess position.
+    ///
+    /// Creates a human-readable text visualization of the board with rank numbers on the left edge and file letters on
+    /// the bottom. The board is displayed from white's perspective (rank 1 at bottom, rank 8 at top).
+    ///
+    /// # Returns
+    /// A formatted string representing the board where:
+    /// - Rank numbers (1-8) are shown on the left edge
+    /// - File letters (a-h) are shown on the bottom edge
+    /// - Pieces are represented by their standard characters (P, N, B, R, Q, K for white; p, n, b, r, q, k for black)
+    /// - Empty squares are represented by dots (.)
+    ///
+    /// # Example Output
+    ///
+    /// 8  r n b q k b n r
+    /// 7  p p p p p p p p
+    /// 6  . . . . . . . .
+    /// 5  . . . . . . . .
+    /// 4  . . . . . . . .
+    /// 3  . . . . . . . .
+    /// 2  P P P P P P P P
+    /// 1  R N B Q K B N R
+    ///    a b c d e f g h
+    ///
+    pub fn to_compact_string(&self) -> String {
+        let mut board = String::with_capacity(171);
+        for rank in Rank::ALL.iter().rev() {
+            board.push_str(&format!("{}  ", rank));
+            for file in File::ALL {
+                let sq = Square::new(file, *rank);
+                match self[sq] {
+                    Some(piece) => board.push(piece.into()),
+                    None => board.push('.'),
+                }
+                if file != File::H {
+                    board.push(' ');
+                } else {
+                    board.push('\n');
+                }
+            }
+        }
+        board.push_str("   a b c d e f g h");
+
+        board
     }
 
     /// Returns a bitboard of squares occupied by pieces matching the specified filter.
@@ -382,44 +487,42 @@ impl Position {
     /// See `OccupancyFilter` for the full set of filtering options available.
     #[inline(always)]
     pub fn occupied<F: Into<OccupancyFilter>>(&self, filter: F) -> Bitboard {
-        #[rustfmt::skip]
-        return match filter.into() {
-            OccupancyFilter::All
-                => self.bb_color[usize::from(Color::White)]
-                 | self.bb_color[usize::from(Color::Black)],
+        match filter.into() {
+            OccupancyFilter::All => self.bb_color[usize::from(Color::White)] | self.bb_color[usize::from(Color::Black)],
 
-            OccupancyFilter::ByColor(color) 
-                => self.bb_color[usize::from(color)],
+            OccupancyFilter::ByColor(color) => self.bb_color[usize::from(color)],
 
-            OccupancyFilter::ByType(piece_type) 
-                => self.bb_piece[usize::from(Piece::new(Color::White, piece_type))]
-                 | self.bb_piece[usize::from(Piece::new(Color::Black, piece_type))],
+            OccupancyFilter::ByType(piece_type) => {
+                self.bb_piece[usize::from(Piece::new(Color::White, piece_type))]
+                    | self.bb_piece[usize::from(Piece::new(Color::Black, piece_type))]
+            }
 
-            OccupancyFilter::ByPiece(piece) 
-                => self.bb_piece[usize::from(piece)],
+            OccupancyFilter::ByPiece(piece) => self.bb_piece[usize::from(piece)],
 
-            OccupancyFilter::ByColorAndType(color, piece_type)
-                => self.bb_piece[usize::from(Piece::new(color, piece_type))],
+            OccupancyFilter::ByColorAndType(color, piece_type) => {
+                self.bb_piece[usize::from(Piece::new(color, piece_type))]
+            }
 
-            OccupancyFilter::ByColorAndTwoTypes(color, type1, type2)
-                => self.bb_piece[usize::from(Piece::new(color, type1))]
-                 | self.bb_piece[usize::from(Piece::new(color, type2))]
-        };
+            OccupancyFilter::ByColorAndTwoTypes(color, type1, type2) => {
+                self.bb_piece[usize::from(Piece::new(color, type1))]
+                    | self.bb_piece[usize::from(Piece::new(color, type2))]
+            }
+        }
     }
 
     /// Returns the color of the side to move.
     pub fn side_to_move(&self) -> Color {
-        self.side_to_move
+        self.state.side_to_move
     }
 
     /// Returns the castling availability of the position.
     pub fn castling_availability(&self) -> CastlingRight {
-        self.castling_rights
+        self.state.castling_rights
     }
 
     /// Returns the en passant square of the position.
     pub fn en_passant_square(&self) -> Option<Square> {
-        self.en_passant_square
+        self.state.en_passant_square
     }
 
     /// Returns the file of the rook involved in castling on a specific side.
@@ -476,7 +579,7 @@ impl Position {
         self.bb_piece[usize::from(piece)] ^= Bitboard::from(square);
     }
 
-    /// Moves a lnown chess piece from one square to another. The piece must be present on the
+    /// Moves a known chess piece from one square to another. The piece must be present on the
     /// `from` square and the `to` square must be empty.
     pub fn move_piece(&mut self, piece: Piece, from: Square, to: Square) {
         debug_assert_eq!(self.board[usize::from(from)], Some(piece));
@@ -585,7 +688,11 @@ impl Position {
     /// Panics if the king of the side to move is not present on the board, which indicates an invalid board state. In
     /// standard chess, both kings must always be present.
     pub fn is_check(&self) -> bool {
-        self.is_attacked(self.king_square(self.side_to_move), self.occupied(OccupancyFilter::All), !self.side_to_move)
+        self.is_attacked(
+            self.king_square(self.side_to_move()),
+            self.occupied(OccupancyFilter::All),
+            !self.side_to_move(),
+        )
     }
 
     /// Returns a bitboard of all enemy pieces that are currently checking the king of the side to move.
@@ -604,7 +711,11 @@ impl Position {
     /// # Note
     /// Multiple pieces may be giving check simultaneously (e.g., in a discovered check scenario).
     pub fn checkers(&self) -> Bitboard {
-        self.attacks_to(self.king_square(self.side_to_move), self.occupied(OccupancyFilter::All), !self.side_to_move)
+        self.attacks_to(
+            self.king_square(self.side_to_move()),
+            self.occupied(OccupancyFilter::All),
+            !self.side_to_move(),
+        )
     }
 
     /// Returns a bitboard of all pieces that are blocking a check on the king of the specified color.
@@ -660,7 +771,7 @@ impl Position {
     ///
     /// # Returns
     ///
-    /// * `bool` - Returns `true` if the move is legal, `false` otherwise
+    /// * `bool` - Returns        //self.history.push(self.state); `true` if the move is legal, `false` otherwise
     ///
     /// # Important
     ///
@@ -701,21 +812,151 @@ impl Position {
         (blockers & mv.from_square()).has_none()
             || Square::are_aligned(mv.from_square(), mv.to_square(), self.king_square(self.side_to_move()))
     }
+
+    fn make_basic(&mut self, mv: Move) {
+        debug_assert!(self[mv.to_square()].is_none()); // TODO : Should be in a pseudo-legal check
+
+        self.move_piece(mv.piece(), mv.from_square(), mv.to_square());
+
+        self.state.en_passant_square = None;
+        if mv.piece().piece_type() == PieceType::Pawn {
+            self.state.halfmove_clock = 0;
+        } else {
+            self.state.halfmove_clock += 1
+        };
+    }
+
+    fn make_capture(&mut self, mv: Move, capture: Piece) {
+        debug_assert!(self[mv.to_square()].is_some_and(|piece| piece == capture)); // TODO : Should be in a pseudo-legal check
+
+        self.remove_piece(mv.to_square());
+        self.move_piece(mv.piece(), mv.from_square(), mv.to_square());
+
+        self.state.en_passant_square = None;
+        self.state.halfmove_clock = 0;
+    }
+
+    fn make_two_square_pawn_push(&mut self, mv: Move) {
+        self.move_piece(mv.piece(), mv.from_square(), mv.to_square());
+
+        // safe because en passant is never on the edge
+        self.state.en_passant_square = Some(unsafe { mv.to_square().down_unchecked(self.side_to_move().forward()) });
+        self.state.halfmove_clock = 0;
+    }
+
+    fn make_promotion(&mut self, mv: Move, promotion: Piece) {
+        debug_assert!(self[mv.from_square()].is_some_and(|piece| piece == mv.piece())); // TODO : Should be in a pseudo-legal check
+        debug_assert!(self[mv.to_square()].is_none()); // TODO : Should be in a pseudo-legal check
+
+        self.remove_piece(mv.from_square());
+        self.put_piece(promotion, mv.to_square());
+
+        self.state.en_passant_square = None;
+        self.state.halfmove_clock = 0;
+    }
+
+    fn make_capture_promotion(&mut self, mv: Move, capture: Piece, promotion: Piece) {
+        debug_assert!(self[mv.from_square()].is_some_and(|piece| piece == mv.piece())); // TODO : Should be in a pseudo-legal check
+        debug_assert!(self[mv.to_square()].is_some_and(|piece| piece == capture)); // TODO : Should be in a pseudo-legal check
+
+        self.remove_piece(mv.to_square());
+        self.make_promotion(mv, promotion);
+
+        self.state.en_passant_square = None;
+        self.state.halfmove_clock = 0;
+    }
+
+    fn make_en_passant(&mut self, mv: Move) {
+        debug_assert!(self[mv.from_square()].is_some_and(|piece| piece == mv.piece())); // TODO : Should be in a pseudo-legal check
+        debug_assert!(self[mv.to_square()].is_none()); // TODO : Should be in a pseudo-legal check
+
+        let direction = match self.side_to_move() {
+            Color::White => -1,
+            Color::Black => 1,
+        };
+        let capture_sq = unsafe { mv.to_square().up_unchecked(direction) }; // Safe because prise en passant square is never on edge.
+        debug_assert!(self[capture_sq].is_some_and(|piece| piece == Piece::new(!self.side_to_move(), PieceType::Pawn))); // TODO : Should be in a pseudo-legal check
+
+        self.remove_piece(capture_sq);
+        self.move_piece(mv.piece(), mv.from_square(), mv.to_square());
+
+        self.state.en_passant_square = None;
+        self.state.halfmove_clock = 0;
+    }
+
+    fn make_castling(&mut self, mv: Move, side: CastlingSide) {
+        let rook = Piece::new(self.side_to_move(), PieceType::Rook);
+        let rank = mv.from_square().rank();
+        let rook_from_file = self.castling_rook_file[usize::from(side)];
+        let rook_from = Square::new(rook_from_file, rank);
+        let rook_to_file = match side {
+            CastlingSide::Queenside => File::D,
+            CastlingSide::Kingside => File::F,
+        };
+        let rook_to = Square::new(rook_to_file, rank);
+
+        self.move_piece(mv.piece(), mv.from_square(), mv.to_square());
+        self.move_piece(rook, rook_from, rook_to);
+
+        self.state.en_passant_square = None;
+        self.state.halfmove_clock += 1
+    }
+
+    /// Makes a move on the board and updates the game state.
+    ///
+    /// This function applies the given move to the board, updating all relevant game state including piece positions,
+    /// castling rights, en passant possibilities, and turn information. It handles all move types including basic
+    /// moves, captures, promotions, en passant captures, and castling.
+    ///
+    /// # Parameters
+    /// * `mv` - The move to be executed on the board
+    ///
+    /// # Panics
+    /// In debug builds, panics if the provided move is illegal. In release builds, making illegal moves leads to
+    /// undefined behavior.
+    ///
+    /// # Note
+    /// This function does not verify the legality of the move in release builds. Callers must ensure moves are legal
+    /// before calling this function.
+    pub fn make(&mut self, mv: Move) {
+        debug_assert!(self.is_legal(mv), "Tried to make an illegal move: {:?}", mv);
+
+        match mv.move_type() {
+            MoveType::Basic => self.make_basic(mv),
+            MoveType::Capture(capture) => self.make_capture(mv, capture),
+            MoveType::TwoSquarePawnPush => self.make_two_square_pawn_push(mv),
+            MoveType::Promotion(promotion) => self.make_promotion(mv, promotion),
+            MoveType::CapturePromotion { capture, promotion } => self.make_capture_promotion(mv, capture, promotion),
+            MoveType::EnPassant => self.make_en_passant(mv),
+            MoveType::Castling(side) => self.make_castling(mv, side),
+        }
+
+        // Update the castling rights if it's needed.
+        let rights = self.castling_rights_mask[usize::from(mv.from_square())]
+            | self.castling_rights_mask[usize::from(mv.to_square())];
+        if !(self.state.castling_rights & rights).is_empty() {
+            self.state.castling_rights &= !rights;
+        }
+
+        if self.side_to_move() == Color::Black {
+            self.state.fullmove_number += 1;
+        }
+
+        self.state.side_to_move = !self.state.side_to_move;
+    }
 }
 
 impl Default for Position {
     fn default() -> Self {
         Self {
-            side_to_move: Color::White,
             board: [None; Square::COUNT],
             bb_color: [Bitboard::EMPTY; Color::COUNT],
             bb_piece: [Bitboard::EMPTY; Piece::COUNT],
-            castling_rights: CastlingRight::empty(),
             castling_rook_file: [File::A, File::H],
             castling_path: [Square::E1 | Square::E8, Square::C1 | Square::D1 | Square::C8 | Square::D8],
-            en_passant_square: None,
-            halfmove_clock: 0,
-            fullmove_number: 1,
+            castling_rights_mask: [CastlingRight::empty(); Square::COUNT],
+            state: GameState::default(),
+            history: Vec::new(),
         }
     }
 }
@@ -734,7 +975,7 @@ mod tests {
     #[test]
     fn test_position_default() {
         let position = Position::default();
-        assert_eq!(position.side_to_move, Color::White);
+        assert_eq!(position.side_to_move(), Color::White);
         assert!(position.board.iter().all(|square| square.is_none()));
         assert!(position.bb_color.iter().all(|bb| bb.has_none()));
         assert!(position.bb_piece.iter().all(|bb| bb.has_none()));
@@ -744,7 +985,7 @@ mod tests {
     fn test_new_initial_position() {
         let position = Position::new();
 
-        assert_eq!(position.side_to_move, Color::White);
+        assert_eq!(position.side_to_move(), Color::White);
 
         assert_eq!(position[Square::A1], Some(Piece::WHITE_ROOK));
         assert_eq!(position[Square::B1], Some(Piece::WHITE_KNIGHT));
@@ -796,15 +1037,15 @@ mod tests {
 
         assert_eq!(position.en_passant_square(), None);
 
-        assert_eq!(position.halfmove_clock, 0);
-        assert_eq!(position.fullmove_number, 1);
+        assert_eq!(position.state.halfmove_clock, 0);
+        assert_eq!(position.state.fullmove_number, 1);
     }
 
     #[test]
     fn test_new_from_fen_black_to_play() {
         let position = Position::new_from_fen("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1").unwrap();
 
-        assert_eq!(position.side_to_move, Color::Black);
+        assert_eq!(position.state.side_to_move, Color::Black);
     }
 
     #[test]
@@ -871,6 +1112,7 @@ mod tests {
             "r3k2r/pppbqppp/2n1bn2/3pp3/3PP3/2N1BN2/PPPBQPPP/R3K2R w - - 0 7",
             "1rrkrr2/8/8/8/8/8/8/1RRKRR2 w KQkq - 0 1",
             "1rrkrr2/8/8/8/8/8/8/1RRKRR2 w ECec - 0 1",
+            "r3k2R/8/8/8/8/8/8/R3K3 b Qq - 0 1",
         ];
 
         for fen in fens.iter() {
@@ -1020,5 +1262,15 @@ mod tests {
 
         let blockers = position.blockers(Color::White);
         assert_eq!(blockers, Bitboard::EMPTY);
+    }
+
+    #[test]
+    fn test_to_compact_string() {
+        let position = Position::new_from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1").unwrap();
+
+        assert_eq!(
+            position.to_compact_string(),
+            "8  r n b q k b n r\n7  p p p p p p p p\n6  . . . . . . . .\n5  . . . . . . . .\n4  . . . . . . . .\n3  . . . . . . . .\n2  P P P P P P P P\n1  R N B Q K B N R\n   a b c d e f g h"
+        );
     }
 }

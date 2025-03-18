@@ -1,4 +1,4 @@
-use crate::chess::{
+use crate::{
     bitboard::Bitboard,
     coordinates::{File, Rank, Square},
     piece::{Color, Piece, PieceType},

@@ -1,8 +1,8 @@
 use std::convert::From;
 use std::fmt::{self, Display};
 
-use crate::chess::bitboard::Bitboard;
-use crate::chess::piece::Color;
+use crate::bitboard::Bitboard;
+use crate::piece::Color;
 
 /// Error type for the coordinates module.
 #[derive(Debug, PartialEq)]

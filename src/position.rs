@@ -1,4 +1,4 @@
-use std::ops::Index;
+use std::{default, mem::MaybeUninit, ops::Index};
 
 use super::{
     bitboard::Bitboard,
@@ -121,6 +121,80 @@ impl Default for GameState {
 }
 
 //======================================================================================================================
+// History implementation
+//======================================================================================================================
+
+/// A stack-like data structure that maintains a history of previous game states.
+///
+/// This structure efficiently stores game states from previous moves to enable move undoing and position repetition
+/// detection. It uses a fixed-size array to avoid heap allocations during gameplay.
+///
+/// # Capacity
+/// The history can store up to 2048 game states, which is enough for even the longest practical chess games.
+///
+/// # Safety
+/// Does not perform bounds checking in release builds for performance reasons.
+#[derive(Clone)]
+pub struct History {
+    pub states: [GameState; 2048],
+    pub count: usize,
+}
+
+impl Default for History {
+    /// Creates a new empty history with uninitialized state storage.
+    ///
+    /// # Returns
+    /// A History with count set to 0 and an uninitialized array of game states.
+    ///
+    /// # Safety
+    /// Uses unsafe code to avoid initializing the entire array for performance reasons. The count field ensures we only
+    /// access initialized elements.
+    fn default() -> Self {
+        Self {
+            states: unsafe {
+                let block = MaybeUninit::uninit();
+                block.assume_init()
+            },
+            count: 0,
+        }
+    }
+}
+
+impl History {
+    /// Adds a game state to the history.
+    ///
+    /// # Parameters
+    /// * `state` - The game state to add to the history
+    ///
+    /// # Panics
+    /// In debug builds, panics if the history is full (count >= 2048). In release builds, this check is omitted for
+    /// performance.
+    pub fn push(&mut self, state: GameState) {
+        debug_assert!(self.count < self.states.len());
+
+        self.states[self.count] = state;
+        self.count += 1;
+    }
+
+    /// Removes and returns the most recent game state from the history.
+    ///
+    /// # Returns
+    /// The most recently added game state.
+    ///
+    /// # Panics
+    /// In debug builds, panics if the history is empty (count == 0). In release builds, this check is omitted for
+    /// performance.
+    pub fn pop(&mut self) -> GameState {
+        debug_assert!(self.count > 0);
+
+        self.count -= 1;
+        self.states[self.count]
+    }
+}
+
+impl History {}
+
+//======================================================================================================================
 // Position implementation
 //======================================================================================================================
 
@@ -134,7 +208,7 @@ pub struct Position {
     castling_path: [Bitboard; CastlingSide::COUNT],
     castling_rights_mask: [CastlingRight; Square::COUNT],
     state: GameState,
-    history: Vec<GameState>,
+    history: History,
 }
 
 impl Position {
@@ -1028,7 +1102,7 @@ impl Position {
             MoveType::Castling(side) => self.unmake_castling(mv, side),
         }
 
-        self.state = self.history.pop().expect("There should be a state in the history.");
+        self.state = self.history.pop();
     }
 }
 
@@ -1042,7 +1116,7 @@ impl Default for Position {
             castling_path: [Square::E1 | Square::E8, Square::C1 | Square::D1 | Square::C8 | Square::D8],
             castling_rights_mask: [CastlingRight::empty(); Square::COUNT],
             state: GameState::default(),
-            history: Vec::new(),
+            history: History::default(),
         }
     }
 }

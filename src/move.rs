@@ -113,6 +113,7 @@ impl From<MoveType> for u8 {
 
 // This is a struct that represents a move in a chess game.
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Hash)]
+#[repr(align(8))]
 pub struct Move {
     from_square: Square,
     to_square: Square,
@@ -180,6 +181,29 @@ impl Move {
     /// Returns the type of move.
     pub fn move_type(self) -> MoveType {
         self.move_type
+    }
+
+    /// Converts a chess move to UCI (Universal Chess Interface) string notation.
+    ///
+    /// The UCI protocol represents moves as a string with:
+    /// - The origin square (e.g., "e2")
+    /// - The destination square (e.g., "e4")
+    /// - An optional promotion piece character (e.g., "q" for queen promotion)
+    ///
+    /// # Returns
+    /// A String representing the move in UCI format (e.g., "e2e4", "e7e8q"). For regular moves and captures, only the
+    /// squares are included. For promotions, the promotion piece character is appended.
+    ///
+    /// # Examples
+    /// - A basic move from e2 to e4 returns "e2e4"
+    /// - A queen promotion from e7 to e8 returns "e7e8q"
+    pub fn to_uci_string(self) -> String {
+        let promotion = match self.move_type {
+            MoveType::Promotion(promotion) => promotion.to_string(),
+            MoveType::CapturePromotion { promotion, .. } => promotion.to_string(),
+            _ => "".to_string(),
+        };
+        format!("{}{}{}", self.from_square, self.to_square, promotion)
     }
 }
 

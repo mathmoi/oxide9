@@ -6822,5 +6822,53 @@
                 "fen": "4k3/8/8/8/4Pp2/8/8/4K3 b - e3 0 2"
             }
         ]
+    },
+    {
+        "fen": "rnbqkb1r/pppppppp/8/8/4n3/3P4/PPPKPPPP/RNBQ1BNR w kq - 0 1",
+        "description": "White can take attacking knight to escape check",
+        "moves": [
+            {
+                "move": {
+                    "from": "d2",
+                    "to": "e3",
+                    "piece": "K",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "d2e3",
+                "san": "Ke3",
+                "lan": "Kd2-e3",
+                "fen": "rnbqkb1r/pppppppp/8/8/4n3/3PK3/PPP1PPPP/RNBQ1BNR b kq - 1 1"
+            },
+            {
+                "move": {
+                    "from": "d2",
+                    "to": "e1",
+                    "piece": "K",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "d2e1",
+                "san": "Ke1",
+                "lan": "Kd2-e1",
+                "fen": "rnbqkb1r/pppppppp/8/8/4n3/3P4/PPP1PPPP/RNBQKBNR b kq - 1 1"
+            },
+            {
+                "move": {
+                    "from": "d3",
+                    "to": "e4",
+                    "piece": "P",
+                    "capture": "n",
+                    "promotion": null,
+                    "type": "Capture"
+                },
+                "uci": "d3e4",
+                "san": "dxe4",
+                "lan": "d3xe4",
+                "fen": "rnbqkb1r/pppppppp/8/8/4P3/8/PPPKPPPP/RNBQ1BNR b kq - 0 1"
+            }
+        ]
     }
 ]

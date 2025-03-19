@@ -9,7 +9,7 @@ use super::{
 };
 
 /// Error type for parsing a FEN (Forsyth-Edwards Notation) string.
-#[derive(Debug)]
+#[derive(Debug)] // TODO : Should use thiserror
 pub enum FenError {
     InvalidPiecePlacement,
     InvalidActiveColor,
@@ -94,6 +94,7 @@ impl From<(Color, PieceType, PieceType)> for OccupancyFilter {
 //======================================================================================================================
 
 #[derive(Clone, Copy)]
+#[repr(align(16))]
 pub struct GameState {
     side_to_move: Color,
     castling_rights: CastlingRight,
@@ -101,6 +102,7 @@ pub struct GameState {
     halfmove_clock: u16,
     fullmove_number: u16,
     last_move: Option<Move>,
+    side_to_move_blockers: Bitboard,
 }
 
 /// Default implementation for the GameState struct.
@@ -113,6 +115,7 @@ impl Default for GameState {
             halfmove_clock: 0,
             fullmove_number: 1,
             last_move: None,
+            side_to_move_blockers: Bitboard::EMPTY,
         }
     }
 }
@@ -288,14 +291,16 @@ impl Position {
         let mut fields = fen.split_whitespace();
         position.read_piece_placement(fields.next().ok_or(FenError::MissingField)?)?;
         position.read_active_color(fields.next().ok_or(FenError::MissingField)?)?;
-        position.read_castling(fields.next().ok_or(FenError::MissingField)?)?;
-        position.read_en_passant_square(fields.next().ok_or(FenError::MissingField)?)?;
+        position.read_castling(fields.next().unwrap_or("-"))?;
+        position.read_en_passant_square(fields.next().unwrap_or("-"))?;
 
         position.state.halfmove_clock =
-            fields.next().ok_or(FenError::MissingField)?.parse().map_err(|_| FenError::InvalidHalfmoveClock)?;
+            fields.next().unwrap_or("0").parse().map_err(|_| FenError::InvalidHalfmoveClock)?;
 
         position.state.fullmove_number =
-            fields.next().ok_or(FenError::MissingField)?.parse().map_err(|_| FenError::InvalidFullmoveNumber)?;
+            fields.next().unwrap_or("1").parse().map_err(|_| FenError::InvalidFullmoveNumber)?;
+
+        position.state.side_to_move_blockers = position.blockers(position.side_to_move());
 
         Ok(position)
     }
@@ -644,32 +649,32 @@ impl Position {
     ///
     /// * `bool` - Returns `true` if any piece of the specified color attacks the target square, `false` otherwise
     pub fn is_attacked(&self, sq: Square, occupied: Bitboard, color: Color) -> bool {
-        // TODO : Evaluate a possible optimisation from Stockfish where we first check if the square is attacked by a
-        // piece on an empty board. This way we can avoid the expensive bitboard operations for sliders. If event with
-        // an empty position the square is not attacked by a slider, we can return true immediately.
-
         let queens_rooks = self.occupied((color, PieceType::Rook, PieceType::Queen));
-        if !(attacks_from::<{ PieceType::ROOK_VALUE }>(occupied, sq) & queens_rooks).has_none() {
+        if attacks_from_rooks(sq).has_any()
+            && (attacks_from::<{ PieceType::ROOK_VALUE }>(occupied, sq) & queens_rooks).has_any()
+        {
             return true;
         }
 
         let queens_bishops = self.occupied((color, PieceType::Bishop, PieceType::Queen));
-        if !(attacks_from::<{ PieceType::BISHOP_VALUE }>(occupied, sq) & queens_bishops).has_none() {
+        if attacks_from_bishops(sq).has_any()
+            && (attacks_from::<{ PieceType::BISHOP_VALUE }>(occupied, sq) & queens_bishops).has_any()
+        {
             return true;
         }
 
         let knights = self.occupied((color, PieceType::Knight));
-        if !(attacks_from::<{ PieceType::KNIGHT_VALUE }>(Bitboard::EMPTY, sq) & knights).has_none() {
+        if (attacks_from::<{ PieceType::KNIGHT_VALUE }>(Bitboard::EMPTY, sq) & knights).has_any() {
             return true;
         }
 
         let king = self.occupied((color, PieceType::King));
-        if !(attacks_from::<{ PieceType::KING_VALUE }>(Bitboard::EMPTY, sq) & king).has_none() {
+        if (attacks_from::<{ PieceType::KING_VALUE }>(Bitboard::EMPTY, sq) & king).has_any() {
             return true;
         }
 
         let pawns = self.occupied((color, PieceType::Pawn));
-        if !(attacks_from_pawns(color, sq) & pawns).has_none() {
+        if (attacks_from_pawns(color, sq) & pawns).has_any() {
             return true;
         }
 
@@ -736,8 +741,7 @@ impl Position {
     /// Only considers absolute pins from sliding pieces. A piece is considered a blocker only if it is the single piece
     /// between the king and an attacking sliding piece. Multiple pieces between the king and a sliding piece are not
     /// considered blockers since they don't create a pin.
-    pub fn blockers(&self, color: Color) -> Bitboard {
-        // TODO : This should be part of the position state to avoid recomputing it every time.
+    fn blockers(&self, color: Color) -> Bitboard {
         let king_sq = self.king_square(color);
 
         let rooks = self.occupied((!color, PieceType::Rook));
@@ -810,8 +814,7 @@ impl Position {
         }
 
         // If the move is not a king move, the piece must not be pinned or if it is pinned it must move along the pin.
-        let blockers = self.blockers(mv.piece().color());
-        (blockers & mv.from_square()).has_none()
+        (self.state.side_to_move_blockers & mv.from_square()).has_none()
             || Square::are_aligned(mv.from_square(), mv.to_square(), self.king_square(self.side_to_move()))
     }
 
@@ -951,6 +954,9 @@ impl Position {
         self.state.side_to_move = !self.state.side_to_move;
 
         self.state.last_move = Some(mv);
+
+        // recompute the blockers for the side to move
+        self.state.side_to_move_blockers = self.blockers(self.side_to_move());
     }
 
     fn unmake_basic(&mut self, mv: Move) {
@@ -1199,6 +1205,16 @@ mod tests {
             let position = Position::new_from_fen(fen).unwrap();
             assert_eq!(fen, &position.to_fen());
         }
+    }
+
+    #[test]
+    fn test_to_fen_without_minimals_fields() {
+        let position = Position::new_from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w").unwrap();
+
+        assert_eq!(position.castling_availability(), CastlingRight::empty());
+        assert_eq!(position.en_passant_square(), None);
+        assert_eq!(position.state.halfmove_clock, 0);
+        assert_eq!(position.state.fullmove_number, 1);
     }
 
     #[test]

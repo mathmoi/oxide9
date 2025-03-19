@@ -1,7 +1,7 @@
 use colored::*;
-use oxide9::chess::{
+use oxide9::{
     coordinates::{Rank, Square},
-    move_gen::generation::{generate_moves, MoveGenerationType},
+    move_gen::{generation::generate_all_moves, move_list::MoveList},
     piece::{Piece, PieceType},
     position::Position,
     r#move::{CastlingSide, Move},
@@ -221,12 +221,8 @@ fn test_move_generation(test: &Test) -> Result<(), MoveGeneratorTestError> {
     let expected_moves = expected_moves?;
 
     // Generate the moves
-    let mut pseudo_legal_moves: Vec<Move> = vec![];
-    if position.is_check() {
-        generate_moves::<{ MoveGenerationType::EVASIONS_VALUE }>(&position, &mut pseudo_legal_moves);
-    } else {
-        generate_moves::<{ MoveGenerationType::ALL_VALUE }>(&position, &mut pseudo_legal_moves);
-    }
+    let mut pseudo_legal_moves = MoveList::new();
+    generate_all_moves(&position, &mut pseudo_legal_moves);
     let legal_moves: Vec<Move> = pseudo_legal_moves.iter().filter(|m| position.is_legal(**m)).copied().collect();
 
     // Compare the moves

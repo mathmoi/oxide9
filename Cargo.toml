@@ -12,21 +12,17 @@ harness = false
 [dependencies]
 bitflags = "2.8.0"
 clap = { version = "4.5.32", features = ["derive"] }
+thiserror = "2.0.11"
 
 [dev-dependencies]
 colored = "3.0.0"
 serde = { version = "1.0.218", features = ["derive"] }
 serde_json = "1.0.139"
-thiserror = "2.0.11"
 
 [profile.release]
-opt-level = 3            # Maximum optimization
 lto = true               # Enable link-time optimization
 codegen-units = 1        # Maximize optimizations, slower compilation
-panic = "abort"          # Remove panic unwinding overhead
-strip = true             # Remove debug symbols
-debug = false            # No debug symbols in release for smaller binary
-rpath = false            # Don't embed library search paths
-debug-assertions = false # Disable debug assertions for performance
-incremental = false      # Disable incremental compilation
-overflow-checks = false  # Disable overflow checks for performance
+
+[profile.flamegraph]
+inherits = "release"
+debug = true

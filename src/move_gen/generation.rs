@@ -6,7 +6,7 @@ use crate::{
     r#move::{CastlingRight, CastlingSide, Move},
 };
 
-use super::attacks::attacks_from;
+use super::{attacks::attacks_from, move_list::MoveList};
 
 /// Enum to specify the type of moves to generate.
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -56,7 +56,7 @@ fn add_captures_promotions<const COLOR_VALUE: u8>(
     to_sq: Square,
     piece: Piece,
     position: &Position,
-    list: &mut Vec<Move>,
+    list: &mut MoveList,
 ) {
     let color: Color = COLOR_VALUE.into();
     list.push(Move::new_capture_promotion(
@@ -89,7 +89,7 @@ fn add_captures_promotions<const COLOR_VALUE: u8>(
     ));
 }
 
-fn generate_pawn_moves<const TYPE: u8, const COLOR: u8>(position: &Position, targets: Bitboard, list: &mut Vec<Move>) {
+fn generate_pawn_moves<const TYPE: u8, const COLOR: u8>(position: &Position, targets: Bitboard, list: &mut MoveList) {
     let generation_type: MoveGenerationType = TYPE.into();
     let color: Color = COLOR.into();
 
@@ -216,7 +216,7 @@ fn generate_pawn_moves<const TYPE: u8, const COLOR: u8>(position: &Position, tar
 fn generate_piece_moves<const COLOR: u8, const PIECE_TYPE: u8>(
     position: &Position,
     targets: Bitboard,
-    list: &mut Vec<Move>,
+    list: &mut MoveList,
 ) {
     let piece = Piece::new(COLOR.into(), PIECE_TYPE.into());
     let bb_from = position.occupied(piece);
@@ -237,7 +237,7 @@ fn generate_piece_moves<const COLOR: u8, const PIECE_TYPE: u8>(
     }
 }
 
-fn generate_castlings<const COLOR: u8, const SIDE: u8>(position: &Position, list: &mut Vec<Move>) {
+fn generate_castlings<const COLOR: u8, const SIDE: u8>(position: &Position, list: &mut MoveList) {
     let color = Color::from(COLOR);
     let side = match SIDE {
         CastlingSide::KINGSIDE_VALUE => CastlingSide::Kingside,
@@ -294,7 +294,7 @@ fn generate_castlings<const COLOR: u8, const SIDE: u8>(position: &Position, list
     list.push(Move::new_castling(king_sq, king_final_sq, king, side));
 }
 
-fn generate_moves_color<const TYPE: u8, const COLOR: u8>(position: &Position, list: &mut Vec<Move>) {
+fn generate_moves_color<const TYPE: u8, const COLOR: u8>(position: &Position, list: &mut MoveList) {
     debug_assert!(TYPE != MoveGenerationType::EVASIONS_VALUE || position.is_check());
 
     let color = Color::from(COLOR);
@@ -335,9 +335,17 @@ fn generate_moves_color<const TYPE: u8, const COLOR: u8>(position: &Position, li
 }
 
 /// Generates all pseudo-legal moves for the given position.
-pub fn generate_moves<const TYPE: u8>(position: &Position, list: &mut Vec<Move>) {
+pub fn generate_moves<const TYPE: u8>(position: &Position, list: &mut MoveList) {
     match position.side_to_move() {
         Color::White => generate_moves_color::<TYPE, { Color::WHITE_VALUE }>(position, list),
         Color::Black => generate_moves_color::<TYPE, { Color::BLACK_VALUE }>(position, list),
+    }
+}
+
+pub fn generate_all_moves(position: &Position, list: &mut MoveList) {
+    if position.is_check() {
+        generate_moves::<{ MoveGenerationType::EVASIONS_VALUE }>(&position, list);
+    } else {
+        generate_moves::<{ MoveGenerationType::ALL_VALUE }>(&position, list);
     }
 }

@@ -1,5 +1,6 @@
 use std::{
     arch::x86_64::_pdep_u64,
+    array,
     fmt::{Debug, Formatter},
     sync::OnceLock,
 };
@@ -197,7 +198,9 @@ impl Bitboard {
                 Box::new(|square| square.left(1).and_then(|square| square.down(1))),
             ];
 
-            let mut between = [Bitboard::EMPTY; Square::COUNT * Square::COUNT];
+            let mut between: [Bitboard; Square::COUNT * Square::COUNT] =
+                array::from_fn(|i| Square::from((i & 0b111111) as u8).into());
+
             for from in Square::ALL {
                 for direction in directions.iter() {
                     let mut bb = Bitboard::EMPTY;
@@ -752,7 +755,7 @@ mod tests {
 
     #[test]
     fn test_between() {
-        assert_eq!(Bitboard::between(Square::A1, Square::A1), Bitboard::EMPTY);
+        assert_eq!(Bitboard::between(Square::A1, Square::A1), Bitboard::from(Square::A1));
         assert_eq!(Bitboard::between(Square::A1, Square::A2), Bitboard::from(Square::A2));
         assert_eq!(Bitboard::between(Square::A1, Square::C1), Square::B1 | Square::C1);
         assert_eq!(

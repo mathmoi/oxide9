@@ -1,4 +1,12 @@
 use clap::{Parser, Subcommand};
+use oxide9::perft::perft;
+use thiserror::Error;
+
+#[derive(Error, Debug)]
+enum Oxide9Error {
+    #[error("Error during the perft command: {0}")]
+    PerftError(#[from] oxide9::perft::PerftError),
+}
 
 /// Command-line interface arguments for the oxide9 chess engine.
 ///
@@ -53,9 +61,24 @@ enum Commands {
     },
 }
 
-/// Main entry point for the oxide9 chess engine.
-fn main() {
+fn run() -> Result<(), Oxide9Error> {
     let args = Oxide9Args::parse();
 
-    println!("command : {:?}", args.command.unwrap_or(Commands::Uci));
+    match args.command.unwrap_or(Commands::Uci) {
+        Commands::Uci => {
+            unimplemented!();
+        }
+        Commands::Perft { depth, fen } => {
+            perft(&fen, depth)?;
+        }
+    }
+    Ok(())
+}
+
+/// Main entry point for the oxide9 chess engine.
+fn main() {
+    if let Err(e) = run() {
+        eprintln!("{}", e);
+        std::process::exit(1);
+    }
 }

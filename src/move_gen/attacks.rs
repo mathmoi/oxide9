@@ -1,10 +1,17 @@
-use std::sync::OnceLock;
-
 use crate::{
     bitboard::Bitboard,
     coordinates::{File, Square},
     piece::{Color, PieceType},
 };
+
+/// Initializes the attack generation module. This function must be called before using any other functions in this module.
+pub fn initialize() {
+    pext_sliders::initialize_rook_pext_data();
+    initialize_king_attacks();
+    initialize_knight_attacks();
+    initialize_rook_attacks();
+    initialize_bishop_attacks();
+}
 
 mod naive_sliders {
     use crate::{bitboard::Bitboard, coordinates::Square};
@@ -232,7 +239,7 @@ mod naive_sliders {
 }
 
 mod pext_sliders {
-    use std::{array, sync::OnceLock};
+    use std::{array, mem::MaybeUninit, sync::OnceLock};
 
     use crate::{
         bitboard::Bitboard,
@@ -249,7 +256,12 @@ mod pext_sliders {
     // Rook attacks
     //==================================================================================================================
 
-    static ROOK_PEXT_DATA: OnceLock<[PextData; Square::COUNT]> = OnceLock::new();
+    static mut ROOK_PEXT_DATA: MaybeUninit<[PextData; Square::COUNT]> = MaybeUninit::uninit();
+
+    pub fn initialize_rook_pext_data() {
+        let data = array::from_fn(|index| get_rook_pext_data_for_square(Square::from(index as u8)));
+        unsafe { ROOK_PEXT_DATA.write(data) };
+    }
 
     fn get_rook_pext_data_for_square(sq: Square) -> PextData {
         let first_and_last_rank: Bitboard = Rank::R1 | Rank::R8;
@@ -264,7 +276,7 @@ mod pext_sliders {
     }
 
     fn get_rook_pext_data() -> &'static [PextData; Square::COUNT] {
-        ROOK_PEXT_DATA.get_or_init(|| array::from_fn(|index| get_rook_pext_data_for_square(Square::from(index as u8))))
+        unsafe { &*ROOK_PEXT_DATA.as_ptr() }
     }
 
     /// Returns a bitboard with all squares attacked by a rook on a given square.
@@ -303,7 +315,15 @@ mod pext_sliders {
     }
 }
 
-static ROOK_ATTACKS: OnceLock<[Bitboard; Square::COUNT]> = OnceLock::new();
+static mut ROOK_ATTACKS: [Bitboard; Square::COUNT] = [Bitboard::EMPTY; Square::COUNT];
+
+fn initialize_rook_attacks() {
+    unsafe {
+        ROOK_ATTACKS = std::array::from_fn(|index| {
+            attacks_from::<{ PieceType::ROOK_VALUE }>(Bitboard::EMPTY, Square::from(index as u8))
+        });
+    }
+}
 
 /// Returns a bitboard representing all squares attacked by a rook on a given square on an empty board.
 ///
@@ -313,15 +333,18 @@ static ROOK_ATTACKS: OnceLock<[Bitboard; Square::COUNT]> = OnceLock::new();
 /// # Returns
 /// A bitboard representing all squares that would be attacked by a rook on the given square on an empty board.
 pub fn attacks_from_rooks(square: Square) -> Bitboard {
-    let lookup = ROOK_ATTACKS.get_or_init(|| {
-        std::array::from_fn(|index| {
-            attacks_from::<{ PieceType::ROOK_VALUE }>(Bitboard::EMPTY, Square::from(index as u8))
-        })
-    });
-    lookup[usize::from(square)]
+    unsafe { ROOK_ATTACKS[usize::from(square)] }
 }
 
-static BISHOP_ATTACKS: OnceLock<[Bitboard; Square::COUNT]> = OnceLock::new();
+static mut BISHOP_ATTACKS: [Bitboard; Square::COUNT] = [Bitboard::EMPTY; Square::COUNT];
+
+fn initialize_bishop_attacks() {
+    unsafe {
+        BISHOP_ATTACKS = std::array::from_fn(|index| {
+            attacks_from::<{ PieceType::BISHOP_VALUE }>(Bitboard::EMPTY, Square::from(index as u8))
+        });
+    }
+}
 
 /// Returns a bitboard representing all squares attacked by a bishop on a given square on an empty board.
 ///
@@ -331,79 +354,70 @@ static BISHOP_ATTACKS: OnceLock<[Bitboard; Square::COUNT]> = OnceLock::new();
 /// # Returns
 /// A bitboard representing all squares that would be attacked by a bishop on the given square on an empty board.
 pub fn attacks_from_bishops(square: Square) -> Bitboard {
-    let lookup = BISHOP_ATTACKS.get_or_init(|| {
-        std::array::from_fn(|index| {
-            attacks_from::<{ PieceType::BISHOP_VALUE }>(Bitboard::EMPTY, Square::from(index as u8))
-        })
-    });
-    lookup[usize::from(square)]
+    unsafe { BISHOP_ATTACKS[usize::from(square)] }
 }
 
 /// Lookup table for all squares attacked by a king on a given square.
-static KING_ATTACKS: OnceLock<[Bitboard; Square::COUNT]> = OnceLock::new();
+static mut KING_ATTACKS: [Bitboard; Square::COUNT] = [Bitboard::EMPTY; Square::COUNT];
 
-fn attacks_from_kings(square: Square) -> Bitboard {
-    let lookup = KING_ATTACKS.get_or_init(|| {
-        let mut attacks = [Bitboard::EMPTY; Square::COUNT];
+fn initialize_king_attacks() {
+    let directions = [
+        |sq: Square| sq.up(1),
+        |sq: Square| sq.down(1),
+        |sq: Square| sq.left(1),
+        |sq: Square| sq.right(1),
+        |sq: Square| sq.up(1).and_then(|sq| sq.left(1)),
+        |sq: Square| sq.up(1).and_then(|sq| sq.right(1)),
+        |sq: Square| sq.down(1).and_then(|sq| sq.left(1)),
+        |sq: Square| sq.down(1).and_then(|sq| sq.right(1)),
+    ];
 
-        let directions = [
-            |sq: Square| sq.up(1),
-            |sq: Square| sq.down(1),
-            |sq: Square| sq.left(1),
-            |sq: Square| sq.right(1),
-            |sq: Square| sq.up(1).and_then(|sq| sq.left(1)),
-            |sq: Square| sq.up(1).and_then(|sq| sq.right(1)),
-            |sq: Square| sq.down(1).and_then(|sq| sq.left(1)),
-            |sq: Square| sq.down(1).and_then(|sq| sq.right(1)),
-        ];
+    for square in Square::ALL {
+        let mut sq_attacks = Bitboard::EMPTY;
 
-        for square in Square::ALL {
-            let mut sq_attacks = Bitboard::EMPTY;
-
-            for direction in directions.iter() {
-                if let Ok(to) = direction(square) {
-                    sq_attacks |= to;
-                }
+        for direction in directions.iter() {
+            if let Ok(to) = direction(square) {
+                sq_attacks |= to;
             }
-
-            attacks[usize::from(square)] = sq_attacks;
         }
-        attacks
-    });
-    lookup[usize::from(square)]
+
+        unsafe { KING_ATTACKS[usize::from(square)] = sq_attacks };
+    }
 }
 
-static KNIGHT_ATTACKS: OnceLock<[Bitboard; Square::COUNT]> = OnceLock::new();
+fn attacks_from_kings(square: Square) -> Bitboard {
+    unsafe { KING_ATTACKS[usize::from(square)] }
+}
+
+static mut KNIGHT_ATTACKS: [Bitboard; Square::COUNT] = [Bitboard::EMPTY; Square::COUNT];
+
+fn initialize_knight_attacks() {
+    let directions = [
+        |sq: Square| sq.up(2).and_then(|sq| sq.left(1)),
+        |sq: Square| sq.up(2).and_then(|sq| sq.right(1)),
+        |sq: Square| sq.down(2).and_then(|sq| sq.left(1)),
+        |sq: Square| sq.down(2).and_then(|sq| sq.right(1)),
+        |sq: Square| sq.left(2).and_then(|sq| sq.up(1)),
+        |sq: Square| sq.left(2).and_then(|sq| sq.down(1)),
+        |sq: Square| sq.right(2).and_then(|sq| sq.up(1)),
+        |sq: Square| sq.right(2).and_then(|sq| sq.down(1)),
+    ];
+
+    for square in Square::ALL {
+        let mut sq_attacks = Bitboard::EMPTY;
+
+        for direction in directions.iter() {
+            if let Ok(to) = direction(square) {
+                sq_attacks |= to;
+            }
+        }
+
+        unsafe { KNIGHT_ATTACKS[usize::from(square)] = sq_attacks };
+    }
+}
 
 fn attacks_from_knight(square: Square) -> Bitboard {
-    let lookup = KNIGHT_ATTACKS.get_or_init(|| {
-        let mut attacks = [Bitboard::EMPTY; Square::COUNT];
-
-        let directions = [
-            |sq: Square| sq.up(2).and_then(|sq| sq.left(1)),
-            |sq: Square| sq.up(2).and_then(|sq| sq.right(1)),
-            |sq: Square| sq.down(2).and_then(|sq| sq.left(1)),
-            |sq: Square| sq.down(2).and_then(|sq| sq.right(1)),
-            |sq: Square| sq.left(2).and_then(|sq| sq.up(1)),
-            |sq: Square| sq.left(2).and_then(|sq| sq.down(1)),
-            |sq: Square| sq.right(2).and_then(|sq| sq.up(1)),
-            |sq: Square| sq.right(2).and_then(|sq| sq.down(1)),
-        ];
-
-        for square in Square::ALL {
-            let mut sq_attacks = Bitboard::EMPTY;
-
-            for direction in directions.iter() {
-                if let Ok(to) = direction(square) {
-                    sq_attacks |= to;
-                }
-            }
-
-            attacks[usize::from(square)] = sq_attacks;
-        }
-        attacks
-    });
-    lookup[usize::from(square)]
+    unsafe { KNIGHT_ATTACKS[usize::from(square)] }
 }
 
 /// Calculates the squares attacked by a pawn of the given color from the specified square.

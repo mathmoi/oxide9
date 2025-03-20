@@ -2,7 +2,6 @@ use std::{
     arch::x86_64::_pdep_u64,
     array,
     fmt::{Debug, Formatter},
-    sync::OnceLock,
 };
 
 use super::coordinates::{Antidiagonal, CoordinatesResult, Diagonal, File, Rank, Square};
@@ -12,9 +11,68 @@ use super::coordinates::{Antidiagonal, CoordinatesResult, Diagonal, File, Rank, 
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Bitboard(u64);
 
-static BITBOARD_BETWEEN: OnceLock<[Bitboard; Square::COUNT * Square::COUNT]> = OnceLock::new();
+static mut BETWEEN_LOOKUP: [Bitboard; Square::COUNT * Square::COUNT] = [Bitboard::EMPTY; Square::COUNT * Square::COUNT];
 
-static BITBOARD_LINE: OnceLock<[Bitboard; Square::COUNT * Square::COUNT]> = OnceLock::new();
+static mut LINE_LOOKUP: [Bitboard; Square::COUNT * Square::COUNT] = [Bitboard::EMPTY; Square::COUNT * Square::COUNT];
+
+/// Initializes the bitboard module. This method must be called before using any
+/// other functions in the module. It needs to be called only once.
+pub fn initialize() {
+    initialize_between_lookup();
+    initialize_line_lookup();
+}
+
+fn initialize_between_lookup() {
+    let directions: [Box<dyn Fn(Square) -> CoordinatesResult<Square>>; 8] = [
+        Box::new(|square| square.right(1)),
+        Box::new(|square| square.left(1)),
+        Box::new(|square| square.up(1)),
+        Box::new(|square| square.down(1)),
+        Box::new(|square| square.right(1).and_then(|square| square.up(1))),
+        Box::new(|square| square.right(1).and_then(|square| square.down(1))),
+        Box::new(|square| square.left(1).and_then(|square| square.up(1))),
+        Box::new(|square| square.left(1).and_then(|square| square.down(1))),
+    ];
+
+    unsafe { BETWEEN_LOOKUP = array::from_fn(|i| Square::from((i & 0b111111) as u8).into()) };
+
+    for from in Square::ALL {
+        for direction in directions.iter() {
+            let mut bb = Bitboard::EMPTY;
+            let mut next = direction(from);
+            while let Ok(to) = next {
+                bb |= to;
+                unsafe { BETWEEN_LOOKUP[usize::from(from) * Square::COUNT + usize::from(to)] = bb };
+                next = direction(to);
+            }
+        }
+    }
+}
+
+fn initialize_line_lookup() {
+    #[rustfmt::skip]
+    let directions: [(fn(Square) -> CoordinatesResult<Square>, fn(Square) -> Bitboard); 4] = [
+        (|sq| sq.right(1),                           |sq| Bitboard::from(sq.rank())),
+        (|sq| sq.up(1),                              |sq| Bitboard::from(sq.file())),
+        (|sq| sq.right(1).and_then(|sq| sq.up(1)),   |sq| Bitboard::from(sq.diagonal())),
+        (|sq| sq.right(1).and_then(|sq| sq.down(1)), |sq| Bitboard::from(sq.antidiagonal())),
+    ];
+
+    unsafe { LINE_LOOKUP = [Bitboard::EMPTY; Square::COUNT * Square::COUNT] };
+    for sq1 in Square::ALL {
+        for (get_next, get_line) in directions {
+            let line = get_line(sq1);
+            let mut maybe_sq2 = get_next(sq1);
+            while let Ok(sq2) = maybe_sq2 {
+                unsafe {
+                    LINE_LOOKUP[usize::from(sq1) * Square::COUNT + usize::from(sq2)] = line;
+                    LINE_LOOKUP[usize::from(sq2) * Square::COUNT + usize::from(sq1)] = line;
+                }
+                maybe_sq2 = get_next(sq2);
+            }
+        }
+    }
+}
 
 impl Bitboard {
     /// Creates a new bitboard with the given value.
@@ -186,36 +244,7 @@ impl Bitboard {
     /// (rank/file) and diagonal paths. If the squares are not on the same rank, file, or diagonal, the function returns
     /// a bitboard with only the to square set.
     pub fn between(from: Square, to: Square) -> Bitboard {
-        let lookup = BITBOARD_BETWEEN.get_or_init(|| {
-            let directions: [Box<dyn Fn(Square) -> CoordinatesResult<Square>>; 8] = [
-                Box::new(|square| square.right(1)),
-                Box::new(|square| square.left(1)),
-                Box::new(|square| square.up(1)),
-                Box::new(|square| square.down(1)),
-                Box::new(|square| square.right(1).and_then(|square| square.up(1))),
-                Box::new(|square| square.right(1).and_then(|square| square.down(1))),
-                Box::new(|square| square.left(1).and_then(|square| square.up(1))),
-                Box::new(|square| square.left(1).and_then(|square| square.down(1))),
-            ];
-
-            let mut between: [Bitboard; Square::COUNT * Square::COUNT] =
-                array::from_fn(|i| Square::from((i & 0b111111) as u8).into());
-
-            for from in Square::ALL {
-                for direction in directions.iter() {
-                    let mut bb = Bitboard::EMPTY;
-                    let mut next = direction(from);
-                    while let Ok(to) = next {
-                        bb |= to;
-                        between[usize::from(from) * Square::COUNT + usize::from(to)] = bb;
-                        next = direction(to);
-                    }
-                }
-            }
-            between
-        });
-
-        lookup[usize::from(from) * Square::COUNT + usize::from(to)]
+        unsafe { BETWEEN_LOOKUP[usize::from(from) * Square::COUNT + usize::from(to)] }
     }
 
     /// Returns a bitboard representing the line (file, rank, or diagonal) shared between two squares.
@@ -234,32 +263,7 @@ impl Bitboard {
     /// If the squares are not on the same rank, file, diagonal, or antidiagonal (i.e., they are not "aligned"), the
     /// function returns an empty bitboard (Bitboard::EMPTY).
     pub fn line(sq1: Square, sq2: Square) -> Bitboard {
-        let lookup = BITBOARD_LINE.get_or_init(|| {
-            #[rustfmt::skip]
-            let directions: [(fn(Square) -> CoordinatesResult<Square>, fn(Square) -> Bitboard); 4] = [
-                (|sq| sq.right(1),                           |sq| Bitboard::from(sq.rank())),
-                (|sq| sq.up(1),                              |sq| Bitboard::from(sq.file())),
-                (|sq| sq.right(1).and_then(|sq| sq.up(1)),   |sq| Bitboard::from(sq.diagonal())),
-                (|sq| sq.right(1).and_then(|sq| sq.down(1)), |sq| Bitboard::from(sq.antidiagonal())),
-            ];
-
-            let mut lines = [Bitboard::EMPTY; Square::COUNT * Square::COUNT];
-            for sq1 in Square::ALL {
-                for (get_next, get_line) in directions {
-                    let line = get_line(sq1);
-                    let mut maybe_sq2 = get_next(sq1);
-                    while let Ok(sq2) = maybe_sq2 {
-                        lines[usize::from(sq1) * Square::COUNT + usize::from(sq2)] = line;
-                        lines[usize::from(sq2) * Square::COUNT + usize::from(sq1)] = line;
-                        maybe_sq2 = get_next(sq2);
-                    }
-                }
-            }
-
-            lines
-        });
-
-        lookup[usize::from(sq1) * Square::COUNT + usize::from(sq2)]
+        unsafe { LINE_LOOKUP[usize::from(sq1) * Square::COUNT + usize::from(sq2)] }
     }
 }
 
@@ -286,21 +290,18 @@ impl Debug for Bitboard {
 
 impl From<Square> for Bitboard {
     fn from(square: Square) -> Self {
-        // TODO : Check if it would be more efficient to have a lookup table
         Bitboard(1u64 << u8::from(square))
     }
 }
 
 impl From<File> for Bitboard {
     fn from(file: File) -> Self {
-        // TODO : Check if it would be more efficient to have a lookup table
         Bitboard(0x0101010101010101 << u8::from(file))
     }
 }
 
 impl From<Rank> for Bitboard {
     fn from(rank: Rank) -> Self {
-        // TODO : Check if it would be more efficient to have a lookup table
         Bitboard(0xff << (8 * u8::from(rank)))
     }
 }

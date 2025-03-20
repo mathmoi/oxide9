@@ -62,6 +62,8 @@ enum Commands {
 }
 
 fn run() -> Result<(), Oxide9Error> {
+    oxide9::initialize();
+
     let args = Oxide9Args::parse();
 
     match args.command.unwrap_or(Commands::Uci) {

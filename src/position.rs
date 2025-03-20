@@ -1,4 +1,4 @@
-use std::{default, mem::MaybeUninit, ops::Index};
+use std::{mem::MaybeUninit, ops::Index};
 
 use super::{
     bitboard::Bitboard,

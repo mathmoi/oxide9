@@ -6,7 +6,8 @@ use crate::{
 
 /// Initializes the attack generation module. This function must be called before using any other functions in this module.
 pub fn initialize() {
-    pext_sliders::initialize_rook_pext_data();
+    let offset = pext_sliders::initialize_rook_pext_data();
+    pext_sliders::initialize_bishop_pext_data(offset);
     initialize_king_attacks();
     initialize_knight_attacks();
     initialize_rook_attacks();
@@ -239,79 +240,96 @@ mod naive_sliders {
 }
 
 mod pext_sliders {
-    use std::{array, mem::MaybeUninit, sync::OnceLock};
-
     use crate::{
         bitboard::Bitboard,
         coordinates::{File, Rank, Square},
     };
 
-    /// This structure contains the data required to perform the PEXT operation for a given square.   
+    /// This structure contains the data required to perform the PEXT operation for a given square.
+    #[derive(Clone, Copy)]
     pub struct PextData {
         mask: Bitboard,
-        lookup: Vec<Bitboard>,
+        offset: usize,
     }
 
     //==================================================================================================================
     // Rook attacks
     //==================================================================================================================
 
-    static mut ROOK_PEXT_DATA: MaybeUninit<[PextData; Square::COUNT]> = MaybeUninit::uninit();
+    static mut PEXT_DATA: [Bitboard; 1000000] = [Bitboard::EMPTY; 1000000]; // NEXT : Choose the size more wisely
 
-    pub fn initialize_rook_pext_data() {
-        let data = array::from_fn(|index| get_rook_pext_data_for_square(Square::from(index as u8)));
-        unsafe { ROOK_PEXT_DATA.write(data) };
-    }
+    static mut ROOK_PEXT_DATA: [PextData; Square::COUNT] =
+        [PextData { mask: Bitboard::EMPTY, offset: 0 }; Square::COUNT];
 
-    fn get_rook_pext_data_for_square(sq: Square) -> PextData {
+    // NEXT : Document
+    pub fn initialize_rook_pext_data() -> usize {
         let first_and_last_rank: Bitboard = Rank::R1 | Rank::R8;
         let first_and_last_file: Bitboard = File::A | File::H;
 
-        let mask = ((sq.file() & !first_and_last_rank) | (sq.rank() & !first_and_last_file)) & !Bitboard::from(sq);
-        let lookup_size = 1u64 << mask.popcnt();
-        let lookup: Vec<Bitboard> =
-            (0..lookup_size).map(|index| super::naive_sliders::attacks_from_rook(mask.pdep(index), sq)).collect();
+        let mut offset: usize = 0;
 
-        PextData { mask, lookup }
-    }
-
-    fn get_rook_pext_data() -> &'static [PextData; Square::COUNT] {
-        unsafe { &*ROOK_PEXT_DATA.as_ptr() }
+        for sq in Square::ALL {
+            let mask = ((sq.file() & !first_and_last_rank) | (sq.rank() & !first_and_last_file)) & !Bitboard::from(sq);
+            let lookup_size = (1 as usize) << mask.popcnt();
+            for index in 0..lookup_size {
+                unsafe {
+                    PEXT_DATA[offset + index] = super::naive_sliders::attacks_from_rook(mask.pdep(index as u64), sq);
+                }
+            }
+            let pext_data = PextData { mask, offset };
+            unsafe {
+                ROOK_PEXT_DATA[usize::from(sq)] = pext_data;
+            }
+            offset += lookup_size;
+        }
+        offset
     }
 
     /// Returns a bitboard with all squares attacked by a rook on a given square.
     pub fn attacks_from_rook(occupied: Bitboard, from_sq: Square) -> Bitboard {
-        let pext_data = &get_rook_pext_data()[usize::from(from_sq)];
-        let index = occupied.pext(pext_data.mask);
-        pext_data.lookup[index as usize]
+        unsafe {
+            let pext_data = ROOK_PEXT_DATA[usize::from(from_sq)];
+            let index = occupied.pext(pext_data.mask);
+            PEXT_DATA[pext_data.offset + index as usize]
+        }
     }
 
     //==================================================================================================================
     // Bishop attacks
     //==================================================================================================================
 
-    static BISHOP_PEXT_DATA: OnceLock<[PextData; Square::COUNT]> = OnceLock::new();
+    static mut BISHOP_PEXT_DATA: [PextData; Square::COUNT] =
+        [PextData { mask: Bitboard::EMPTY, offset: 0 }; Square::COUNT];
 
-    fn get_bishop_pext_data_for_square(sq: Square) -> PextData {
+    // NEXT : Document
+    pub fn initialize_bishop_pext_data(offset: usize) {
         let border = Rank::R1 | Rank::R8 | File::A | File::H;
-        let mask = (Bitboard::from(sq.diagonal()) ^ Bitboard::from(sq.antidiagonal())) & !border;
-        let lookup_size = 1u64 << mask.popcnt();
-        let lookup: Vec<Bitboard> =
-            (0..lookup_size).map(|index| super::naive_sliders::attacks_from_bishop(mask.pdep(index), sq)).collect();
 
-        PextData { mask, lookup }
-    }
+        let mut offset = offset;
 
-    fn get_bishop_pext_data() -> &'static [PextData; Square::COUNT] {
-        BISHOP_PEXT_DATA
-            .get_or_init(|| array::from_fn(|index| get_bishop_pext_data_for_square(Square::from(index as u8))))
+        for sq in Square::ALL {
+            let mask = (Bitboard::from(sq.diagonal()) ^ Bitboard::from(sq.antidiagonal())) & !border;
+            let lookup_size = (1 as usize) << mask.popcnt();
+            for index in 0..lookup_size {
+                unsafe {
+                    PEXT_DATA[offset + index] = super::naive_sliders::attacks_from_bishop(mask.pdep(index as u64), sq);
+                }
+            }
+            let pext_data = PextData { mask, offset };
+            unsafe {
+                BISHOP_PEXT_DATA[usize::from(sq)] = pext_data;
+            }
+            offset += lookup_size;
+        }
     }
 
     /// Returns a bitboard with all squares attacked by a bishop on a given square.
     pub fn attacks_from_bishop(occupied: Bitboard, from_sq: Square) -> Bitboard {
-        let pext_data = &get_bishop_pext_data()[usize::from(from_sq)];
-        let index = occupied.pext(pext_data.mask);
-        pext_data.lookup[index as usize]
+        unsafe {
+            let pext_data = BISHOP_PEXT_DATA[usize::from(from_sq)];
+            let index = occupied.pext(pext_data.mask);
+            PEXT_DATA[pext_data.offset + index as usize]
+        }
     }
 }
 
@@ -481,6 +499,12 @@ pub fn attacks_from<const PIECE_TYPE_VALUE: u8>(occupied: Bitboard, sq: Square) 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use ctor::ctor;
+
+    #[ctor]
+    fn setup() {
+        crate::initialize();
+    }
 
     #[test]
     fn test_attacks_from_rooks() {

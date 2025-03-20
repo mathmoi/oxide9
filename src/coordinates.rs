@@ -632,6 +632,12 @@ impl TryFrom<&str> for Square {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use ctor::ctor;
+
+    #[ctor]
+    fn setup() {
+        crate::initialize();
+    }
 
     mod file_tests {
         use super::*;

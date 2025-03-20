@@ -360,6 +360,8 @@ fn get_resource_path(relative_path: &str) -> Result<PathBuf, TestHarnessError> {
 
 /// The main function for the test harness. It will run the tests and print any unexpected errors.
 fn main() -> Result<(), MoveGeneratorTestError> {
+    oxide9::initialize();
+
     if let Err(error) = run_tests() {
         eprintln!("{}", error);
         std::process::exit(EXIT_FAILURE)

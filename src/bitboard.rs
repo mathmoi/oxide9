@@ -674,6 +674,12 @@ impl IntoIterator for Bitboard {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use ctor::ctor;
+
+    #[ctor]
+    fn setup() {
+        crate::initialize();
+    }
 
     #[test]
     fn test_bitboard_from_square() {

@@ -1,3 +1,5 @@
+use std::sync::Once;
+
 pub mod bitboard;
 pub mod coordinates;
 pub mod r#move;
@@ -6,8 +8,12 @@ pub mod perft;
 pub mod piece;
 pub mod position;
 
+static INIT: Once = Once::new();
+
 /// Initialize the library, this function must be called before using any other functions.
 pub fn initialize() {
-    bitboard::initialize();
-    move_gen::attacks::initialize();
+    INIT.call_once(|| {
+        bitboard::initialize();
+        move_gen::attacks::initialize();
+    });
 }

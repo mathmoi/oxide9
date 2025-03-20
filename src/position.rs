@@ -1131,6 +1131,12 @@ impl Index<Square> for Position {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use ctor::ctor;
+
+    #[ctor]
+    fn setup() {
+        crate::initialize();
+    }
 
     #[test]
     fn test_position_default() {

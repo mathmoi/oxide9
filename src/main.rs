@@ -58,6 +58,10 @@ enum Commands {
         /// FEN string representing the position to calculate the perft
         #[arg(short, long, default_value = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")]
         fen: String,
+
+        /// The number of threads to use for the perft calculation
+        #[arg(short, long, default_value = "16")]
+        threads: u32,
     },
 }
 
@@ -70,8 +74,8 @@ fn run() -> Result<(), Oxide9Error> {
         Commands::Uci => {
             unimplemented!();
         }
-        Commands::Perft { depth, fen } => {
-            perft(&fen, depth)?;
+        Commands::Perft { depth, fen, threads } => {
+            perft(&fen, depth, threads)?;
         }
     }
     Ok(())

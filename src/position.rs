@@ -632,6 +632,18 @@ impl Position {
         self.occupied((color, PieceType::King)).lsb().expect("There should always be a king on the board.")
     }
 
+    /// Returns the last move that led to the current position.
+    ///
+    /// Provides access to the move that was most recently executed on the board, which resulted in the current
+    /// position.
+    ///
+    /// # Returns
+    /// * `Some(Move)` - The most recent move if one exists
+    /// * `None` - If no moves have been made yet or the position was set directly
+    pub fn last_move(&self) -> Option<Move> {
+        self.state.last_move
+    }
+
     /// Places a chess piece on a specific square on the board.
     ///
     /// # Arguments

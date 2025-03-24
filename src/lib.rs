@@ -1,7 +1,9 @@
 use std::sync::Once;
 
 pub mod bitboard;
+pub mod config;
 pub mod coordinates;
+pub mod eval;
 pub mod r#move;
 pub mod move_gen;
 pub mod perft;

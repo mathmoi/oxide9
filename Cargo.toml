@@ -4,6 +4,10 @@ version = "0.1.0"
 authors = ["Mathieu Pagé"]
 edition = "2021"
 
+[[bin]]
+name = "oxide9"
+path = "src/main.rs"
+
 [[test]]
 name = "move_generator_tests"
 path = "tests/move_generator_tests.rs"
@@ -12,11 +16,12 @@ harness = false
 [dependencies]
 bitflags = "2.8.0"
 clap = { version = "4.5.32", features = ["derive"] }
+config = "0.15.11"
 thiserror = "2.0.11"
+serde = { version = "1.0.218", features = ["derive"] }
 
 [dev-dependencies]
 colored = "3.0.0"
-serde = { version = "1.0.218", features = ["derive"] }
 serde_json = "1.0.139"
 ctor = "0.4.1"
 

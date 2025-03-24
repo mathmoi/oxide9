@@ -1,83 +1,104 @@
-use clap::{Parser, Subcommand};
-use oxide9::perft::perft;
+use std::path::PathBuf;
+
+use clap::Parser;
+use oxide9::{
+    config::{self, get_config},
+    perft::perft,
+};
 use thiserror::Error;
 
 #[derive(Error, Debug)]
 enum Oxide9Error {
     #[error("Error during the perft command: {0}")]
     PerftError(#[from] oxide9::perft::PerftError),
+
+    #[error("Config file not found")]
+    ConfigFileNotFound,
+
+    #[error("Error reading the configuration file: {0}")]
+    ConfigError(#[from] oxide9::config::ConfigError),
 }
 
-/// Command-line interface arguments for the oxide9 chess engine.
-///
-/// This struct defines the top-level CLI arguments and subcommands accepted by the chess engine application.
-///
-/// # Structure
-/// The application supports multiple commands through subcommands while making these subcommands optional (via
-/// subcommand_negates_reqs).
-///
-/// # Fields
-/// * `command` - An optional subcommand to execute. When not provided, the application will run the `uci` command
-#[derive(Parser)]
-#[command(
-    name = "oxide9",
-    author = "Mathieu Pagé",
-    version = "0.1.0",
-    about = "A chess engine written by Mathieu Pagé",
-    subcommand_negates_reqs = true // This allow subcommands to be optional
-)]
+mod arguments {
+    use clap::{Parser, Subcommand};
+    use std::path::{Path, PathBuf};
 
-/// Commands supported by the oxide9 chess engine.
-///
-/// This enum defines the available subcommands that can be executed by the application. Each variant represents a
-/// different operation mode for the engine.
-///
-/// # Commands
-/// * `Uci` - Starts the engine in UCI (Universal Chess Interface) protocol mode. This is the default command when no
-///          subcommand is specified.
-///
-/// * `Perft` - Performs a performance test (node counting) on a chess position. This command is used for debugging and
-///           verification of the move generator. - `depth`: The search depth for the perft calculation - `fen`: Chess
-///           position in FEN notation to analyze. Defaults to the standard starting position if not specified.
-struct Oxide9Args {
-    #[command(subcommand)]
-    command: Option<Commands>,
+    /// A chess engine written by Mathieu Pagé
+    #[derive(Parser)]
+    #[command(
+        name = "oxide9",
+        author = "Mathieu Pagé",
+        version = "0.1.0",
+        about = "A chess engine written by Mathieu Pagé",
+        subcommand_negates_reqs = true // This allows the user to run the program without any subcommands
+    )]
+    pub struct Oxide9Args {
+        #[command(subcommand)]
+        pub command: Option<Commands>,
+    }
+
+    #[derive(Debug, Clone, Subcommand)]
+    pub enum Commands {
+        /// Start the UCI protocol (default commnand)
+        Uci,
+
+        /// Calculate the perft of a position
+        Perft {
+            /// The depth to calculate the perft
+            #[arg(short, long)]
+            depth: u32,
+
+            /// FEN string representing the position to calculate the perft
+            #[arg(short, long, default_value = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")]
+            fen: String,
+
+            /// The number of threads to use for the perft calculation
+            #[arg(short, long)]
+            threads: Option<u32>,
+        },
+    }
 }
 
-#[derive(Debug, Clone, Subcommand)]
-enum Commands {
-    /// Start the UCI protocol (default commnand)
-    Uci,
+fn get_config_path() -> Result<PathBuf, Oxide9Error> {
+    let config_filename = "oxide9.toml";
 
-    /// Calculate the perft of a position
-    Perft {
-        /// The depth to calculate the perft
-        #[arg(short, long)]
-        depth: u32,
+    // Check several possible locations for config file
+    let paths = vec![
+        // Current directory
+        PathBuf::from(config_filename),
+        // Assets directory
+        PathBuf::from("assets/config").join(config_filename),
+    ];
 
-        /// FEN string representing the position to calculate the perft
-        #[arg(short, long, default_value = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")]
-        fen: String,
+    // Return the first path that exists
+    for path in &paths {
+        if path.exists() {
+            return Ok(path.clone());
+        }
+    }
 
-        /// The number of threads to use for the perft calculation
-        #[arg(short, long, default_value = "16")]
-        threads: u32,
-    },
+    Err(Oxide9Error::ConfigFileNotFound)
 }
 
 fn run() -> Result<(), Oxide9Error> {
-    oxide9::initialize();
+    // Read configuration file
+    let config_path = get_config_path()?;
+    oxide9::config::initialize(config_path)?;
+    let config = get_config();
 
-    let args = Oxide9Args::parse();
+    // Parse command line arguments
+    let args = arguments::Oxide9Args::parse();
 
-    match args.command.unwrap_or(Commands::Uci) {
-        Commands::Uci => {
+    // Run the command
+    match args.command.unwrap_or(arguments::Commands::Uci) {
+        arguments::Commands::Uci => {
             unimplemented!();
         }
-        Commands::Perft { depth, fen, threads } => {
-            perft(&fen, depth, threads)?;
+        arguments::Commands::Perft { depth, fen, threads } => {
+            perft(&fen, depth, threads.unwrap_or(config.perft_threads))?;
         }
     }
+
     Ok(())
 }
 

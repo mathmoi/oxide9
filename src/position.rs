@@ -1,5 +1,7 @@
 use std::{mem::MaybeUninit, ops::Index};
 
+use crate::eval::{get_piece_square_value, get_piece_type_game_phase, EvalPair};
+
 use super::{
     bitboard::Bitboard,
     coordinates::{File, Rank, Square},
@@ -103,6 +105,8 @@ pub struct GameState {
     fullmove_number: u16,
     last_move: Option<Move>,
     side_to_move_blockers: Bitboard,
+    psqt_eval: EvalPair,
+    game_phase: u8,
 }
 
 /// Default implementation for the GameState struct.
@@ -116,6 +120,8 @@ impl Default for GameState {
             fullmove_number: 1,
             last_move: None,
             side_to_move_blockers: Bitboard::EMPTY,
+            psqt_eval: EvalPair::default(),
+            game_phase: 0,
         }
     }
 }
@@ -331,33 +337,31 @@ impl Position {
     ///
     /// A FEN string contains 6 fields separated by spaces:
     ///
-    /// 1. Piece placement: Each rank is described from 8 to 1, separated by '/'. Letters represent
-    ///    pieces (P=pawn, N=knight, B=bishop, R=rook, Q=queen, K=king). Uppercase is white,
-    ///    lowercase is black. Numbers represent empty squares.
-    ///    Example: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"
+    /// 1. Piece placement: Each rank is described from 8 to 1, separated by '/'. Letters represent pieces (P=pawn,
+    ///    N=knight, B=bishop, R=rook, Q=queen, K=king). Uppercase is white, lowercase is black. Numbers represent empty
+    ///    squares. Example: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"
     ///
     /// 2. Active color: "w" means White moves next, "b" means Black moves next.
     ///
-    /// 3. Castling availability: Combination of "K"(white kingside), "Q"(white queenside),
-    ///    "k"(black kingside), "q"(black queenside), or "-" if no castling is possible.
+    /// 3. Castling availability: Combination of "K"(white kingside), "Q"(white queenside), "k"(black kingside),
+    ///    "q"(black queenside), or "-" if no castling is possible.
     ///
-    /// 4. En passant target square: The square where a pawn can be captured en passant, in
-    ///    algebraic notation (e.g., "e3"), or "-" if not available.
+    /// 4. En passant target square: The square where a pawn can be captured en passant, in algebraic notation (e.g.,
+    ///    "e3"), or "-" if not available.
     ///
-    /// 5. Halfmove clock: Number of halfmoves since the last pawn advance or piece capture. Used
-    ///    for the fifty-move rule.
+    /// 5. Halfmove clock: Number of halfmoves since the last pawn advance or piece capture. Used for the fifty-move
+    ///    rule.
     ///
-    /// 6. Fullmove number: The number of complete moves. Starts at 1 and increments after Black's
-    ///    move.
+    /// 6. Fullmove number: The number of complete moves. Starts at 1 and increments after Black's move.
     ///
     /// # Arguments
     ///
-    /// * fen - A string containing the FEN representation of a chess position.
-    ///         FEN is a standard notation to describe a particular board position of a chess
-    ///         game.
+    /// * fen - A string containing the FEN representation of a chess position. FEN is a standard notation to describe a
+    ///         particular board position of a chess game.
     ///
     /// # See also
-    /// [The PGN specifications](https://ia902908.us.archive.org/26/items/pgn-standard-1994-03-12/PGN_standard_1994-03-12.txt)
+    /// [The PGN
+    /// specifications](https://ia902908.us.archive.org/26/items/pgn-standard-1994-03-12/PGN_standard_1994-03-12.txt)
     /// that defines the FEN format at section 16.1.
     pub fn new_from_fen(fen: &str) -> Result<Self, FenError> {
         let mut position = Position::default();
@@ -519,7 +523,6 @@ impl Position {
     /// 2  P P P P P P P P
     /// 1  R N B Q K B N R
     ///    a b c d e f g h
-    ///
     pub fn to_compact_string(&self) -> String {
         let mut board = String::with_capacity(171);
         for rank in Rank::ALL.iter().rev() {
@@ -625,8 +628,8 @@ impl Position {
     /// The square where the king of the specified color is located.
     ///
     /// # Panics
-    /// Panics if no king of the specified color is found on the board, which should never
-    /// happen in a valid chess position.
+    /// Panics if no king of the specified color is found on the board, which should never happen in a valid chess
+    /// position.
     pub fn king_square(&self, color: Color) -> Square {
         // TODO: Should we keep this incrementally updated?
         self.occupied((color, PieceType::King)).lsb().expect("There should always be a king on the board.")
@@ -644,18 +647,82 @@ impl Position {
         self.state.last_move
     }
 
+    /// Returns the incrementally updated portion of the position evaluation, adjusted for the side to move.
+    ///
+    /// # Purpose
+    /// Retrieves the current value of the incrementally maintained evaluation score from the perspective
+    /// of the side to move, which primarily consists of piece-square table values.
+    ///
+    /// # Returns
+    /// An `EvalPair` containing both middlegame and endgame evaluation components that have been incrementally updated
+    /// throughout the game, with the sign adjusted to reflect the advantage of the side to move.
+    ///
+    /// # Important
+    /// - This provides only the material and piece positioning component of evaluation
+    /// - Does not include dynamic evaluation factors that must be calculated on demand
+    /// - This value is efficiently maintained through incremental updates during moves
+    /// - The value is automatically signed relative to the side to move (positive values favor the side to move)
+    /// - Typically used as a base value for full position evaluation
+    pub fn incremental_eval(&self) -> EvalPair {
+        match self.side_to_move() {
+            Color::White => self.state.psqt_eval,
+            Color::Black => -self.state.psqt_eval,
+        }
+    }
+
+    /// Returns the current game phase value of the position.
+    ///
+    /// # Purpose
+    /// Retrieves the computed game phase value for the current board position. This value indicates how far the game
+    /// has progressed from opening to endgame.
+    ///
+    /// # Returns
+    /// A `u8` value representing the current game phase.
+    ///
+    /// # Important
+    /// - The value is incrementally updated as pieces are added or removed from the board
+    /// - Higher values typically indicate an earlier game phase (more pieces on board)
+    /// - Lower values indicate progression toward endgame (fewer pieces on board)
+    /// - Used to determine the blend between middlegame and endgame evaluation
+    pub fn game_phase(&self) -> u8 {
+        self.state.game_phase
+    }
+
     /// Places a chess piece on a specific square on the board.
     ///
-    /// # Arguments
+    /// # Purpose
+    /// Updates both the board representation and the game state by placing the specified piece on the given square.
     ///
-    /// * `piece` - The chess piece to place
-    /// * `square` - The square where the piece should be placed
+    /// # Parameters
+    /// * `piece` - The chess piece to place on the board
+    /// * `square` - The target square where the piece will be placed
     ///
-    /// # Note
-    ///
-    /// This method doesn't check if the square is already occupied. If calling code
-    /// needs to replace a piece, it should first remove any existing piece from the square.
+    /// # Important
+    /// - The target square must be empty before placing the piece
+    /// - This method properly updates all relevant game state information
+    /// - For low-level placement without full state updates, use `put_piece_only` instead
     pub fn put_piece(&mut self, piece: Piece, square: Square) {
+        self.put_piece_only(piece, square);
+
+        self.state.psqt_eval += get_piece_square_value(piece, square);
+        self.state.game_phase += get_piece_type_game_phase(piece);
+    }
+
+    /// Places a chess piece on a specific square on the board without updating the game state.
+    ///
+    /// # Purpose
+    /// This is a low-level method that only updates the board representation but not the full game state. It should be
+    /// used in contexts where the game state will be properly restored later (typically in unmake() operations).
+    ///
+    /// # Parameters
+    /// * `piece` - The chess piece to place on the board
+    /// * `square` - The target square where the piece will be placed
+    ///
+    /// # Important
+    /// - The target square must be empty before placing the piece (checked with debug_assert)
+    /// - After using this method, the game state must be eventually restored to maintain position consistency
+    /// - For normal piece placement with full state updates, use `put_piece` instead
+    fn put_piece_only(&mut self, piece: Piece, square: Square) {
         debug_assert_eq!(self.board[usize::from(square)], None);
 
         self.board[usize::from(square)] = Some(piece);
@@ -664,17 +731,87 @@ impl Position {
     }
 
     /// Removes a piece from a specific square.
-    pub fn remove_piece(&mut self, square: Square) {
-        let piece =
-            self.board[usize::from(square)].expect("It is not possible to remove a piece from an empty square.");
+    ///
+    /// # Purpose
+    /// Updates both the board representation and the game state by removing the piece from the given square.
+    ///
+    /// # Parameters
+    /// * `square` - The square from which to remove the piece
+    ///
+    /// # Important
+    /// - The square must contain a piece (panics if the square is empty)
+    /// - This method properly updates all relevant game state information
+    /// - For low-level removal without full state updates, use `remove_piece_only` instead
+    fn remove_piece(&mut self, square: Square) {
+        let piece = self.board[usize::from(square)].expect("There should be a piece to remove");
+
+        self.remove_piece_only(piece, square);
+
+        self.state.psqt_eval -= get_piece_square_value(piece, square);
+        self.state.game_phase -= get_piece_type_game_phase(piece);
+    }
+
+    /// Removes a piece from a specific square without updating the game state.
+    ///
+    /// # Purpose
+    /// This is a low-level method that only updates the board representation but not the full game state. It should be
+    /// used in contexts where the game state will be properly restored later.
+    ///
+    /// # Parameters
+    /// * `square` - The square from which to remove the piece
+    ///
+    /// # Important
+    /// - The square must contain a piece (panics with an error message if the square is empty)
+    /// - After using this method, the game state must be eventually restored to maintain position consistency
+    /// - This method only updates the board representation and bitboards, but not the complete game state
+    fn remove_piece_only(&mut self, piece: Piece, square: Square) {
+        debug_assert_eq!(self.board[usize::from(square)], Some(piece));
+
         self.board[usize::from(square)] = None;
         self.bb_color[usize::from(piece.color())] ^= Bitboard::from(square);
         self.bb_piece[usize::from(piece)] ^= Bitboard::from(square);
     }
 
-    /// Moves a known chess piece from one square to another. The piece must be present on the
-    /// `from` square and the `to` square must be empty.
-    pub fn move_piece(&mut self, piece: Piece, from: Square, to: Square) {
+    /// Moves a known chess piece from one square to another.
+    ///
+    /// # Purpose
+    /// Updates both the board representation and the game state by moving the specified piece from the source square to
+    /// the destination square.
+    ///
+    /// # Parameters
+    /// * `piece` - The chess piece to be moved
+    /// * `from` - The source square where the piece is currently located
+    /// * `to` - The destination square where the piece will be moved
+    ///
+    /// # Important
+    /// - The `from` square must contain the specified piece
+    /// - The `to` square must be empty
+    /// - This method properly updates all relevant game state information
+    /// - For low-level movement without full state updates, use `move_piece_only` instead
+    fn move_piece(&mut self, piece: Piece, from: Square, to: Square) {
+        self.move_piece_only(piece, from, to);
+
+        self.state.psqt_eval += get_piece_square_value(piece, to) - get_piece_square_value(piece, from);
+    }
+
+    /// Moves a known chess piece from one square to another without updating the game state.
+    ///
+    /// # Purpose
+    /// This is a low-level method that only updates the board representation but not the full game state. It should be
+    /// used in contexts where the game state will be properly restored later.
+    ///
+    /// # Parameters
+    /// * `piece` - The chess piece to be moved
+    /// * `from` - The source square where the piece is currently located
+    /// * `to` - The destination square where the piece will be moved
+    ///
+    /// # Important
+    /// - The piece specified must match the piece actually present on the `from` square (checked with debug_assert)
+    /// - The `to` square must be empty (checked with debug_assert)
+    /// - After using this method, the game state must be eventually restored to maintain position consistency
+    /// - This method efficiently updates both board and bitboard representations in a single operation
+    /// - For normal piece movement with full state updates, use `move_piece` instead
+    fn move_piece_only(&mut self, piece: Piece, from: Square, to: Square) {
         debug_assert_eq!(self.board[usize::from(from)], Some(piece));
         debug_assert_eq!(self.board[usize::from(to)], None);
 
@@ -1046,29 +1183,29 @@ impl Position {
     }
 
     fn unmake_basic(&mut self, mv: Move) {
-        self.move_piece(mv.piece(), mv.to_square(), mv.from_square());
+        self.move_piece_only(mv.piece(), mv.to_square(), mv.from_square());
     }
 
     fn unmake_capture(&mut self, mv: Move, capture: Piece) {
-        self.move_piece(mv.piece(), mv.to_square(), mv.from_square());
-        self.put_piece(capture, mv.to_square());
+        self.move_piece_only(mv.piece(), mv.to_square(), mv.from_square());
+        self.put_piece_only(capture, mv.to_square());
     }
 
     fn unmake_promotion(&mut self, mv: Move) {
-        self.remove_piece(mv.to_square());
-        self.put_piece(mv.piece(), mv.from_square());
+        self.remove_piece_only(mv.piece(), mv.to_square());
+        self.put_piece_only(mv.piece(), mv.from_square());
     }
 
     fn unmake_capture_promotion(&mut self, mv: Move, capture: Piece) {
-        self.remove_piece(mv.to_square());
-        self.put_piece(capture, mv.to_square());
-        self.put_piece(mv.piece(), mv.from_square());
+        self.remove_piece_only(mv.piece(), mv.to_square());
+        self.put_piece_only(capture, mv.to_square());
+        self.put_piece_only(mv.piece(), mv.from_square());
     }
 
     fn unmake_en_passant(&mut self, mv: Move) {
-        self.move_piece(mv.piece(), mv.to_square(), mv.from_square());
+        self.move_piece_only(mv.piece(), mv.to_square(), mv.from_square());
         let capture_sq = unsafe { mv.to_square().down_unchecked(mv.piece().color().forward()) }; // Safe because prise en passant square is never on edge.
-        self.put_piece(Piece::new(self.side_to_move(), PieceType::Pawn), capture_sq);
+        self.put_piece_only(Piece::new(self.side_to_move(), PieceType::Pawn), capture_sq);
     }
 
     fn unmake_castling(&mut self, mv: Move, side: CastlingSide) {
@@ -1082,25 +1219,25 @@ impl Position {
         };
         let rook_to = Square::new(rook_to_file, rank);
 
-        self.remove_piece(mv.to_square());
-        self.remove_piece(rook_to);
-        self.put_piece(mv.piece(), mv.from_square());
-        self.put_piece(rook, rook_from);
+        self.remove_piece_only(mv.piece(), mv.to_square());
+        self.remove_piece_only(rook, rook_to);
+        self.put_piece_only(mv.piece(), mv.from_square());
+        self.put_piece_only(rook, rook_from);
     }
 
     /// Reverts the last move made on the board and restores the previous game state.
     ///
-    /// This function handles all move types (basic moves, captures, promotions, en passant, and castling)
-    /// and completely restores the previous board position including piece positions, castling rights,
-    /// en passant possibilities, and turn information.
+    /// This function handles all move types (basic moves, captures, promotions, en passant, and castling) and
+    /// completely restores the previous board position including piece positions, castling rights, en passant
+    /// possibilities, and turn information.
     ///
     /// # Panics
-    /// Panics if there is no last move to undo (state.last_move is None) or if there's no previous state
-    /// in the history stack.
+    /// Panics if there is no last move to undo (state.last_move is None) or if there's no previous state in the history
+    /// stack.
     ///
     /// # Note
-    /// This function assumes that moves and states have been properly tracked and stored in the history.
-    /// It should only be called if a previous move exists.
+    /// This function assumes that moves and states have been properly tracked and stored in the history. It should only
+    /// be called if a previous move exists.
     pub fn unmake(&mut self) {
         let mv = self.state.last_move.expect("There should be a last move.");
 

@@ -79,6 +79,9 @@ enum MoveGeneratorTestError {
 
     #[error("---- {} ----\n{}", .test_name, .test_failure_error)]
     TestFailed { test_name: String, test_failure_error: TestFailureError },
+
+    #[error("Error reading the configuration file: {0}")]
+    ConfigError(#[from] oxide9::config::ConfigError),
 }
 
 //======================================================================================================================

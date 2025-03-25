@@ -445,6 +445,15 @@ impl Square {
         Square((u8::from(rank) << 3) | u8::from(file))
     }
 
+    /// Returns the rank relative to the specified color. If the color is white, the rank is returned, if the color is
+    /// black, the rank is flipped.
+    pub fn relative_to_color(self, color: Color) -> Square {
+        match color {
+            Color::White => self,
+            Color::Black => Square((0b111000 - (self.0 & 0b111000)) | (0b111 & self.0)),
+        }
+    }
+
     /// Returns the rank of the square.
     pub fn rank(self) -> Rank {
         (self.0 >> 3).into()
@@ -1060,6 +1069,29 @@ mod tests {
             assert!(Square::are_aligned(Square::A8, Square::H1, Square::E4));
             assert!(!Square::are_aligned(Square::A8, Square::E4, Square::H2));
             assert!(!Square::are_aligned(Square::A8, Square::H2, Square::E4));
+        }
+
+        #[test]
+        fn test_relative_to_color() {
+            // Check white relative squares
+            assert_eq!(Square::A1.relative_to_color(Color::White), Square::A1);
+            assert_eq!(Square::B2.relative_to_color(Color::White), Square::B2);
+            assert_eq!(Square::C3.relative_to_color(Color::White), Square::C3);
+            assert_eq!(Square::D4.relative_to_color(Color::White), Square::D4);
+            assert_eq!(Square::E5.relative_to_color(Color::White), Square::E5);
+            assert_eq!(Square::F6.relative_to_color(Color::White), Square::F6);
+            assert_eq!(Square::G7.relative_to_color(Color::White), Square::G7);
+            assert_eq!(Square::H8.relative_to_color(Color::White), Square::H8);
+
+            // Check black relative squares (should be flipped)
+            assert_eq!(Square::A1.relative_to_color(Color::Black), Square::A8);
+            assert_eq!(Square::B2.relative_to_color(Color::Black), Square::B7);
+            assert_eq!(Square::C3.relative_to_color(Color::Black), Square::C6);
+            assert_eq!(Square::D4.relative_to_color(Color::Black), Square::D5);
+            assert_eq!(Square::E5.relative_to_color(Color::Black), Square::E4);
+            assert_eq!(Square::F6.relative_to_color(Color::Black), Square::F3);
+            assert_eq!(Square::G7.relative_to_color(Color::Black), Square::G2);
+            assert_eq!(Square::H8.relative_to_color(Color::Black), Square::H1);
         }
     }
 }

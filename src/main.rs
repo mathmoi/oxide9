@@ -1,27 +1,15 @@
-use std::path::PathBuf;
-
 use clap::Parser;
-use oxide9::{
-    config::{self, get_config},
-    perft::perft,
-};
+use oxide9::{config::get_config, perft::perft};
 use thiserror::Error;
 
 #[derive(Error, Debug)]
 enum Oxide9Error {
     #[error("Error during the perft command: {0}")]
     PerftError(#[from] oxide9::perft::PerftError),
-
-    #[error("Config file not found")]
-    ConfigFileNotFound,
-
-    #[error("Error reading the configuration file: {0}")]
-    ConfigError(#[from] oxide9::config::ConfigError),
 }
 
 mod arguments {
     use clap::{Parser, Subcommand};
-    use std::path::{Path, PathBuf};
 
     /// A chess engine written by Mathieu Pagé
     #[derive(Parser)]
@@ -59,35 +47,13 @@ mod arguments {
     }
 }
 
-fn get_config_path() -> Result<PathBuf, Oxide9Error> {
-    let config_filename = "oxide9.toml";
-
-    // Check several possible locations for config file
-    let paths = vec![
-        // Current directory
-        PathBuf::from(config_filename),
-        // Assets directory
-        PathBuf::from("assets/config").join(config_filename),
-    ];
-
-    // Return the first path that exists
-    for path in &paths {
-        if path.exists() {
-            return Ok(path.clone());
-        }
-    }
-
-    Err(Oxide9Error::ConfigFileNotFound)
-}
-
 fn run() -> Result<(), Oxide9Error> {
-    // Read configuration file
-    let config_path = get_config_path()?;
-    oxide9::config::initialize(config_path)?;
-    let config = get_config();
-
     // Parse command line arguments
     let args = arguments::Oxide9Args::parse();
+
+    // Initialize the engine
+    oxide9::initialize();
+    let config = get_config();
 
     // Run the command
     match args.command.unwrap_or(arguments::Commands::Uci) {

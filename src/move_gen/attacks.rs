@@ -6,8 +6,7 @@ use crate::{
 
 /// Initializes the attack generation module. This function must be called before using any other functions in this module.
 pub fn initialize() {
-    let offset = pext_sliders::initialize_rook_pext_data();
-    pext_sliders::initialize_bishop_pext_data(offset);
+    pext_sliders::initialize();
     initialize_king_attacks();
     initialize_knight_attacks();
     initialize_rook_attacks();
@@ -252,17 +251,38 @@ mod pext_sliders {
         offset: usize,
     }
 
+    /// Initializes the lookup tables for rook and bishop attacks using the PEXT instruction.
+    pub fn initialize() {
+        let offset = initialize_rook_pext_data();
+        initialize_bishop_pext_data(offset);
+    }
+
     //==================================================================================================================
     // Rook attacks
     //==================================================================================================================
 
-    static mut PEXT_DATA: [Bitboard; 1000000] = [Bitboard::EMPTY; 1000000]; // NEXT : Choose the size more wisely
+    static PEXT_DATA_SIZE: usize = 107648;
+    static mut PEXT_DATA: [Bitboard; PEXT_DATA_SIZE] = [Bitboard::EMPTY; PEXT_DATA_SIZE];
 
     static mut ROOK_PEXT_DATA: [PextData; Square::COUNT] =
         [PextData { mask: Bitboard::EMPTY, offset: 0 }; Square::COUNT];
 
-    // NEXT : Document
-    pub fn initialize_rook_pext_data() -> usize {
+    /// Initializes the lookup table for rook attacks using the PEXT instruction.
+    ///
+    /// This function precomputes all possible rook attacks for each square on the board, using the PEXT (Parallel Bits
+    /// Extract) CPU instruction for efficient lookup.
+    ///
+    /// For each square, the function calculates relevant file and rank masks (excluding the first and last ranks/files)
+    /// and generates attack patterns for all possible blocker configurations.
+    ///
+    /// # Returns
+    /// * `usize` - The next available offset in the PEXT_DATA array, which can be used for initializing other piece
+    ///   attack tables.
+    ///
+    /// # Note
+    /// This function must be called during engine initialization before any move generation or evaluation that relies
+    /// on rook movement patterns.
+    fn initialize_rook_pext_data() -> usize {
         let first_and_last_rank: Bitboard = Rank::R1 | Rank::R8;
         let first_and_last_file: Bitboard = File::A | File::H;
 
@@ -301,8 +321,21 @@ mod pext_sliders {
     static mut BISHOP_PEXT_DATA: [PextData; Square::COUNT] =
         [PextData { mask: Bitboard::EMPTY, offset: 0 }; Square::COUNT];
 
-    // NEXT : Document
-    pub fn initialize_bishop_pext_data(offset: usize) {
+    /// Initializes the lookup table for bishop attacks using the PEXT instruction.
+    ///
+    /// This function precomputes all possible bishop attacks for each square on the board, using the PEXT (Parallel
+    /// Bits Extract) CPU instruction for efficient lookup.
+    ///
+    /// The function calculates attack patterns for each square, considering the diagonal and anti-diagonal paths while
+    /// excluding the board borders.
+    ///
+    /// # Parameters
+    /// * `offset` - The starting index in the PEXT_DATA array where the bishop attack data should be stored.
+    ///
+    /// # Note
+    /// This function must be called during engine initialization before any move generation or evaluation that relies
+    /// on bishop movement patterns.
+    fn initialize_bishop_pext_data(offset: usize) {
         let border = Rank::R1 | Rank::R8 | File::A | File::H;
 
         let mut offset = offset;

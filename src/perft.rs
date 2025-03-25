@@ -315,8 +315,8 @@ pub fn perft(fen: &str, depth: u32, threads: u32) -> Result<(), PerftError> {
     let duration = start.elapsed();
 
     println!("\nNodes: {}", nodes);
-    println!("Time: {:.6}", duration.as_secs_f64());
-    println!("Nodes per second: {:.6}", nodes as f64 / duration.as_secs_f64());
+    println!("Time: {:.3}", duration.as_secs_f64());
+    println!("Nodes per second: {:.0}", nodes as f64 / duration.as_secs_f64());
 
     Ok(())
 }

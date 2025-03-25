@@ -41,7 +41,7 @@
             "args": [
                 "perft",
                 "--depth",
-                "1"
+                "1",
             ],
             "cwd": "${workspaceFolder}"
         },

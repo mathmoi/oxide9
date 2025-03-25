@@ -15,7 +15,9 @@ static INIT: Once = Once::new();
 /// Initialize the library, this function must be called before using any other functions.
 pub fn initialize() {
     INIT.call_once(|| {
+        config::initialize().unwrap();
         bitboard::initialize();
         move_gen::attacks::initialize();
+        eval::initialize();
     });
 }

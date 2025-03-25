@@ -6870,5 +6870,291 @@
                 "fen": "rnbqkb1r/pppppppp/8/8/4P3/8/PPPKPPPP/RNBQ1BNR b kq - 0 1"
             }
         ]
+    },
+    {
+        "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+        "description": "Starting position",
+        "moves": [
+            {
+                "move": {
+                    "from": "g1",
+                    "to": "h3",
+                    "piece": "N",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "g1h3",
+                "san": "Nh3",
+                "lan": "Ng1-h3",
+                "fen": "rnbqkbnr/pppppppp/8/8/8/7N/PPPPPPPP/RNBQKB1R b KQkq - 1 1"
+            },
+            {
+                "move": {
+                    "from": "g1",
+                    "to": "f3",
+                    "piece": "N",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "g1f3",
+                "san": "Nf3",
+                "lan": "Ng1-f3",
+                "fen": "rnbqkbnr/pppppppp/8/8/8/5N2/PPPPPPPP/RNBQKB1R b KQkq - 1 1"
+            },
+            {
+                "move": {
+                    "from": "b1",
+                    "to": "c3",
+                    "piece": "N",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "b1c3",
+                "san": "Nc3",
+                "lan": "Nb1-c3",
+                "fen": "rnbqkbnr/pppppppp/8/8/8/2N5/PPPPPPPP/R1BQKBNR b KQkq - 1 1"
+            },
+            {
+                "move": {
+                    "from": "b1",
+                    "to": "a3",
+                    "piece": "N",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "b1a3",
+                "san": "Na3",
+                "lan": "Nb1-a3",
+                "fen": "rnbqkbnr/pppppppp/8/8/8/N7/PPPPPPPP/R1BQKBNR b KQkq - 1 1"
+            },
+            {
+                "move": {
+                    "from": "h2",
+                    "to": "h3",
+                    "piece": "P",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "h2h3",
+                "san": "h3",
+                "lan": "h2-h3",
+                "fen": "rnbqkbnr/pppppppp/8/8/8/7P/PPPPPPP1/RNBQKBNR b KQkq - 0 1"
+            },
+            {
+                "move": {
+                    "from": "g2",
+                    "to": "g3",
+                    "piece": "P",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "g2g3",
+                "san": "g3",
+                "lan": "g2-g3",
+                "fen": "rnbqkbnr/pppppppp/8/8/8/6P1/PPPPPP1P/RNBQKBNR b KQkq - 0 1"
+            },
+            {
+                "move": {
+                    "from": "f2",
+                    "to": "f3",
+                    "piece": "P",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "f2f3",
+                "san": "f3",
+                "lan": "f2-f3",
+                "fen": "rnbqkbnr/pppppppp/8/8/8/5P2/PPPPP1PP/RNBQKBNR b KQkq - 0 1"
+            },
+            {
+                "move": {
+                    "from": "e2",
+                    "to": "e3",
+                    "piece": "P",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "e2e3",
+                "san": "e3",
+                "lan": "e2-e3",
+                "fen": "rnbqkbnr/pppppppp/8/8/8/4P3/PPPP1PPP/RNBQKBNR b KQkq - 0 1"
+            },
+            {
+                "move": {
+                    "from": "d2",
+                    "to": "d3",
+                    "piece": "P",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "d2d3",
+                "san": "d3",
+                "lan": "d2-d3",
+                "fen": "rnbqkbnr/pppppppp/8/8/8/3P4/PPP1PPPP/RNBQKBNR b KQkq - 0 1"
+            },
+            {
+                "move": {
+                    "from": "c2",
+                    "to": "c3",
+                    "piece": "P",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "c2c3",
+                "san": "c3",
+                "lan": "c2-c3",
+                "fen": "rnbqkbnr/pppppppp/8/8/8/2P5/PP1PPPPP/RNBQKBNR b KQkq - 0 1"
+            },
+            {
+                "move": {
+                    "from": "b2",
+                    "to": "b3",
+                    "piece": "P",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "b2b3",
+                "san": "b3",
+                "lan": "b2-b3",
+                "fen": "rnbqkbnr/pppppppp/8/8/8/1P6/P1PPPPPP/RNBQKBNR b KQkq - 0 1"
+            },
+            {
+                "move": {
+                    "from": "a2",
+                    "to": "a3",
+                    "piece": "P",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "a2a3",
+                "san": "a3",
+                "lan": "a2-a3",
+                "fen": "rnbqkbnr/pppppppp/8/8/8/P7/1PPPPPPP/RNBQKBNR b KQkq - 0 1"
+            },
+            {
+                "move": {
+                    "from": "h2",
+                    "to": "h4",
+                    "piece": "P",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "h2h4",
+                "san": "h4",
+                "lan": "h2-h4",
+                "fen": "rnbqkbnr/pppppppp/8/8/7P/8/PPPPPPP1/RNBQKBNR b KQkq - 0 1"
+            },
+            {
+                "move": {
+                    "from": "g2",
+                    "to": "g4",
+                    "piece": "P",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "g2g4",
+                "san": "g4",
+                "lan": "g2-g4",
+                "fen": "rnbqkbnr/pppppppp/8/8/6P1/8/PPPPPP1P/RNBQKBNR b KQkq - 0 1"
+            },
+            {
+                "move": {
+                    "from": "f2",
+                    "to": "f4",
+                    "piece": "P",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "f2f4",
+                "san": "f4",
+                "lan": "f2-f4",
+                "fen": "rnbqkbnr/pppppppp/8/8/5P2/8/PPPPP1PP/RNBQKBNR b KQkq - 0 1"
+            },
+            {
+                "move": {
+                    "from": "e2",
+                    "to": "e4",
+                    "piece": "P",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "e2e4",
+                "san": "e4",
+                "lan": "e2-e4",
+                "fen": "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1"
+            },
+            {
+                "move": {
+                    "from": "d2",
+                    "to": "d4",
+                    "piece": "P",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "d2d4",
+                "san": "d4",
+                "lan": "d2-d4",
+                "fen": "rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq - 0 1"
+            },
+            {
+                "move": {
+                    "from": "c2",
+                    "to": "c4",
+                    "piece": "P",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "c2c4",
+                "san": "c4",
+                "lan": "c2-c4",
+                "fen": "rnbqkbnr/pppppppp/8/8/2P5/8/PP1PPPPP/RNBQKBNR b KQkq - 0 1"
+            },
+            {
+                "move": {
+                    "from": "b2",
+                    "to": "b4",
+                    "piece": "P",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "b2b4",
+                "san": "b4",
+                "lan": "b2-b4",
+                "fen": "rnbqkbnr/pppppppp/8/8/1P6/8/P1PPPPPP/RNBQKBNR b KQkq - 0 1"
+            },
+            {
+                "move": {
+                    "from": "a2",
+                    "to": "a4",
+                    "piece": "P",
+                    "capture": null,
+                    "promotion": null,
+                    "type": "Basic"
+                },
+                "uci": "a2a4",
+                "san": "a4",
+                "lan": "a2-a4",
+                "fen": "rnbqkbnr/pppppppp/8/8/P7/8/1PPPPPPP/RNBQKBNR b KQkq - 0 1"
+            }
+        ]
     }
 ]

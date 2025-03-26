@@ -1000,7 +1000,7 @@ impl Position {
     ///
     /// # Returns
     ///
-    /// * `bool` - Returns        //self.history.push(self.state); `true` if the move is legal, `false` otherwise
+    /// * `bool` - Returns `true` if the move is legal, `false` otherwise
     ///
     /// # Important
     ///

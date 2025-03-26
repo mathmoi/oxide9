@@ -19,7 +19,6 @@ cargo build --release
 ```
 The executable will be located at `target/release/oxide9`.
 
-## Usage
 ### Running with Cargo
 You can run the engine directly with Cargo:
 ```bash
@@ -31,6 +30,18 @@ If you want to run the binary directly (for example, when connecting to a chess 
 
 1. Copy the binary from `target/release/oxide9` to your desired location
 2. Make sure to also copy the [oxide9.toml](assets/config/oxide9.toml) configuration file to the same directory as the binary
+
+## Change log
+
+The change log can be found in the [CHANGELOG.md](CHANGELOG.md) file.
+
+### Versionning
+
+Oxide9 version number use the following format: [MAJOR].[MINOR].[PATCH] (example: 1.2.3).
+
+- MAJOR is incremented for each releases intended for end-users. For this reasons users will generally used version in the format vX.0 where 'X' is the Releases number.
+- MINOR is incremented each time a new features is implemented, an existing features is improved or removed. Version where the MINOR value is not '0' are considered development version and should not be used by end-users.
+- PATCH is optional. It is present and incremented when changes are made without significantly modifying the features of the engine.
 
 ## License
 

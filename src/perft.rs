@@ -299,8 +299,8 @@ impl PerftNode {
 /// # Note
 /// The function automatically switches to parallel computation for depths greater than 5 to improve performance on
 /// multi-core systems.
-pub fn perft(fen: &str, depth: u32, threads: u32) -> Result<(), PerftError> {
-    const MIN_PARALLEL_DEPTH: u32 = 5;
+pub fn perft(fen: &str, depth: u16, threads: u32) -> Result<(), PerftError> {
+    const MIN_PARALLEL_DEPTH: u16 = 5;
 
     let mut position = Position::new_from_fen(fen).map_err(|e| PerftError::InvalidFen(fen.to_string(), e))?;
 
@@ -336,7 +336,7 @@ pub fn perft(fen: &str, depth: u32, threads: u32) -> Result<(), PerftError> {
 /// # Note
 /// This function prints the results for each move directly to the console, making it useful for debugging move
 /// generation or comparing against other chess engines.
-fn divide(position: &mut Position, depth: u32) -> u64 {
+fn divide(position: &mut Position, depth: u16) -> u64 {
     let mut total_nodes = 0;
 
     let mut moves = MoveList::new();
@@ -375,7 +375,7 @@ fn divide(position: &mut Position, depth: u32) -> u64 {
 /// # Note
 /// At depth 1, the function avoids making/unmaking moves and simply counts legal moves. For greater depths, it
 /// recursively explores each legal move.
-fn recursive_perft(position: &mut Position, depth: u32) -> u64 {
+fn recursive_perft(position: &mut Position, depth: u16) -> u64 {
     let mut nodes = 0;
 
     let mut moves = MoveList::new();
@@ -412,7 +412,7 @@ fn recursive_perft(position: &mut Position, depth: u32) -> u64 {
 /// # Note
 /// This function creates a shared work distribution system to effectively balance the workload across all available
 /// threads, which significantly improves performance for deeper perft tests on multi-core systems.
-fn parallel_perft(position: &mut Position, depth: u32, threads_count: u32) -> u64 {
+fn parallel_perft(position: &mut Position, depth: u16, threads_count: u32) -> u64 {
     let root = PerftNode::new();
     root.make_shared(position);
 
@@ -455,7 +455,7 @@ fn parallel_perft(position: &mut Position, depth: u32, threads_count: u32) -> u6
 ///
 /// # Note
 /// At ply 1, the function prints move-specific results to maintain compatibility with the divide view's output format.
-fn work_shared_node(node: PerftNode, position: &mut Position, depth: u32, ply: u32, has_shared: bool) {
+fn work_shared_node(node: PerftNode, position: &mut Position, depth: u16, ply: u32, has_shared: bool) {
     // First we check for a new node to work on
     let child_count = node.child_count();
     for index in 0..child_count {
@@ -523,8 +523,8 @@ fn work_shared_node(node: PerftNode, position: &mut Position, depth: u32, ply: u
 /// # Note
 /// The depth threshold for sharing (MAX_SHARED_DEPTH = 5) balances the overhead of work distribution against the
 /// benefits of parallelism.
-fn work_new_node(node: PerftNode, position: &mut Position, depth: u32, ply: u32, has_shared: bool) {
-    const MAX_SHARED_DEPTH: u32 = 5;
+fn work_new_node(node: PerftNode, position: &mut Position, depth: u16, ply: u32, has_shared: bool) {
+    const MAX_SHARED_DEPTH: u16 = 5;
     if has_shared || depth < MAX_SHARED_DEPTH {
         if !node.make_exclusive() {
             return;

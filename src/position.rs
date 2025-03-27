@@ -1191,13 +1191,13 @@ impl Position {
         self.put_piece_only(capture, mv.to_square());
     }
 
-    fn unmake_promotion(&mut self, mv: Move) {
-        self.remove_piece_only(mv.piece(), mv.to_square());
+    fn unmake_promotion(&mut self, mv: Move, promotion: Piece) {
+        self.remove_piece_only(promotion, mv.to_square());
         self.put_piece_only(mv.piece(), mv.from_square());
     }
 
-    fn unmake_capture_promotion(&mut self, mv: Move, capture: Piece) {
-        self.remove_piece_only(mv.piece(), mv.to_square());
+    fn unmake_capture_promotion(&mut self, mv: Move, capture: Piece, promotion: Piece) {
+        self.remove_piece_only(promotion, mv.to_square());
         self.put_piece_only(capture, mv.to_square());
         self.put_piece_only(mv.piece(), mv.from_square());
     }
@@ -1245,8 +1245,8 @@ impl Position {
             MoveType::Basic => self.unmake_basic(mv),
             MoveType::Capture(capture) => self.unmake_capture(mv, capture),
             MoveType::TwoSquarePawnPush => self.unmake_basic(mv),
-            MoveType::Promotion(_) => self.unmake_promotion(mv),
-            MoveType::CapturePromotion { capture, .. } => self.unmake_capture_promotion(mv, capture),
+            MoveType::Promotion(promotion) => self.unmake_promotion(mv, promotion),
+            MoveType::CapturePromotion { capture, promotion } => self.unmake_capture_promotion(mv, capture, promotion),
             MoveType::EnPassant => self.unmake_en_passant(mv),
             MoveType::Castling(side) => self.unmake_castling(mv, side),
         }

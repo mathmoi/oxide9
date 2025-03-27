@@ -1,11 +1,14 @@
 use clap::Parser;
-use oxide9::{config::get_config, perft::perft};
+use oxide9::{analyze::analyze, config::get_config, perft::perft};
 use thiserror::Error;
 
 #[derive(Error, Debug)]
 enum Oxide9Error {
     #[error("Error during the perft command: {0}")]
     PerftError(#[from] oxide9::perft::PerftError),
+
+    #[error("Error during the analysis command: {0}")]
+    AnalyzeError(#[from] oxide9::analyze::AnalyzeError),
 }
 
 mod arguments {
@@ -34,7 +37,7 @@ mod arguments {
         Perft {
             /// The depth to calculate the perft
             #[arg(short, long)]
-            depth: u32,
+            depth: u16,
 
             /// FEN string representing the position to calculate the perft
             #[arg(short, long, default_value = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")]
@@ -43,6 +46,17 @@ mod arguments {
             /// The number of threads to use for the perft calculation
             #[arg(short, long)]
             threads: Option<u32>,
+        },
+
+        /// Analyze a position
+        Analyze {
+            /// FEN string representing the position to analyze
+            #[arg(short, long, default_value = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")]
+            fen: String,
+
+            /// The depth to analyze the position to
+            #[arg(short, long)]
+            depth: u16,
         },
     }
 }
@@ -62,6 +76,9 @@ fn run() -> Result<(), Oxide9Error> {
         }
         arguments::Commands::Perft { depth, fen, threads } => {
             perft(&fen, depth, threads.unwrap_or(config.perft_threads))?;
+        }
+        arguments::Commands::Analyze { fen, depth } => {
+            analyze(&fen, depth)?;
         }
     }
 

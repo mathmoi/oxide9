@@ -8,8 +8,16 @@ use crate::{
 };
 
 /// A simple wrapper around a 16-bit integer that represents the evaluation of a position.
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Eval(i16);
+
+impl Eval {
+    /// The minimum possible evaluation score
+    pub const MIN: Eval = Eval(-32000);
+
+    /// The maximum possible evaluation score
+    pub const MAX: Eval = Eval(32000);
+}
 
 impl Default for Eval {
     fn default() -> Self {
@@ -39,8 +47,8 @@ impl std::ops::Neg for Eval {
 }
 
 impl From<Eval> for i32 {
-    fn from(eval: Eval) -> i32 {
-        eval.0 as i32
+    fn from(value: Eval) -> Self {
+        value.0 as i32
     }
 }
 

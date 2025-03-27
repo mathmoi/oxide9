@@ -1,5 +1,6 @@
 use std::sync::Once;
 
+pub mod analyze;
 pub mod bitboard;
 pub mod config;
 pub mod coordinates;
@@ -9,6 +10,7 @@ pub mod move_gen;
 pub mod perft;
 pub mod piece;
 pub mod position;
+pub mod search;
 
 static INIT: Once = Once::new();
 

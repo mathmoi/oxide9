@@ -34,7 +34,7 @@ impl<'a> Search<'a> {
     /// order, with the best move to play in the current position being the last move in the vector.
     pub fn start(&mut self) -> Vec<Move> {
         let mut pv = Vec::new();
-        self.search(self.depth, &mut pv);
+        self.search(self.depth, Eval::MIN, Eval::MAX, &mut pv);
         pv
     }
 
@@ -45,6 +45,8 @@ impl<'a> Search<'a> {
     ///
     /// # Parameters
     /// * `depth` - Current remaining search depth in half-moves
+    /// * `alpha` - The current alpha value for alpha-beta pruning
+    /// * `beta` - The current beta value for alpha-beta pruning
     /// * `pv` - Mutable vector to store the principal variation (best line of moves)
     ///
     /// # Returns
@@ -53,7 +55,9 @@ impl<'a> Search<'a> {
     ///
     /// # Note
     /// This is an internal recursive method used by the `start` method.
-    fn search(&mut self, depth: u16, pv: &mut Vec<Move>) -> Eval {
+    fn search(&mut self, depth: u16, alpha: Eval, beta: Eval, pv: &mut Vec<Move>) -> Eval {
+        let mut alpha = alpha; // Make alpha mutable locally
+
         // TODO : Is Vec really performant for pv structure?
         // TODO : Should we use a stack to store the PV and others things?
         if depth == 0 {
@@ -63,22 +67,25 @@ impl<'a> Search<'a> {
         let mut moves = MoveList::new();
         generate_all_moves(&self.position, &mut moves);
 
-        let mut best_score = Eval::MIN;
         for mv in moves.iter() {
             if self.position.is_legal(*mv) {
                 self.position.make(*mv);
                 let mut local_pv = Vec::new();
-                let score = -self.search(depth - 1, &mut local_pv);
+                let score = -self.search(depth - 1, -beta, -alpha, &mut local_pv);
                 self.position.unmake();
 
-                if score > best_score {
-                    best_score = score;
+                if score >= beta {
+                    return beta;
+                }
+
+                if score > alpha {
+                    alpha = score;
                     *pv = local_pv;
                     pv.push(*mv);
                 }
             }
         }
 
-        best_score
+        alpha
     }
 }

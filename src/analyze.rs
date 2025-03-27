@@ -41,12 +41,17 @@ pub fn analyze(fen: &str, depth: u16) -> Result<(), AnalyzeError> {
     println!("Analyzing position:\n\n{}\n\n{}", position.to_compact_string(), fen);
 
     let mut search = Search::new(&mut position, depth as u16);
+
+    let start = std::time::Instant::now();
     let moves = search.start();
+    let elapsed = start.elapsed();
 
     for mv in moves.iter().rev() {
         print!("{} ", mv.to_uci_string());
-        println!("");
     }
+    println!("");
+
+    println!("\nAnalysis complete in {:.2} seconds", elapsed.as_secs_f64());
 
     Ok(())
 }

@@ -1,6 +1,9 @@
 use crate::{
     eval::{evaluate, Eval},
-    move_gen::{generation::generate_all_moves, move_list::MoveList},
+    move_gen::{
+        generation::{generate_all_moves, generate_qsearch},
+        move_list::MoveList,
+    },
     position::Position,
     r#move::Move,
 };
@@ -34,7 +37,7 @@ impl<'a> Search<'a> {
     /// order, with the best move to play in the current position being the last move in the vector.
     pub fn start(&mut self) -> Vec<Move> {
         let mut pv = Vec::new();
-        self.search(self.depth, Eval::MIN, Eval::MAX, &mut pv);
+        self.search::<false>(self.depth, Eval::MIN, Eval::MAX, &mut pv);
         pv
     }
 
@@ -55,23 +58,41 @@ impl<'a> Search<'a> {
     ///
     /// # Note
     /// This is an internal recursive method used by the `start` method.
-    fn search(&mut self, depth: u16, alpha: Eval, beta: Eval, pv: &mut Vec<Move>) -> Eval {
+    fn search<const QSEARCH: bool>(&mut self, depth: u16, alpha: Eval, beta: Eval, pv: &mut Vec<Move>) -> Eval {
         let mut alpha = alpha; // Make alpha mutable locally
 
         // TODO : Is Vec really performant for pv structure?
         // TODO : Should we use a stack to store the PV and others things?
-        if depth == 0 {
-            return evaluate(&self.position);
+
+        // In the qsearch we evaluate the stand pat (stop capturing) option. If the stand pat is better than beta, we
+        // stop the search and return beta (beta cut-off). If the stand pat is better than alpha, we update alpha with the
+        // stand pat value.
+        if QSEARCH {
+            let stand_pat = evaluate(&self.position);
+            if stand_pat >= beta {
+                return beta;
+            }
+            if stand_pat > alpha {
+                alpha = stand_pat;
+            }
         }
 
         let mut moves = MoveList::new();
-        generate_all_moves(&self.position, &mut moves);
+        if QSEARCH {
+            generate_qsearch(&self.position, &mut moves);
+        } else {
+            generate_all_moves(&self.position, &mut moves);
+        }
 
         for mv in moves.iter() {
             if self.position.is_legal(*mv) {
                 self.position.make(*mv);
                 let mut local_pv = Vec::new();
-                let score = -self.search(depth - 1, -beta, -alpha, &mut local_pv);
+                let score = if QSEARCH || depth == 1 {
+                    -self.search::<true>(0, -beta, -alpha, &mut local_pv)
+                } else {
+                    -self.search::<false>(depth - 1, -beta, -alpha, &mut local_pv)
+                };
                 self.position.unmake();
 
                 if score >= beta {
@@ -80,8 +101,10 @@ impl<'a> Search<'a> {
 
                 if score > alpha {
                     alpha = score;
-                    *pv = local_pv;
-                    pv.push(*mv);
+                    if !QSEARCH {
+                        *pv = local_pv;
+                        pv.push(*mv);
+                    }
                 }
             }
         }

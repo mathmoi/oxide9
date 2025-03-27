@@ -342,10 +342,45 @@ pub fn generate_moves<const TYPE: u8>(position: &Position, list: &mut MoveList) 
     }
 }
 
+/// Generates all legal chess moves for the current position.
+///
+/// This function populates the provided `MoveList` with all legal moves for the given chess position. It handles two
+/// distinct scenarios:
+/// - When the king is in check, it generates only evasion moves
+/// - Otherwise, it generates all possible legal moves
+///
+/// # Parameters
+/// * `position` - The chess position to generate moves for
+/// * `list` - Mutable reference to a `MoveList` that will be populated with the generated moves
+///
+/// # Note
+/// The function does not return a new list but updates the provided `list` in-place.
 pub fn generate_all_moves(position: &Position, list: &mut MoveList) {
     if position.is_check() {
         generate_moves::<{ MoveGenerationType::EVASIONS_VALUE }>(&position, list);
     } else {
         generate_moves::<{ MoveGenerationType::ALL_VALUE }>(&position, list);
+    }
+}
+
+/// Generates moves for quiescence search.
+///
+/// This function populates the provided `MoveList` with moves suitable for quiescence search evaluation. The behavior
+/// varies based on the position:
+/// - When the king is in check, it generates all evasion moves (including non-captures)
+/// - Otherwise, it generates only capturing moves
+///
+/// # Parameters
+/// * `position` - The chess position to generate moves for
+/// * `list` - Mutable reference to a `MoveList` that will be populated with the generated moves
+///
+/// # Note
+/// The function updates the provided `list` in-place. This function is specifically designed for use in quiescence
+/// search to evaluate tactically active positions.
+pub fn generate_qsearch(position: &Position, list: &mut MoveList) {
+    if position.is_check() {
+        generate_moves::<{ MoveGenerationType::EVASIONS_VALUE }>(&position, list);
+    } else {
+        generate_moves::<{ MoveGenerationType::CAPTURES_VALUE }>(&position, list);
     }
 }

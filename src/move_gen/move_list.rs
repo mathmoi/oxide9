@@ -63,6 +63,24 @@ impl MoveList {
         self.count += 1;
     }
 
+    /// Removes and returns the last move from the list.
+    ///
+    /// # Returns
+    /// The last move in the list.
+    ///
+    /// # Panics
+    /// Debug builds will panic if the list is empty. In release builds, calling this method on an empty list results in
+    /// undefined behavior.
+    ///
+    /// # Note
+    /// Reduces the count of moves in the list by 1.
+    pub fn pop(&mut self) -> Move {
+        debug_assert!(self.count > 0);
+
+        self.count -= 1;
+        self.moves[self.count]
+    }
+
     /// Returns the number of moves currently in the list.
     ///
     /// Provides the count of valid moves that have been added to the list. This value is also the index where the next
@@ -87,5 +105,25 @@ impl MoveList {
     /// of the internal array.
     pub fn iter(&self) -> impl Iterator<Item = &Move> {
         self.moves.iter().take(self.count)
+    }
+
+    /// Returns a mutable iterator over the valid moves in the list.
+    ///
+    /// # Returns
+    /// A mutable iterator that yields references to each valid move in the list (from index 0 to count-1).
+    ///
+    /// # Note
+    /// Only iterates through the populated portion of the list up to the current count of moves, allowing for in-place
+    /// modification of individual moves.
+    pub fn iter_mut(&mut self) -> impl Iterator<Item = &mut Move> {
+        self.moves.iter_mut().take(self.count)
+    }
+
+    /// Sorts the moves in the list in ascending order based on their evaluation values.
+    ///
+    /// This method uses an unstable sort to arrange moves by their evaluation scores. After sorting, moves with lower
+    /// evaluation scores will appear earlier in the list.
+    pub fn sort(&mut self) {
+        self.moves[0..self.count].sort_unstable_by_key(|mv| mv.eval());
     }
 }

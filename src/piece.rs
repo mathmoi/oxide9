@@ -39,6 +39,7 @@ impl Color {
     ///
     /// # Returns
     /// An integer representing the forward direction: 1 for White, -1 for Black
+    #[inline(always)]
     pub fn forward(self) -> i8 {
         match self {
             Color::White => 1,
@@ -59,6 +60,7 @@ impl Display for Color {
 
 impl From<Color> for u8 {
     /// Converts a `Color` to a `u8` value.
+    #[inline(always)]
     fn from(color: Color) -> Self {
         color as u8
     }
@@ -66,6 +68,7 @@ impl From<Color> for u8 {
 
 impl From<Color> for char {
     /// Converts a `Color` to a single character.
+    #[inline(always)]
     fn from(color: Color) -> Self {
         match color {
             Color::White => 'w',
@@ -76,6 +79,7 @@ impl From<Color> for char {
 
 impl From<Color> for usize {
     /// Converts a `Color` to a `usize` value.
+    #[inline(always)]
     fn from(color: Color) -> Self {
         color as usize
     }
@@ -83,6 +87,7 @@ impl From<Color> for usize {
 
 impl From<u8> for Color {
     /// Converts a `u8` value to a `Color`.
+    #[inline(always)]
     fn from(value: u8) -> Self {
         assert!(value <= Color::Black.into());
         unsafe { std::mem::transmute(value) }
@@ -93,6 +98,7 @@ impl std::ops::Not for Color {
     type Output = Color;
 
     /// Returns the opposite color.
+    #[inline(always)]
     fn not(self) -> Self::Output {
         match self {
             Color::White => Color::Black,
@@ -130,6 +136,7 @@ impl PieceType {
 
 impl From<PieceType> for u8 {
     /// Converts a `PieceType` to a `u8` value.
+    #[inline(always)]
     fn from(piece_type: PieceType) -> Self {
         piece_type as u8
     }
@@ -137,6 +144,7 @@ impl From<PieceType> for u8 {
 
 impl From<PieceType> for usize {
     /// Converts a `PieceType` to a `usize` value.
+    #[inline(always)]
     fn from(piece_type: PieceType) -> Self {
         piece_type as usize
     }
@@ -144,6 +152,7 @@ impl From<PieceType> for usize {
 
 impl From<u8> for PieceType {
     /// Converts a `u8` value to a `PieceType`.
+    #[inline(always)]
     fn from(value: u8) -> Self {
         assert!(value <= 5);
         unsafe { std::mem::transmute(value) }
@@ -237,16 +246,19 @@ impl Piece {
     ];
 
     /// Creates a new `Piece` with the given `Color` and `PieceType`.
+    #[inline(always)]
     pub fn new(color: Color, piece_type: PieceType) -> Self {
         Piece((u8::from(piece_type) << 1) | u8::from(color))
     }
 
     /// Returns the Color of the piece.
+    #[inline(always)]
     pub fn color(self) -> Color {
         Color::from(self.0 & 1)
     }
 
     /// Returns the PieceType of the piece.
+    #[inline(always)]
     pub fn piece_type(self) -> PieceType {
         PieceType::from(self.0 >> 1)
     }
@@ -254,6 +266,7 @@ impl Piece {
 
 impl From<Piece> for u8 {
     /// Converts a `Piece` to a `u8` value.
+    #[inline(always)]
     fn from(piece: Piece) -> Self {
         piece.0
     }
@@ -261,6 +274,7 @@ impl From<Piece> for u8 {
 
 impl From<Piece> for usize {
     /// Converts a `Piece` to a `usize` value.
+    #[inline(always)]
     fn from(piece: Piece) -> Self {
         piece.0 as usize
     }
@@ -268,6 +282,7 @@ impl From<Piece> for usize {
 
 impl From<u8> for Piece {
     /// Converts a `u8` value to a `Piece`.
+    #[inline(always)]
     fn from(value: u8) -> Self {
         assert!(value <= 11);
         Piece(value)

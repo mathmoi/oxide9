@@ -39,9 +39,9 @@
                 }
             },
             "args": [
-                "perft",
+                "analyze",
                 "--depth",
-                "1",
+                "2",
             ],
             "cwd": "${workspaceFolder}"
         },

@@ -1,9 +1,6 @@
 use crate::{
     eval::{evaluate, Eval},
-    move_gen::{
-        generation::{generate_all_moves, generate_qsearch},
-        move_list::MoveList,
-    },
+    move_gen::move_generator::MoveGenerator,
     position::Position,
     r#move::Move,
 };
@@ -77,16 +74,10 @@ impl<'a> Search<'a> {
             }
         }
 
-        let mut moves = MoveList::new();
-        if QSEARCH {
-            generate_qsearch(&self.position, &mut moves);
-        } else {
-            generate_all_moves(&self.position, &mut moves);
-        }
-
-        for mv in moves.iter() {
-            if self.position.is_legal(*mv) {
-                self.position.make(*mv);
+        let move_generator = MoveGenerator::new(self.position, QSEARCH);
+        for mv in move_generator {
+            if self.position.is_legal(mv) {
+                self.position.make(mv);
                 let mut local_pv = Vec::new();
                 let score = if QSEARCH || depth == 1 {
                     -self.search::<true>(0, -beta, -alpha, &mut local_pv)
@@ -103,7 +94,7 @@ impl<'a> Search<'a> {
                     alpha = score;
                     if !QSEARCH {
                         *pv = local_pv;
-                        pv.push(*mv);
+                        pv.push(mv);
                     }
                 }
             }

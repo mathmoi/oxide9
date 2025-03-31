@@ -8,7 +8,7 @@ use crate::{
 };
 
 /// A simple wrapper around a 16-bit integer that represents the evaluation of a position.
-#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Eval(i16);
 
 impl Eval {
@@ -17,6 +17,13 @@ impl Eval {
 
     /// The maximum possible evaluation score
     pub const MAX: Eval = Eval(32000);
+
+    /// Creates a new Eval instance with the given value.
+    pub const fn new(value: i16) -> Self {
+        debug_assert!(value >= i16::MIN && value <= i16::MAX);
+
+        Eval(value)
+    }
 }
 
 impl Default for Eval {
@@ -36,6 +43,20 @@ impl std::ops::Sub for Eval {
     type Output = Self;
     fn sub(self, rhs: Self) -> Self {
         Eval(self.0 - rhs.0)
+    }
+}
+
+impl std::ops::Mul<i16> for Eval {
+    type Output = Self;
+    fn mul(self, rhs: i16) -> Self {
+        Eval(self.0 * rhs)
+    }
+}
+
+impl std::ops::Mul<Eval> for i16 {
+    type Output = Eval;
+    fn mul(self, rhs: Eval) -> Self::Output {
+        Eval(self * rhs.0)
     }
 }
 
@@ -87,8 +108,23 @@ impl Default for EvalPair {
 }
 
 impl EvalPair {
+    /// Creates a new EvalPair with separate evaluations for middle game and end game phases.
+    ///
+    /// # Parameters
+    /// * `mg` - The middle game evaluation score
+    /// * `eg` - The end game evaluation score
     pub fn new(mg: Eval, eg: Eval) -> Self {
         EvalPair { mg, eg }
+    }
+
+    /// Returns the middle game evaluation.
+    pub fn mg(&self) -> Eval {
+        self.mg
+    }
+
+    /// Returns the end game evaluation.
+    pub fn eg(&self) -> Eval {
+        self.eg
     }
 }
 

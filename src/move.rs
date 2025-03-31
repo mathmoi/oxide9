@@ -1,5 +1,7 @@
 use bitflags::bitflags;
 
+use crate::eval::Eval;
+
 use super::{
     coordinates::Square,
     piece::{Color, Piece},
@@ -119,22 +121,23 @@ pub struct Move {
     to_square: Square,
     piece: Piece,
     move_type: MoveType,
+    eval: Eval,
 }
 
 impl Move {
     /// This is a constructor for a new move that is basic (i.e., not a capture, promotion, etc.).
     pub fn new(from_square: Square, to_square: Square, piece: Piece) -> Self {
-        Self { from_square, to_square, piece, move_type: MoveType::Basic }
+        Self { from_square, to_square, piece, move_type: MoveType::Basic, eval: Eval::default() }
     }
 
     /// This is a constructor for a new move that is a capture.
     pub fn new_capture(from_square: Square, to_square: Square, piece: Piece, capture: Piece) -> Self {
-        Self { from_square, to_square, piece, move_type: MoveType::Capture(capture) }
+        Self { from_square, to_square, piece, move_type: MoveType::Capture(capture), eval: Eval::default() }
     }
 
     /// Creates a new move that is a promotion.
     pub fn new_promotion(from_square: Square, to_square: Square, piece: Piece, promotion: Piece) -> Self {
-        Self { from_square, to_square, piece, move_type: MoveType::Promotion(promotion) }
+        Self { from_square, to_square, piece, move_type: MoveType::Promotion(promotion), eval: Eval::default() }
     }
 
     /// Creates a new move that is both a capture and a promotion.
@@ -145,22 +148,38 @@ impl Move {
         capture: Piece,
         promotion: Piece,
     ) -> Self {
-        Self { from_square, to_square, piece, move_type: MoveType::CapturePromotion { capture, promotion } }
+        Self {
+            from_square,
+            to_square,
+            piece,
+            move_type: MoveType::CapturePromotion { capture, promotion },
+            eval: Eval::default(),
+        }
     }
 
     /// Creates a new move that is a two-square pawn push.
     pub fn new_two_square_pawn_push(from_square: Square, to_square: Square, piece: Piece) -> Self {
-        Self { from_square, to_square, piece, move_type: MoveType::TwoSquarePawnPush }
+        Self { from_square, to_square, piece, move_type: MoveType::TwoSquarePawnPush, eval: Eval::default() }
     }
 
     /// Creates a new move that is a capture of a pawn en passant.
     pub fn new_en_passant(from_square: Square, to_square: Square, piece: Piece) -> Self {
-        Self { from_square, to_square, piece, move_type: MoveType::EnPassant }
+        Self { from_square, to_square, piece, move_type: MoveType::EnPassant, eval: Eval::default() }
     }
 
     /// Creates a new move that is a castling move.
     pub fn new_castling(from_square: Square, to_square: Square, piece: Piece, side: CastlingSide) -> Self {
-        Self { from_square, to_square, piece, move_type: MoveType::Castling(side) }
+        Self { from_square, to_square, piece, move_type: MoveType::Castling(side), eval: Eval::default() }
+    }
+
+    /// Sets the evaluation of the move.
+    pub fn set_eval(&mut self, eval: Eval) {
+        self.eval = eval;
+    }
+
+    /// Returns the evaluation of the move.
+    pub fn eval(self) -> Eval {
+        self.eval
     }
 
     /// Returns the source square of the move.
@@ -260,7 +279,7 @@ impl From<u32> for Move {
             _ => unreachable!(),
         };
 
-        Self { from_square: from, to_square: to, piece, move_type }
+        Self { from_square: from, to_square: to, piece, move_type, eval: Eval::default() }
     }
 }
 
@@ -391,7 +410,7 @@ mod tests {
             let capture = Piece::BLACK_PAWN;
             let move_type = MoveType::Capture(capture);
 
-            let chess_move = Move { from_square: from, to_square: to, piece, move_type };
+            let chess_move = Move { from_square: from, to_square: to, piece, move_type, eval: Eval::default() };
 
             assert_eq!(chess_move.from_square(), from);
             assert_eq!(chess_move.to_square(), to);

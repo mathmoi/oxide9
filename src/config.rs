@@ -23,6 +23,10 @@ pub struct Oxide9Config {
 
     /// Evaluation parameters for the engine
     pub eval: Eval,
+
+    /// Indicate if number output should be precise. If false, some output will be printed in a more human-readable
+    /// format.
+    pub precise: bool,
 }
 /// Evaluation parameters for the engine
 #[derive(Debug, serde::Deserialize)]
@@ -75,10 +79,14 @@ fn get_config_path() -> Result<PathBuf, ConfigError> {
 }
 
 /// Initialize the configuration of the engine
-pub fn initialize() -> Result<(), ConfigError> {
+pub fn initialize(perft_threads: Option<u32>, precise: bool) -> Result<(), ConfigError> {
     let path = get_config_path()?;
     let settings = Config::builder().add_source(File::from(path.clone())).build()?;
-    let config: Oxide9Config = settings.try_deserialize()?;
+    let mut config: Oxide9Config = settings.try_deserialize()?;
+
+    config.perft_threads = perft_threads.unwrap_or(config.perft_threads);
+    config.precise = config.precise || precise;
+
     CONFIG.set(config).expect("It should be possible to initialize the configuration");
 
     Ok(())

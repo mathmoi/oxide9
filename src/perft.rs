@@ -5,11 +5,13 @@ use std::{
 };
 
 use crate::{
+    config::get_config,
     move_gen::{generation::generate_all_moves, move_list::MoveList},
     position::{FenError, Position},
     r#move::Move,
 };
 
+use human_repr::{HumanCount, HumanDuration};
 use thiserror::Error;
 
 /// Represents errors that can occur during perft (performance test) operations.
@@ -299,7 +301,7 @@ impl PerftNode {
 /// # Note
 /// The function automatically switches to parallel computation for depths greater than 5 to improve performance on
 /// multi-core systems.
-pub fn perft(fen: &str, depth: u16, threads: u32) -> Result<(), PerftError> {
+pub fn perft(fen: &str, depth: u16) -> Result<(), PerftError> {
     const MIN_PARALLEL_DEPTH: u16 = 5;
 
     let mut position = Position::new_from_fen(fen).map_err(|e| PerftError::InvalidFen(fen.to_string(), e))?;
@@ -307,16 +309,13 @@ pub fn perft(fen: &str, depth: u16, threads: u32) -> Result<(), PerftError> {
     println!("Perft ({}) for position:\n\n{}\n", depth, position.to_compact_string());
 
     let start = Instant::now();
-    let nodes = if depth <= MIN_PARALLEL_DEPTH {
-        divide(&mut position, depth)
-    } else {
-        parallel_perft(&mut position, depth, threads)
-    };
+    let nodes =
+        if depth <= MIN_PARALLEL_DEPTH { divide(&mut position, depth) } else { parallel_perft(&mut position, depth) };
     let duration = start.elapsed();
 
     println!("\nNodes: {}", nodes);
-    println!("Time: {:.3}", duration.as_secs_f64());
-    println!("Nodes per second: {:.0}", nodes as f64 / duration.as_secs_f64());
+    println!("Time: {:.3}", duration.human_duration());
+    println!("Nodes per second: {:.0}", (nodes as f64 / duration.as_secs_f64()).human_count("nps"));
 
     Ok(())
 }
@@ -404,7 +403,6 @@ fn recursive_perft(position: &mut Position, depth: u16) -> u64 {
 /// # Parameters
 /// * `position` - A mutable reference to the starting chess position
 /// * `depth` - The depth of the move tree to traverse
-/// * `threads_count` - The number of worker threads to create
 ///
 /// # Returns
 /// * The total number of leaf nodes found at the specified depth
@@ -412,11 +410,12 @@ fn recursive_perft(position: &mut Position, depth: u16) -> u64 {
 /// # Note
 /// This function creates a shared work distribution system to effectively balance the workload across all available
 /// threads, which significantly improves performance for deeper perft tests on multi-core systems.
-fn parallel_perft(position: &mut Position, depth: u16, threads_count: u32) -> u64 {
+fn parallel_perft(position: &mut Position, depth: u16) -> u64 {
     let root = PerftNode::new();
     root.make_shared(position);
 
     // Spawning threads
+    let threads_count = get_config().perft_threads;
     let mut threads = Vec::with_capacity(threads_count as usize);
     for _ in 0..threads_count {
         let thread_root = root.clone();

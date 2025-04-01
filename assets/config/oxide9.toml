@@ -1,4 +1,5 @@
 perft_threads = 16
+precise = false
 
 [eval]
 piece_type_game_phase = [0, 1, 1, 2, 4, 0]

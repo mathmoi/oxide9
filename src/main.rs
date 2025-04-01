@@ -1,5 +1,5 @@
 use clap::Parser;
-use oxide9::{analyze::analyze, config::get_config, perft::perft};
+use oxide9::{analyze::analyze, perft::perft};
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -26,6 +26,14 @@ mod arguments {
     pub struct Oxide9Args {
         #[command(subcommand)]
         pub command: Option<Commands>,
+
+        /// Indicate if output number should be precise instead of human-readable
+        #[arg(short, long)]
+        pub precise: bool,
+
+        /// The number of threads to use for the perft calculation
+        #[arg(short, long)]
+        pub threads: Option<u32>,
     }
 
     #[derive(Debug, Clone, Subcommand)]
@@ -42,10 +50,6 @@ mod arguments {
             /// FEN string representing the position to calculate the perft
             #[arg(short, long, default_value = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")]
             fen: String,
-
-            /// The number of threads to use for the perft calculation
-            #[arg(short, long)]
-            threads: Option<u32>,
         },
 
         /// Analyze a position
@@ -66,16 +70,15 @@ fn run() -> Result<(), Oxide9Error> {
     let args = arguments::Oxide9Args::parse();
 
     // Initialize the engine
-    oxide9::initialize();
-    let config = get_config();
+    oxide9::initialize_with_args(args.threads, args.precise);
 
     // Run the command
     match args.command.unwrap_or(arguments::Commands::Uci) {
         arguments::Commands::Uci => {
             unimplemented!();
         }
-        arguments::Commands::Perft { depth, fen, threads } => {
-            perft(&fen, depth, threads.unwrap_or(config.perft_threads))?;
+        arguments::Commands::Perft { depth, fen } => {
+            perft(&fen, depth)?;
         }
         arguments::Commands::Analyze { fen, depth } => {
             analyze(&fen, depth)?;

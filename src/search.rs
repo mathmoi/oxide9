@@ -5,8 +5,23 @@ use crate::{
     r#move::Move,
 };
 
+pub struct SearchStats {
+    /// The number of nodes searched. This excludes quiescence nodes.
+    pub nodes: u64,
+
+    /// The number of quiescence nodes searched
+    pub qnodes: u64,
+}
+
+impl Default for SearchStats {
+    fn default() -> Self {
+        SearchStats { nodes: 0, qnodes: 0 }
+    }
+}
+
 pub struct Search<'a> {
     position: &'a mut Position,
+    stats: SearchStats,
     depth: u16,
 }
 
@@ -21,7 +36,12 @@ impl<'a> Search<'a> {
     /// # Returns
     /// A new Search instance configured with the specified position and depth
     pub fn new(position: &'a mut Position, depth: u16) -> Search<'a> {
-        Search { position, depth }
+        Search { position, stats: SearchStats::default(), depth }
+    }
+
+    /// Returns the search statistics.
+    pub fn stats(&self) -> &SearchStats {
+        &self.stats
     }
 
     /// Starts the search and returns the principal variation.
@@ -60,6 +80,11 @@ impl<'a> Search<'a> {
 
         // TODO : Is Vec really performant for pv structure?
         // TODO : Should we use a stack to store the PV and others things?
+
+        match QSEARCH {
+            true => self.stats.qnodes += 1,
+            false => self.stats.nodes += 1,
+        }
 
         // In the qsearch we evaluate the stand pat (stop capturing) option. If the stand pat is better than beta, we
         // stop the search and return beta (beta cut-off). If the stand pat is better than alpha, we update alpha with the

@@ -1,6 +1,8 @@
+use human_repr::{HumanCount, HumanDuration};
 use thiserror::Error;
 
 use crate::{
+    config::get_config,
     position::{FenError, Position},
     search::Search,
 };
@@ -38,7 +40,7 @@ pub enum AnalyzeError {
 pub fn analyze(fen: &str, depth: u16) -> Result<(), AnalyzeError> {
     let mut position = Position::new_from_fen(fen).map_err(|e| AnalyzeError::InvalidFen(fen.to_string(), e))?;
 
-    println!("Analyzing position:\n\n{}\n\n{}", position.to_compact_string(), fen);
+    println!("Analyzing position:\n\n{}\n\n{}\n", position.to_compact_string(), fen);
 
     let mut search = Search::new(&mut position, depth as u16);
 
@@ -51,7 +53,18 @@ pub fn analyze(fen: &str, depth: u16) -> Result<(), AnalyzeError> {
     }
     println!("");
 
-    println!("\nAnalysis complete in {:.2} seconds", elapsed.as_secs_f64());
+    let config = get_config();
+    let stats = search.stats();
+    if config.precise {
+        println!("time={} nodes={} qnodes={}", elapsed.as_secs_f64(), stats.nodes, stats.qnodes);
+    } else {
+        println!(
+            "time={} nodes={} qnodes={}",
+            elapsed.human_duration(),
+            stats.nodes.human_count_bare(),
+            stats.qnodes.human_count_bare()
+        );
+    }
 
     Ok(())
 }

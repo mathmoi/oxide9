@@ -132,6 +132,7 @@ fn mvv_lva(mv: Move) -> Eval {
         MoveType::Promotion(promotion) => VALUES[usize::from(promotion.piece_type())],
         MoveType::CapturePromotion { capture, promotion } => {
             VALUES[usize::from(capture.piece_type())] + VALUES[usize::from(promotion.piece_type())]
+            // TODO: Is this correct?
         }
         _ => unreachable!(),
     };

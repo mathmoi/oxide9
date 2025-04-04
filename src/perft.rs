@@ -202,7 +202,7 @@ impl PerftNode {
             let mut moves = MoveList::new();
             generate_all_moves(&position, &mut moves);
             let children: Vec<(Move, PerftNode)> =
-                moves.iter().filter(|mv| position.is_legal(**mv)).map(|mv| (*mv, PerftNode::new())).collect();
+                moves.iter().filter(|mv| position.is_legal(*mv)).map(|mv| (mv, PerftNode::new())).collect();
             *status = PerftNodeStatus::Shared { children };
             true
         } else {
@@ -342,12 +342,12 @@ fn divide(position: &mut Position, depth: u16) -> u64 {
     generate_all_moves(position, &mut moves);
 
     for mv in moves.iter() {
-        if position.is_legal(*mv) {
+        if position.is_legal(mv) {
             let nodes;
             if depth == 1 {
                 nodes = 1;
             } else {
-                position.make(*mv);
+                position.make(mv);
                 nodes = recursive_perft(position, depth - 1);
                 position.unmake();
             };
@@ -381,11 +381,11 @@ fn recursive_perft(position: &mut Position, depth: u16) -> u64 {
     generate_all_moves(position, &mut moves);
 
     if depth == 1 {
-        nodes += moves.iter().filter(|m| position.is_legal(**m)).count() as u64;
+        nodes += moves.iter().filter(|m| position.is_legal(*m)).count() as u64;
     } else {
         for mv in moves.iter() {
-            if position.is_legal(*mv) {
-                position.make(*mv);
+            if position.is_legal(mv) {
+                position.make(mv);
                 nodes += recursive_perft(position, depth - 1);
                 position.unmake();
             }

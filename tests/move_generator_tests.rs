@@ -226,7 +226,7 @@ fn test_move_generation(test: &Test) -> Result<(), MoveGeneratorTestError> {
     // Generate the moves
     let mut pseudo_legal_moves = MoveList::new();
     generate_all_moves(&position, &mut pseudo_legal_moves);
-    let legal_moves: Vec<Move> = pseudo_legal_moves.iter().filter(|m| position.is_legal(**m)).copied().collect();
+    let legal_moves: Vec<Move> = pseudo_legal_moves.iter().filter(|m| position.is_legal(*m)).collect();
 
     // Compare the moves
     let (missing, extra) = compare_moves_set(&expected_moves, &legal_moves);

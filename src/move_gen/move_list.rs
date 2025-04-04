@@ -103,8 +103,8 @@ impl MoveList {
     /// # Performance
     /// Uses the standard iterator implementation with a take() operation to limit iteration to only the valid portion
     /// of the internal array.
-    pub fn iter(&self) -> impl Iterator<Item = &Move> {
-        self.moves.iter().take(self.count)
+    pub fn iter(&self) -> impl Iterator<Item = Move> + '_ {
+        self.moves.iter().take(self.count).copied()
     }
 
     /// Returns a mutable iterator over the valid moves in the list.
@@ -115,7 +115,7 @@ impl MoveList {
     /// # Note
     /// Only iterates through the populated portion of the list up to the current count of moves, allowing for in-place
     /// modification of individual moves.
-    pub fn iter_mut(&mut self) -> impl Iterator<Item = &mut Move> {
+    pub fn iter_mut(&mut self) -> impl Iterator<Item = &mut Move> + '_ {
         self.moves.iter_mut().take(self.count)
     }
 

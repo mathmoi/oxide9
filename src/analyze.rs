@@ -47,7 +47,7 @@ pub fn analyze(fen: &str, depth: u16) -> Result<(), AnalyzeError> {
     println!("Analyzing position:\n\n{}\n\n{}\n", position.to_compact_string(), fen);
     print_header();
 
-    let mut search = Search::new(&mut position, depth as u16, Some(report_progress));
+    let mut search = Search::new(&mut position, depth as u16, report_progress);
 
     let start = std::time::Instant::now();
     search.start();
@@ -65,7 +65,7 @@ pub fn analyze(fen: &str, depth: u16) -> Result<(), AnalyzeError> {
 
 const DEPTH_COLUMN_WIDTH: usize = 5;
 const TIME_COLUMN_WIDTH: usize = 8;
-const SCORE_COLUMN_WIDTH: usize = 5;
+const SCORE_COLUMN_WIDTH: usize = 6;
 const NODES_COLUMN_WIDTH: usize = 6;
 
 const EXTRA_SEPARATOR_CHAR_COUNT: usize = 16;

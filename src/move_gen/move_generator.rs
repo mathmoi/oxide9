@@ -65,7 +65,6 @@ impl Iterator for MoveGenerator {
                         &mut self.list,
                     );
                     self.list.iter_mut().for_each(|mv| mv.set_eval(mvv_lva(*mv)));
-                    self.list.sort();
                     self.step = GenerationStep::DistributeCaptures;
                 }
 
@@ -77,7 +76,6 @@ impl Iterator for MoveGenerator {
 
                     generate_moves::<{ MoveGenerationType::QUIET_VALUE }>(unsafe { &*self.position }, &mut self.list);
                     self.list.iter_mut().for_each(|mv| mv.set_eval(evaluate_quiet_move(*mv)));
-                    self.list.sort();
                     self.step = GenerationStep::DistributeQuiet;
                 }
 

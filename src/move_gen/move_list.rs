@@ -16,6 +16,7 @@ const MAX_MOVES: usize = 256;
 ///
 /// # Memory Layout
 /// Uses a fixed array of size MAX_MOVES and a counter to track the number of valid moves.
+#[derive(Debug, Clone)]
 pub struct MoveList {
     pub moves: [Move; MAX_MOVES],
     pub count: usize,
@@ -63,10 +64,13 @@ impl MoveList {
         self.count += 1;
     }
 
-    /// Removes and returns the last move from the list.
+    /// Removes and returns the highest-scoring move from the list.
+    ///
+    /// Finds the move with the highest evaluation score, swaps it with the last move in the list, and returns it after
+    /// reducing the count of moves.
     ///
     /// # Returns
-    /// The last move in the list.
+    /// The move with the highest evaluation score in the list.
     ///
     /// # Panics
     /// Debug builds will panic if the list is empty. In release builds, calling this method on an empty list results in
@@ -77,8 +81,19 @@ impl MoveList {
     pub fn pop(&mut self) -> Move {
         debug_assert!(self.count > 0);
 
+        let mut best = self.moves[0].eval();
+        let mut best_index = 0;
+        for index in 1..self.count {
+            if best < self.moves[index].eval() {
+                best = self.moves[index].eval();
+                best_index = index;
+            }
+        }
+
+        let result = self.moves[best_index];
+        self.moves[best_index] = self.moves[self.count - 1];
         self.count -= 1;
-        self.moves[self.count]
+        result
     }
 
     /// Returns the number of moves currently in the list.
@@ -119,11 +134,41 @@ impl MoveList {
         self.moves.iter_mut().take(self.count)
     }
 
-    /// Sorts the moves in the list in ascending order based on their evaluation values.
+    /// Moves a specified move to the front of the moves list.
     ///
-    /// This method uses an unstable sort to arrange moves by their evaluation scores. After sorting, moves with lower
-    /// evaluation scores will appear earlier in the list.
-    pub fn sort(&mut self) {
-        self.moves[0..self.count].sort_unstable_by_key(|mv| mv.eval());
+    /// If the specified move exists in the list, it will be moved to the front, shifting all other moves one position
+    /// to accommodate this change. If the move doesn't exist in the list, no action is taken.
+    ///
+    /// # Parameters
+    /// * `mv` - The move to be brought to the front of the list
+    pub fn move_front(&mut self, mv: Move) {
+        let maybe_position = self.moves[0..self.count - 1].iter().position(|x| *x == mv);
+        if let Some(position) = maybe_position {
+            self.moves.copy_within(0..position, 1);
+            self.moves[0] = mv;
+        }
+    }
+}
+
+impl FromIterator<Move> for MoveList {
+    /// Creates a MoveList from an iterator of moves.
+    ///
+    /// This method collects moves from the provided iterator into a new MoveList. It will panic if the number of moves
+    /// exceeds MAX_MOVES.
+    ///
+    /// # Parameters
+    /// * `iter` - An iterator over Move objects.
+    ///
+    /// # Returns
+    /// A new MoveList containing all moves from the iterator.
+    ///
+    /// # Panics
+    /// If the number of moves exceeds MAX_MOVES, this method will panic.
+    fn from_iter<I: IntoIterator<Item = Move>>(iter: I) -> Self {
+        let mut list = Self::new();
+        for mv in iter {
+            list.push(mv);
+        }
+        list
     }
 }

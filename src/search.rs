@@ -5,6 +5,7 @@ use crate::{
     move_gen::{move_generator::MoveGenerator, move_list::MoveList},
     position::Position,
     r#move::Move,
+    time::TimeManager,
 };
 
 /// The SearchStats struct holds statistics about the search process.
@@ -50,19 +51,21 @@ impl Default for SearchStats {
 ///   - `move_number`: Current move number being searched
 ///   - `move_count`: Total number of moves to search
 ///   - `mv`: The move currently being searched
+#[derive(Debug)]
 pub enum ProgressType<'a> {
     Iteration { depth: u16, elapsed: Duration, score: Eval, nodes: u64, pv: &'a [Move] },
     NewBestMove { depth: u16, elapsed: Duration, score: Eval, nodes: u64, pv: &'a [Move] },
     NewMoveAtRoot { depth: u16, elapsed: Duration, nodes: u64, move_number: u64, move_count: u64, mv: Move },
+    SearchFinished { mv: Move },
 }
 
 pub type ProgressCallback = fn(progress_type: ProgressType);
 
 /// Represents a chess position search operation.
-pub struct Search<'a> {
+pub struct Search {
     /// Mutable reference to the chess position being searched. While the position is mutated during search, it will be
     /// restored to its original state after the search is complete.
-    position: &'a mut Position,
+    position: Position,
 
     /// List of moves at the root of the search tree. This is used to store the moves generated at the root level and
     /// keep the best moves at the beginning of the list between iterations.
@@ -72,28 +75,40 @@ pub struct Search<'a> {
     stats: SearchStats,
 
     /// Maximum depth to search
-    depth: u16,
+    max_depth: u16,
 
     /// Callback for reporting search progress
     progress: ProgressCallback,
 
     /// Timestamp when the search was started, it is Nonot when the search is not started yet.
     start_time: Option<Instant>,
+
+    /// Time manager to control the search time
+    time_manager: TimeManager,
 }
 
-impl<'a> Search<'a> {
+impl Search {
     /// Creates a new search instance with the given position and depth.
     ///
     /// # Parameters
     /// * `position` - A mutable reference to the chess position to be searched. While the position will be mutated
     ///   during search it will be restored to its original state after the search is complete.
-    /// * `depth` - The maximum depth (in half-moves) to search to
+    /// * `time_manager` - The time manager to control the search time
+    /// * `max_depth` - The maximum depth (in half-moves) to search to
     ///
     /// # Returns
     /// A new Search instance configured with the specified position and depth
-    pub fn new(position: &'a mut Position, depth: u16, progress: ProgressCallback) -> Search<'a> {
-        let moves_at_root = Self::generate_moves_at_root(position);
-        Search { position, moves_at_root, stats: SearchStats::default(), depth, progress, start_time: None }
+    pub fn new(position: Position, max_depth: u16, time_manager: TimeManager, progress: ProgressCallback) -> Search {
+        let moves_at_root = Self::generate_moves_at_root(&position);
+        Search {
+            position,
+            moves_at_root,
+            stats: SearchStats::default(),
+            max_depth,
+            progress,
+            start_time: None,
+            time_manager,
+        }
     }
 
     /// Generates all legal moves for the current position at the root level of the search tree.
@@ -110,17 +125,18 @@ impl<'a> Search<'a> {
         &self.stats
     }
 
-    /// Starts the search and returns the principal variation.
-    ///
-    /// This method initiates a search to the depth specified during initialization, finding the best sequence of moves
-    /// (principal variation) from the current position.
-    ///
-    /// # Returns
-    /// A vector of moves representing the principal variation (best line of play). The moves in the vector are in reverse
-    /// order, with the best move to play in the current position being the last move in the vector.
-    pub fn start(&mut self) -> Vec<Move> {
+    /// Starts the search for the best moves from the current position.
+    pub fn start(&mut self) {
         self.start_time = Some(Instant::now());
-        self.iterative_deepening()
+        self.run();
+    }
+
+    /// Executes the search process and reports the final result.
+    fn run(&mut self) {
+        let pv = self.iterative_deepening();
+        if let Some(best_move) = pv.last() {
+            (self.progress)(ProgressType::SearchFinished { mv: *best_move });
+        }
     }
 
     /// Performs an iterative deepening search to the specified maximum depth.
@@ -133,9 +149,15 @@ impl<'a> Search<'a> {
     /// # Returns
     ///
     /// * The principal variation (PV) representing the best sequence of moves found during the search
-    pub fn iterative_deepening(&mut self) -> Vec<Move> {
+    fn iterative_deepening(&mut self) -> Vec<Move> {
         let mut pv = Vec::new();
-        for depth in 2..=self.depth {
+        for depth in 2..=self.max_depth {
+            if !self.time_manager.can_start_iteration() {
+                break;
+            }
+
+            self.time_manager.iteration_started();
+
             let score = self.search_root(depth, &mut pv);
             let start_time = self.start_time.expect("The timer should be started");
             (self.progress)(ProgressType::Iteration {
@@ -151,6 +173,8 @@ impl<'a> Search<'a> {
                 let best_move = pv.last().expect("The PV should not be empty");
                 self.moves_at_root.move_front(*best_move);
             }
+
+            self.time_manager.iteration_finished();
         }
         pv
     }
@@ -232,7 +256,7 @@ impl<'a> Search<'a> {
 
         self.stats.nodes += 1;
 
-        let move_generator = MoveGenerator::new(self.position, false);
+        let move_generator = MoveGenerator::new(&self.position, false);
         for mv in move_generator {
             if self.position.is_legal(mv) {
                 self.position.make(mv);
@@ -287,7 +311,7 @@ impl<'a> Search<'a> {
         }
 
         // TODO : If we are in check we should probably search all moves? How to prevent perpetual check?
-        let move_generator = MoveGenerator::new(self.position, true);
+        let move_generator = MoveGenerator::new(&self.position, true);
         for mv in move_generator {
             if self.position.is_legal(mv) {
                 self.position.make(mv);

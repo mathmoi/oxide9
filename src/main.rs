@@ -1,5 +1,5 @@
 use clap::Parser;
-use oxide9::{analyze::analyze, perft::perft};
+use oxide9::{analyze::analyze, perft::perft, uci::run_uci};
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -75,7 +75,7 @@ fn run() -> Result<(), Oxide9Error> {
     // Run the command
     match args.command.unwrap_or(arguments::Commands::Uci) {
         arguments::Commands::Uci => {
-            unimplemented!();
+            run_uci();
         }
         arguments::Commands::Perft { depth, fen } => {
             perft(&fen, depth)?;

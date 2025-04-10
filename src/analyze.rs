@@ -9,6 +9,7 @@ use crate::{
     position::{FenError, Position},
     r#move::Move,
     search::{ProgressType, Search, SearchStats},
+    time::{TimeControl, TimeManager},
 };
 
 /// Represents errors that can occur while analyzing a chess position.
@@ -42,12 +43,12 @@ pub enum AnalyzeError {
 /// # Side Effects
 /// Prints analysis results to standard output.
 pub fn analyze(fen: &str, depth: u16) -> Result<(), AnalyzeError> {
-    let mut position = Position::new_from_fen(fen).map_err(|e| AnalyzeError::InvalidFen(fen.to_string(), e))?;
+    let position = Position::new_from_fen(fen).map_err(|e| AnalyzeError::InvalidFen(fen.to_string(), e))?;
 
     println!("Analyzing position:\n\n{}\n\n{}\n", position.to_compact_string(), fen);
     print_header();
 
-    let mut search = Search::new(&mut position, depth as u16, report_progress);
+    let mut search = Search::new(position, depth as u16, TimeManager::new(TimeControl::Infinite), report_progress);
 
     let start = std::time::Instant::now();
     search.start();
@@ -190,6 +191,7 @@ fn report_progress(progress_type: ProgressType) {
             nodes,
             vec![format!("{} ({})", mv.to_uci_string(), (nodes as f64 / elapsed.as_secs_f64()).human_count("nps"))],
         ),
+        _ => return,
     };
 
     // Return to the beginning of the line

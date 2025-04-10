@@ -218,8 +218,10 @@ impl Move {
     /// - A queen promotion from e7 to e8 returns "e7e8q"
     pub fn to_uci_string(self) -> String {
         let promotion = match self.move_type {
-            MoveType::Promotion(promotion) => promotion.to_string(),
-            MoveType::CapturePromotion { promotion, .. } => promotion.to_string(),
+            MoveType::Promotion(promotion) => char::from(promotion.piece_type()).to_lowercase().to_string(),
+            MoveType::CapturePromotion { promotion, .. } => {
+                char::from(promotion.piece_type()).to_lowercase().to_string()
+            }
             _ => "".to_string(),
         };
         format!("{}{}{}", self.from_square, self.to_square, promotion)

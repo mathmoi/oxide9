@@ -1,15 +1,23 @@
 use std::convert::From;
 use std::fmt::{self, Display};
+use std::ops;
+
+use thiserror::Error;
 
 use crate::bitboard::Bitboard;
 use crate::piece::Color;
 
 /// Error type for the coordinates module.
-#[derive(Debug, PartialEq)]
+#[derive(Error, Debug, PartialEq)]
 pub enum CoordinatesError {
+    #[error("Trying to get a square beyond the edge of the board")]
     MoveOffBoard,
-    InvalidCharacter,
-    InvalidString,
+
+    #[error("Invalid character ({character}) for {purpose}")]
+    InvalidCharacter { character: char, purpose: &'static str },
+
+    #[error("Invalid string ({0}) for a square")]
+    InvalidSquareString(String),
 }
 
 /// Result type for the coordinates module
@@ -136,7 +144,7 @@ impl TryFrom<char> for File {
             'F' => Ok(File::F),
             'G' => Ok(File::G),
             'H' => Ok(File::H),
-            _ => Err(CoordinatesError::InvalidCharacter),
+            _ => Err(CoordinatesError::InvalidCharacter { character: value, purpose: "File" }),
         }
     }
 }
@@ -256,8 +264,17 @@ impl TryFrom<char> for Rank {
             '6' => Ok(Rank::R6),
             '7' => Ok(Rank::R7),
             '8' => Ok(Rank::R8),
-            _ => Err(CoordinatesError::InvalidCharacter),
+            _ => Err(CoordinatesError::InvalidCharacter { character: value, purpose: "Rank" }),
         }
+    }
+}
+
+impl ops::Sub<Rank> for Rank {
+    type Output = i8;
+
+    /// Subtracts two ranks and returns the difference as an `i8`.
+    fn sub(self, rhs: Rank) -> Self::Output {
+        (u8::from(self) as i8) - (u8::from(rhs) as i8)
     }
 }
 
@@ -630,10 +647,12 @@ impl TryFrom<&str> for Square {
     /// Converts a `&str` value to a `Square`.
     fn try_from(value: &str) -> Result<Self, Self::Error> {
         if value.len() != 2 {
-            return Err(CoordinatesError::InvalidString);
+            return Err(CoordinatesError::InvalidSquareString(value.to_string()));
         }
-        let file = File::try_from(value.chars().nth(0).expect("The size of value was checked"))?;
-        let rank = Rank::try_from(value.chars().nth(1).expect("The size of value was checked"))?;
+        let file = File::try_from(value.chars().nth(0).expect("The size of value was checked"))
+            .map_err(|_| CoordinatesError::InvalidSquareString(value.to_string()))?;
+        let rank = Rank::try_from(value.chars().nth(1).expect("The size of value was checked"))
+            .map_err(|_| CoordinatesError::InvalidSquareString(value.to_string()))?;
         Ok(Square::new(file, rank))
     }
 }
@@ -752,7 +771,10 @@ mod tests {
             assert_eq!(File::try_from('f'), Ok(File::F));
             assert_eq!(File::try_from('g'), Ok(File::G));
             assert_eq!(File::try_from('h'), Ok(File::H));
-            assert_eq!(File::try_from('i'), Err(CoordinatesError::InvalidCharacter));
+            assert_eq!(
+                File::try_from('i'),
+                Err(CoordinatesError::InvalidCharacter { character: 'i', purpose: "File" })
+            );
         }
     }
 
@@ -848,7 +870,10 @@ mod tests {
             assert_eq!(Rank::try_from('6'), Ok(Rank::R6));
             assert_eq!(Rank::try_from('7'), Ok(Rank::R7));
             assert_eq!(Rank::try_from('8'), Ok(Rank::R8));
-            assert_eq!(Rank::try_from('9'), Err(CoordinatesError::InvalidCharacter));
+            assert_eq!(
+                Rank::try_from('9'),
+                Err(CoordinatesError::InvalidCharacter { character: '9', purpose: "Rank" })
+            );
         }
 
         #[test]
@@ -1040,8 +1065,8 @@ mod tests {
             assert_eq!(Square::try_from("f6"), Ok(Square::F6));
             assert_eq!(Square::try_from("g7"), Ok(Square::G7));
             assert_eq!(Square::try_from("h8"), Ok(Square::H8));
-            assert_eq!(Square::try_from("i9"), Err(CoordinatesError::InvalidCharacter));
-            assert_eq!(Square::try_from("x"), Err(CoordinatesError::InvalidString));
+            assert_eq!(Square::try_from("i9"), Err(CoordinatesError::InvalidSquareString("i9".to_string())));
+            assert_eq!(Square::try_from("x"), Err(CoordinatesError::InvalidSquareString("x".to_string())));
         }
 
         #[test]

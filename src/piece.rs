@@ -1,10 +1,14 @@
 use std::convert::From;
 use std::fmt::{self, Display};
 
+use thiserror::Error;
+
 #[derive(Debug, PartialEq)]
 /// Error type for the piece module.
+#[derive(Error)]
 pub enum PieceError {
-    InvalidCharacter(char),
+    #[error("Invalid character ({0}) for a piece type")]
+    InvalidPieceTypeCharacter(char),
 }
 
 /// Result type for the piece module.
@@ -183,7 +187,7 @@ impl TryFrom<char> for PieceType {
             'r' | 'R' => Ok(PieceType::Rook),
             'q' | 'Q' => Ok(PieceType::Queen),
             'k' | 'K' => Ok(PieceType::King),
-            _ => Err(PieceError::InvalidCharacter(value)),
+            _ => Err(PieceError::InvalidPieceTypeCharacter(value)),
         }
     }
 }

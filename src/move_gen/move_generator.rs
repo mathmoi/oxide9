@@ -1,6 +1,6 @@
 use crate::{
     eval::{get_piece_square_value, Eval},
-    piece::PieceType,
+    piece::{Color, PieceType},
     position::Position,
     r#move::{Move, MoveType},
 };
@@ -64,7 +64,8 @@ impl Iterator for MoveGenerator {
                         unsafe { &*self.position },
                         &mut self.list,
                     );
-                    self.list.iter_mut().for_each(|mv| mv.set_eval(mvv_lva(*mv)));
+                    let color_factor = if unsafe { &*self.position }.side_to_move() == Color::White { 1 } else { -1 };
+                    self.list.iter_mut().for_each(|mv| mv.set_eval(color_factor * mvv_lva(*mv)));
                     self.step = GenerationStep::DistributeCaptures;
                 }
 
@@ -75,7 +76,8 @@ impl Iterator for MoveGenerator {
                     }
 
                     generate_moves::<{ MoveGenerationType::QUIET_VALUE }>(unsafe { &*self.position }, &mut self.list);
-                    self.list.iter_mut().for_each(|mv| mv.set_eval(evaluate_quiet_move(*mv)));
+                    let color_factor = if unsafe { &*self.position }.side_to_move() == Color::White { 1 } else { -1 };
+                    self.list.iter_mut().for_each(|mv| mv.set_eval(color_factor * evaluate_quiet_move(*mv)));
                     self.step = GenerationStep::DistributeQuiet;
                 }
 

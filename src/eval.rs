@@ -81,6 +81,18 @@ impl From<i32> for Eval {
     }
 }
 
+impl From<Eval> for i16 {
+    fn from(value: Eval) -> Self {
+        value.0 as i16
+    }
+}
+
+impl From<i16> for Eval {
+    fn from(value: i16) -> Self {
+        Eval(value as i16)
+    }
+}
+
 /// Formats the evaluation score as a floating-point number.
 ///
 /// The internal centipawn value is converted to a decimal value and displayed with 2 decimal places. For example, an

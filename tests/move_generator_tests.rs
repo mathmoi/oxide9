@@ -2,6 +2,7 @@ use colored::*;
 use oxide9::{
     coordinates::{Rank, Square},
     move_gen::{generation::generate_all_moves, move_list::MoveList},
+    notation::{parse_coordinate_notation, NotationError},
     piece::{Piece, PieceType},
     position::Position,
     r#move::{CastlingSide, Move},
@@ -23,23 +24,23 @@ enum TestHarnessError {
     #[error("The {} environment variable cannot be red", CARGO_MANIFEST_DIR_ENV_VARIABLE)]
     ManifestDirNotFound,
 
-    #[error("Resource path not found: {:?}", .0)]
+    #[error("Resource path not found: {0:?}")]
     ResourcePathNotFound(PathBuf),
 
-    #[error("Cannot read the test data file ({:?})", .0)]
+    #[error("Cannot read the test data file ({0:?})")]
     CannotReadTestDataFile(PathBuf),
 
-    #[error("Cannot parse the test data file: {}", .0)]
+    #[error("Cannot parse the test data file: {0}")]
     CannotParseTestDataFile(#[from] serde_json::Error),
 }
 
 /// Errors that are related to the test data.
 #[derive(Error, Debug)]
 enum TestDataError {
-    #[error("Cannot parse \"{}\" as a square", .0)]
+    #[error("Cannot parse \"{0}\" as a square")]
     CannotParseSquare(String),
 
-    #[error("Cannot parse \"{}\" as a piece", .0)]
+    #[error("Cannot parse \"{0}\" as a piece")]
     CannotParsePiece(String),
 
     #[error("Missing captured piece for move with type Capture or PromotionCapture")]
@@ -48,24 +49,33 @@ enum TestDataError {
     #[error("Missing promotion piece for move with type Promotion or PromotionCapture")]
     MissingPromotionPiece,
 
-    #[error("Unable to parse the fen string : \"{}\"", .0)]
+    #[error("Unable to parse the fen string : \"{0}\"")]
     UnableToParseFen(String),
 }
 
 /// Errors used when tests fail.
 #[derive(Error, Debug)]
 enum TestFailureError {
-    #[error("Missing moves during move generation: {:?}", .0)]
+    #[error("Missing moves during move generation: {0:?}")]
     MissingMoves(HashSet<Move>),
 
-    #[error("Extra moves during move generation: {:?}", .0)]
+    #[error("Extra moves during move generation: {0:?}")]
     ExtraMoves(HashSet<Move>),
 
-    #[error("Unexpected position after making a move ({:?})\n\nOriginal:\n{}\n\nExpected:\n{}\n\nActual:\n{}\n", .mv, .original, .expected, .actual)]
+    #[error("Unexpected position after making a move ({mv:?})\n\nOriginal:\n{original}\n\nExpected:\n{expected}\n\nActual:\n{actual}\n")]
     UnexpectedPositionAfterMake { mv: Move, original: String, expected: String, actual: String },
 
-    #[error("Unexpected position after unmaking a move ({:?})\n\nOriginal:\n{}\n\nActual:\n{}\n", .mv, .original, .actual)]
+    #[error("Unexpected position after unmaking a move ({mv:?})\n\nOriginal:\n{original}\n\nActual:\n{actual}\n")]
     UnexpectedPositionAfterUnmake { mv: Move, original: String, actual: String },
+
+    #[error("Error generating UCI notation for move ({mv:?})\n\nExpected: {expected}\n\nActual: {actual}")]
+    ErrorGeneratingUciNotation { mv: Move, expected: String, actual: String },
+
+    #[error("Error while parsing UCI notation ({uci:?})\n\nError: {error}")]
+    ErrorWhileParsingUciNotation { uci: String, error: NotationError },
+
+    #[error("Error parsing UCI notation ({uci:?})\n\nExpected: {expected:?}\n\nActual: {actual:?}")]
+    ErrorParsingUciNotation { uci: String, expected: Move, actual: Move },
 }
 
 /// Global errors for this module.
@@ -101,6 +111,7 @@ struct Test {
 struct TestMove {
     #[serde(rename = "move")]
     details: TestMoveDetails,
+    uci: String,
     fen: String,
 }
 
@@ -290,10 +301,57 @@ fn test_move_execution(test: &Test) -> Result<(), MoveGeneratorTestError> {
     Ok(())
 }
 
+fn test_uci_notation_generation(test: &Test) -> Result<(), MoveGeneratorTestError> {
+    for test_move in test.moves.iter() {
+        let mv = Move::try_from(&test_move.details)?;
+        let expected = test_move.uci.as_str();
+        let actual = mv.to_uci_string();
+        if expected != actual {
+            return Err(MoveGeneratorTestError::TestFailed {
+                test_name: test.description.clone(),
+                test_failure_error: TestFailureError::ErrorGeneratingUciNotation {
+                    mv,
+                    expected: expected.to_string(),
+                    actual,
+                },
+            });
+        }
+    }
+
+    Ok(())
+}
+
+fn test_uci_notation_parser(test: &Test) -> Result<(), MoveGeneratorTestError> {
+    let position = Position::new_from_fen(&test.fen).or(Err(TestDataError::UnableToParseFen(test.fen.clone())))?;
+
+    for test_move in test.moves.iter() {
+        let uci = test_move.uci.as_str();
+        let expected = Move::try_from(&test_move.details)?;
+        let actual = parse_coordinate_notation(&position, uci).map_err(|e| MoveGeneratorTestError::TestFailed {
+            test_name: test.description.clone(),
+            test_failure_error: TestFailureError::ErrorWhileParsingUciNotation { uci: uci.to_string(), error: e },
+        })?;
+        if expected != actual {
+            return Err(MoveGeneratorTestError::TestFailed {
+                test_name: test.description.clone(),
+                test_failure_error: TestFailureError::ErrorParsingUciNotation {
+                    uci: uci.to_string(),
+                    expected,
+                    actual,
+                },
+            });
+        }
+    }
+
+    Ok(())
+}
+
 /// Run a single test case.
 fn run_test(test: Test) -> Result<(), MoveGeneratorTestError> {
     test_move_generation(&test)?;
     test_move_execution(&test)?;
+    test_uci_notation_generation(&test)?;
+    test_uci_notation_parser(&test)?;
     Ok(())
 }
 

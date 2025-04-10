@@ -7,10 +7,13 @@ pub mod coordinates;
 pub mod eval;
 pub mod r#move;
 pub mod move_gen;
+pub mod notation;
 pub mod perft;
 pub mod piece;
 pub mod position;
 pub mod search;
+pub mod time;
+pub mod uci;
 
 static INIT: Once = Once::new();
 

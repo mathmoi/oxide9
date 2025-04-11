@@ -7,6 +7,7 @@ use regex::Regex;
 use thiserror::Error;
 
 use crate::{
+    config::get_config,
     notation::parse_coordinate_notation,
     piece::Color,
     position::Position,
@@ -704,7 +705,8 @@ impl UciEngine {
     /// # Returns
     /// `Result<(), UciError>` - Ok if the command was processed successfully.
     fn handle_uci(&self) -> Result<(), UciError> {
-        Uci::send_id("name", "Oxide9");
+        let config = get_config();
+        Uci::send_id("name", &config.name);
         Uci::send_id("author", "Mathieu Pagé <m@mathieupage.com>");
         Uci::send_uciok();
         Ok(())

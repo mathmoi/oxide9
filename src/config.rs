@@ -27,6 +27,9 @@ pub struct Oxide9Config {
     /// Indicate if number output should be precise. If false, some output will be printed in a more human-readable
     /// format.
     pub precise: bool,
+
+    /// Name of the engine. Should be "Oxide9" except for testing versions.
+    pub name: String,
 }
 /// Evaluation parameters for the engine
 #[derive(Debug, serde::Deserialize)]

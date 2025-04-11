@@ -1,5 +1,6 @@
 perft_threads = 16
 precise = false
+name = "Oxide9"
 
 [eval]
 piece_type_game_phase = [0, 1, 1, 2, 4, 0]

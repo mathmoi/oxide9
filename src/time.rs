@@ -100,10 +100,12 @@ pub struct TimeManager {
 }
 
 impl TimeManager {
-    const SAFETY_MARGIN: Duration = Duration::from_millis(50);
+    const SAFETY_MARGIN: Duration = Duration::from_millis(30);
     const MOVES_TO_GO_ESTIMATE: u32 = 35;
     const MAX_TIME_RATIO_PER_MOVE: f32 = 0.8;
-    const MIN_ITERATIONS: u16 = 3;
+    const MIN_ITERATIONS: u16 = 1;
+    const MIN_DURATION_BETWEEN_CHECKS: Duration = Duration::from_millis(10);
+    const MAX_DURATION_BETWEEN_CHECKS: Duration = Duration::from_millis(1000);
 
     /// Creates a new TimeManager instance with the specified time control.
     ///
@@ -224,5 +226,16 @@ impl TimeManager {
                 * self.last_iteration_duration[1].as_secs_f64(),
         );
         estimate_next_iteration / 2 < time_before_target
+    }
+
+    /// Returns the time remaining before the engine should check for time constraints (by calling can_continue).
+    pub fn time_before_check(&self) -> Duration {
+        let elapsed = self.search_start.elapsed();
+        if self.max <= elapsed {
+            return Self::MIN_DURATION_BETWEEN_CHECKS;
+        }
+
+        ((self.max - self.search_start.elapsed()) / 2)
+            .clamp(Self::MIN_DURATION_BETWEEN_CHECKS, Self::MAX_DURATION_BETWEEN_CHECKS)
     }
 }

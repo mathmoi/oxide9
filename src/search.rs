@@ -11,15 +11,15 @@ use crate::{
 /// The SearchStats struct holds statistics about the search process.
 pub struct SearchStats {
     /// The number of nodes searched. This excludes quiescence nodes.
-    pub nodes: u64,
+    pub total_nodes: u64,
 
     /// The number of quiescence nodes searched
-    pub qnodes: u64,
+    pub nodes: u64,
 }
 
 impl Default for SearchStats {
     fn default() -> Self {
-        SearchStats { nodes: 0, qnodes: 0 }
+        SearchStats { total_nodes: 0, nodes: 0 }
     }
 }
 
@@ -85,6 +85,12 @@ pub struct Search {
 
     /// Time manager to control the search time
     time_manager: TimeManager,
+
+    /// Indicate that the search should stop
+    stop_search: bool,
+
+    /// Number of nodes searched before checking the time
+    nodes_at_next_check: u64,
 }
 
 impl Search {
@@ -108,6 +114,8 @@ impl Search {
             progress,
             start_time: None,
             time_manager,
+            stop_search: false,
+            nodes_at_next_check: 300000,
         }
     }
 
@@ -158,13 +166,22 @@ impl Search {
 
             self.time_manager.iteration_started();
 
-            let score = self.search_root(depth, &mut pv);
+            let mut local_pv = Vec::new();
+            let score = self.search_root(depth, &mut local_pv);
+
+            // If we are aborting the search we break out of the loop immediately
+            if self.stop_search {
+                break;
+            }
+            pv = local_pv;
+
+            // Report the end if the iteration
             let start_time = self.start_time.expect("The timer should be started");
             (self.progress)(ProgressType::Iteration {
                 depth,
                 elapsed: start_time.elapsed(),
                 score,
-                nodes: self.stats.nodes + self.stats.qnodes,
+                nodes: self.stats.total_nodes,
                 pv: &pv,
             });
 
@@ -198,7 +215,7 @@ impl Search {
             (self.progress)(ProgressType::NewMoveAtRoot {
                 depth,
                 elapsed: self.start_time.expect("The timer should be started").elapsed(),
-                nodes: self.stats.nodes + self.stats.qnodes,
+                nodes: self.stats.total_nodes,
                 move_number: move_searched + 1,
                 move_count: self.moves_at_root.len() as u64,
                 mv,
@@ -208,6 +225,11 @@ impl Search {
             let mut local_pv = Vec::new();
             let score = -self.search(depth - 1, Eval::MIN, -alpha, &mut local_pv);
             self.position.unmake();
+
+            // If we are aborting the search we return immediately
+            if self.stop_search {
+                return Eval::default();
+            }
 
             if score > alpha {
                 alpha = score;
@@ -219,7 +241,7 @@ impl Search {
                         depth,
                         elapsed: self.start_time.expect("The timer should be started").elapsed(),
                         score,
-                        nodes: self.stats.nodes + self.stats.qnodes,
+                        nodes: self.stats.total_nodes,
                         pv: &pv,
                     });
                 }
@@ -254,7 +276,17 @@ impl Search {
         // TODO : Is Vec really performant for pv structure?
         // TODO : Should we use a stack to store the PV and others things?
 
+        self.stats.total_nodes += 1;
         self.stats.nodes += 1;
+
+        // Here we check if we need to stop the search because of time constraints.
+        if self.nodes_at_next_check <= self.stats.total_nodes {
+            self.stop_search = !self.time_manager.can_continue();
+            if self.stop_search {
+                return Eval::default();
+            }
+            self.update_nodes_at_next_check();
+        }
 
         let move_generator = MoveGenerator::new(&self.position, false);
         for mv in move_generator {
@@ -267,6 +299,11 @@ impl Search {
                     -self.search(depth - 1, -beta, -alpha, &mut local_pv)
                 };
                 self.position.unmake();
+
+                // If we are aborting the search we return immediately
+                if self.stop_search {
+                    return Eval::default();
+                }
 
                 if score >= beta {
                     return beta;
@@ -283,6 +320,13 @@ impl Search {
         alpha
     }
 
+    fn update_nodes_at_next_check(&mut self) {
+        let elapsed = self.start_time.expect("The timer should be started").elapsed();
+        let nps = self.stats.total_nodes as f64 / elapsed.as_secs_f64();
+        let time_before_check = self.time_manager.time_before_check();
+        self.nodes_at_next_check = self.stats.total_nodes + (nps * time_before_check.as_secs_f64()) as u64;
+    }
+
     /// Performs quiescence search to evaluate positions with tactical sequences.
     ///
     /// Quiescence search is a selective search that only explores capturing moves to reach a "quiet" position where
@@ -297,7 +341,7 @@ impl Search {
     /// the side to move.
     fn qsearch(&mut self, alpha: Eval, beta: Eval) -> Eval {
         let mut alpha = alpha; // Make alpha mutable locally
-        self.stats.qnodes += 1;
+        self.stats.total_nodes += 1;
 
         // In the qsearch we evaluate the stand pat (stop capturing) option. If the stand pat is better than beta, we
         // stop the search and return beta (beta cut-off). If the stand pat is better than alpha, we update alpha with the

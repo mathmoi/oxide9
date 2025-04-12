@@ -443,37 +443,7 @@ impl Uci {
         println!("Unknown command: {}", command);
     }
 
-    /// Sends a general information message to the GUI.
-    ///
-    /// This method outputs an informational message using the UCI protocol's "info string" format. It can be used to
-    /// provide debugging information, status updates, or error messages that are intended to be displayed to the user
-    /// by the GUI.
-    ///
-    /// # Parameters
-    /// * `info` - The information message to be sen/// Sends detailed search information to the GUI during calculation.
-    ///
-    /// This method outputs various search statistics and evaluation data in UCI protocol format. It allows the GUI to
-    /// display the engine's analysis progress, current evaluation, principal variation, and other performance metrics
-    /// during the search process.
-    ///
-    /// # Parameters
-    /// * `options` - A `SendInfoOptions` structure containing the search information to be sent
-    ///
-    /// # Supported Information Fields
-    /// * `depth` - Current search depth in plies
-    /// * `sel_depth` - Selective search depth (deepest leaf nodes reached)
-    /// * `time` - Time spent on the search so far
-    /// * `nodes` - Number of nodes searched
-    /// * `pv` - Principal variation (best line found)
-    /// * `multi_pv` - Line number for multi-PV mode
-    /// * `score` - Position evaluation in centipawns
-    /// * `current_move` - Move currently being examined
-    /// * `current_move_number` - Ordinal number of the current move
-    /// * `hash_full` - Hash table usage percentage
-    /// * `nps` - Search speed in nodes per second
-    /// * `tb_hits` - Number of tablebase position lookups
-    /// * `cpu_load` - CPU usage percentage
-    /// * `string` - Arbitrary string informationt to the GUI
+    /// Sends an informational string to the GUI.
     pub fn send_info_string(info: &str) {
         println!("info string {}", info);
     }
@@ -664,7 +634,7 @@ impl UciEngine {
     fn report_progress(progress_type: ProgressType) {
         match progress_type {
             ProgressType::Iteration { depth, elapsed, score, nodes, pv } => {
-                let pv_as_string: Vec<String> = pv.iter().map(|m| m.to_uci_string()).collect();
+                let pv_as_string: Vec<String> = pv.iter().rev().map(|m| m.to_uci_string()).collect();
                 Uci::send_info(SendInfoOptions {
                     depth: Some(depth),
                     time: Some(elapsed),
@@ -675,7 +645,7 @@ impl UciEngine {
                 });
             }
             ProgressType::NewBestMove { depth, elapsed, score, nodes, pv } => {
-                let pv_as_string: Vec<String> = pv.iter().map(|m| m.to_uci_string()).collect();
+                let pv_as_string: Vec<String> = pv.iter().rev().map(|m| m.to_uci_string()).collect();
                 Uci::send_info(SendInfoOptions {
                     depth: Some(depth),
                     time: Some(elapsed),

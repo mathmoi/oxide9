@@ -255,16 +255,16 @@ fn print_stats(elapsed: Duration, stats: &SearchStats) {
             "time={} nodes={} qnodes={} nps={}",
             elapsed.as_secs_f64(),
             stats.nodes,
-            stats.qnodes,
-            (stats.nodes + stats.qnodes) as f64 / elapsed.as_secs_f64()
+            stats.total_nodes - stats.nodes,
+            stats.total_nodes as f64 / elapsed.as_secs_f64()
         )
     } else {
         format!(
             "time={} nodes={} qnodes={} nps={}",
             elapsed.human_duration(),
             stats.nodes.human_count_bare(),
-            stats.qnodes.human_count_bare(),
-            ((stats.nodes + stats.qnodes) as f64 / elapsed.as_secs_f64()).human_count_bare()
+            (stats.total_nodes - stats.nodes).human_count_bare(),
+            (stats.total_nodes as f64 / elapsed.as_secs_f64()).human_count_bare()
         )
     };
 

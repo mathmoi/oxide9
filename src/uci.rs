@@ -94,6 +94,7 @@ impl Uci {
                 Some(&"quit") => break,
                 Some(&"position") => self.handle_position(tokens.as_slice()),
                 Some(&"go") => self.handle_go(tokens.as_slice()),
+                Some(&"stop") => Ok(()), // NEXT : Implement this
                 Some(&command) => {
                     Self::send_unknown_command(command);
                     Ok(())
@@ -184,9 +185,9 @@ impl Uci {
                 if tokens.len() < next_token_index + FEN_TOKENS {
                     return Err(UciError::InvalidFenString(tokens[next_token_index..].join(" ")));
                 }
-
+                next_token_index += 1;
                 let fen = tokens[next_token_index..next_token_index + FEN_TOKENS].join(" ");
-                next_token_index += FEN_TOKENS + 1;
+                next_token_index += FEN_TOKENS;
                 fen
             }
             _ => {

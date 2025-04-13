@@ -12,17 +12,33 @@ use crate::{
 pub struct Eval(i16);
 
 impl Eval {
+    const MAX_MAT_DEPTH: u16 = 2000;
+
     /// The minimum possible evaluation score
-    pub const MIN: Eval = Eval(-32000);
+    pub const MIN: Eval = Eval(-i16::MAX); // We use the negative of the maximum value to represent the minimum because
+                                           // we can't use i16::MIN, because it cannot be negated as a valid i16 valuue.
 
     /// The maximum possible evaluation score
-    pub const MAX: Eval = Eval(32000);
+    pub const MAX: Eval = Eval(i16::MAX);
+
+    /// The evaluation score for a mat.
+    pub const MAT: Eval = Eval(-30000);
+
+    /// The evaluation score for a draw.
+    pub const DRAW: Eval = Eval(0);
 
     /// Creates a new Eval instance with the given value.
     pub const fn new(value: i16) -> Self {
         debug_assert!(value >= i16::MIN && value <= i16::MAX);
 
         Eval(value)
+    }
+
+    /// Creates a new Eval instance representing a checkmate.
+    pub const fn new_mat(depth: u16) -> Self {
+        debug_assert!(depth <= Self::MAX_MAT_DEPTH);
+
+        Eval(Self::MAT.0 + (depth as i16))
     }
 }
 

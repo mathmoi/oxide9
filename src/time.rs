@@ -84,7 +84,6 @@ impl TimeControl {
 
             return TimeControl::SuddenDeath { time };
         }
-
         unreachable!()
     }
 }
@@ -103,7 +102,7 @@ impl TimeManager {
     const SAFETY_MARGIN: Duration = Duration::from_millis(30);
     const MOVES_TO_GO_ESTIMATE: u32 = 35;
     const MAX_TIME_RATIO_PER_MOVE: f32 = 0.8;
-    const MIN_ITERATIONS: u16 = 1;
+    const MIN_ITERATIONS: u16 = 2;
     const MIN_DURATION_BETWEEN_CHECKS: Duration = Duration::from_millis(10);
     const MAX_DURATION_BETWEEN_CHECKS: Duration = Duration::from_millis(1000);
 

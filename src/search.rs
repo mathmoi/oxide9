@@ -223,7 +223,7 @@ impl Search {
 
             self.position.make(mv);
             let mut local_pv = Vec::new();
-            let score = -self.search(depth - 1, Eval::MIN, -alpha, &mut local_pv);
+            let score = -self.search(depth - 1, 1, Eval::MIN, -alpha, &mut local_pv);
             self.position.unmake();
 
             // If we are aborting the search we return immediately
@@ -260,6 +260,7 @@ impl Search {
     ///
     /// # Parameters
     /// * `depth` - Current remaining search depth in half-moves
+    /// * `ply` - Current search depth in half-moves
     /// * `alpha` - The current alpha value for alpha-beta pruning
     /// * `beta` - The current beta value for alpha-beta pruning
     /// * `pv` - Mutable vector to store the principal variation (best line of moves)
@@ -270,7 +271,7 @@ impl Search {
     ///
     /// # Note
     /// This is an internal recursive method used by the `start` method.
-    fn search(&mut self, depth: u16, alpha: Eval, beta: Eval, pv: &mut Vec<Move>) -> Eval {
+    fn search(&mut self, depth: u16, ply: u16, alpha: Eval, beta: Eval, pv: &mut Vec<Move>) -> Eval {
         let mut alpha = alpha; // Make alpha mutable locally
 
         // TODO : Is Vec really performant for pv structure?
@@ -289,14 +290,16 @@ impl Search {
         }
 
         let move_generator = MoveGenerator::new(&self.position, false);
+        let mut has_legal_move = false;
         for mv in move_generator {
             if self.position.is_legal(mv) {
+                has_legal_move = true;
                 self.position.make(mv);
                 let mut local_pv = Vec::new();
                 let score = if depth == 1 {
                     -self.qsearch(-beta, -alpha)
                 } else {
-                    -self.search(depth - 1, -beta, -alpha, &mut local_pv)
+                    -self.search(depth - 1, ply + 1, -beta, -alpha, &mut local_pv)
                 };
                 self.position.unmake();
 
@@ -315,6 +318,15 @@ impl Search {
                     pv.push(mv);
                 }
             }
+        }
+
+        // If we have not legal move we are in checkmate or stalemate
+        if !has_legal_move {
+            if self.position.is_check() {
+                return Eval::new_mat(ply);
+            }
+
+            return Eval::DRAW;
         }
 
         alpha

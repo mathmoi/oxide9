@@ -545,6 +545,93 @@ impl Position {
         board
     }
 
+    pub fn to_string(&self) -> String {
+        let mut board = String::with_capacity(2000);
+
+        // Top border
+        board.push_str(self.generate_border_string(Color::Black, '┌', '┐', '~', '┬').as_str());
+
+        // Add all the ranks
+        for rank in Rank::ALL.iter().rev() {
+            board.push(char::from(*rank));
+            board.push_str(" │");
+            for file in File::ALL {
+                let square = Square::new(file, *rank);
+                if let Some(piece) = self[square] {
+                    board.push(if piece.color() == Color::Black { '░' } else { '▌' });
+                    board.push(piece.piece_type().into());
+                    board.push(if piece.color() == Color::Black { '░' } else { '▐' });
+                } else {
+                    board.push(' ');
+                    board.push(if u8::from(*rank) % 2 == u8::from(file) % 2 { '.' } else { ' ' });
+                    board.push(' ');
+                }
+                if file < File::H {
+                    board.push('│');
+                }
+            }
+            board.push_str("│\n");
+
+            if Rank::R1 < *rank {
+                board.push_str("  ├───┼───┼───┼───┼───┼───┼───┼───┤\n");
+            }
+        }
+
+        // Bottom border
+        board.push_str(self.generate_border_string(Color::White, '└', '┘', '~', '┴').as_str());
+
+        // En passant indicator
+        if let Some(en_passant_square) = self.en_passant_square() {
+            board.push_str(" ".repeat(4 + usize::from(en_passant_square.file()) * 4).as_str());
+            board.push_str("▲\n");
+        }
+
+        // file letters
+        board.push_str("    a   b   c   d   e   f   g   h");
+
+        board
+    }
+
+    fn generate_border_string(
+        &self,
+        color: Color,
+        left_corner: char,
+        right_corner: char,
+        castling_indicator: char,
+        column_separator: char,
+    ) -> String {
+        let mut line = String::with_capacity(40);
+
+        line.push_str(if self.side_to_move() == color { "=>" } else { "  " });
+        line.push(left_corner);
+
+        let queenside_castling_file = self.castling_file(CastlingSide::Queenside);
+        let kingside_castling_file = self.castling_file(CastlingSide::Kingside);
+        let can_castle_queenside =
+            self.castling_availability().contains(CastlingRight::new(color, CastlingSide::Queenside));
+        let can_castle_kingside =
+            self.castling_availability().contains(CastlingRight::new(color, CastlingSide::Kingside));
+        for file in File::ALL {
+            line.push('─');
+            if (can_castle_queenside && file == queenside_castling_file)
+                || (can_castle_kingside && file == kingside_castling_file)
+            {
+                line.push(castling_indicator);
+            } else {
+                line.push('─');
+            }
+            line.push('─');
+
+            if file < File::H {
+                line.push(column_separator);
+            }
+        }
+        line.push(right_corner);
+        line.push('\n');
+
+        line
+    }
+
     /// Returns a bitboard of squares occupied by pieces matching the specified filter.
     ///
     /// This method retrieves a bitboard representing all squares that contain pieces matching the provided filter

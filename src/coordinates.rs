@@ -115,6 +115,13 @@ impl From<File> for u8 {
     }
 }
 
+impl From<File> for usize {
+    /// Converts a `File` to a `usize` value.
+    fn from(file: File) -> Self {
+        file as usize
+    }
+}
+
 impl From<File> for char {
     /// Converts a `File` to a `char` value.
     fn from(file: File) -> Self {
@@ -157,7 +164,7 @@ impl TryFrom<char> for File {
 ///
 /// Ranks are labeled from 1 to 8, going from the bottom to the top when viewing the board from White's perspective.
 #[repr(u8)]
-#[derive(Copy, Clone, Debug, PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq, PartialOrd)]
 pub enum Rank {
     R1 = 0,
     R2 = 1,
@@ -247,6 +254,13 @@ impl From<Rank> for u8 {
     /// Converts a `Rank` to a `u8` value.
     fn from(file: Rank) -> Self {
         file as u8
+    }
+}
+
+impl From<Rank> for char {
+    /// Converts a `Rank` to a `char` value.
+    fn from(rank: Rank) -> Self {
+        (u8::from(rank) + b'1') as char
     }
 }
 

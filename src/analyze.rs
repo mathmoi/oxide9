@@ -45,7 +45,7 @@ pub enum AnalyzeError {
 pub fn analyze(fen: &str, depth: u16) -> Result<(), AnalyzeError> {
     let position = Position::new_from_fen(fen).map_err(|e| AnalyzeError::InvalidFen(fen.to_string(), e))?;
 
-    println!("Analyzing position:\n\n{}\n\n{}\n", position.to_compact_string(), fen);
+    println!("Analyzing position:\n\n{}\n\n{}\n", position.to_string(), fen);
     print_header();
 
     let handle = Search::new(position, depth as u16, TimeManager::new(TimeControl::Infinite), report_progress);

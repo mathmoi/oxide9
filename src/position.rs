@@ -1,6 +1,9 @@
 use std::{mem::MaybeUninit, ops::Index};
 
-use crate::eval::{get_piece_square_value, get_piece_type_game_phase, EvalPair};
+use crate::{
+    eval::{get_piece_square_value, get_piece_type_game_phase, EvalPair},
+    zobrist::{zobrist_black_to_move, zobrist_castling, zobrist_en_passant, zobrist_piece_square, Zobrist},
+};
 
 use super::{
     bitboard::Bitboard,
@@ -96,7 +99,6 @@ impl From<(Color, PieceType, PieceType)> for OccupancyFilter {
 //======================================================================================================================
 
 #[derive(Clone, Copy)]
-#[repr(align(16))]
 pub struct GameState {
     side_to_move: Color,
     castling_rights: CastlingRight,
@@ -107,6 +109,7 @@ pub struct GameState {
     side_to_move_blockers: Bitboard,
     psqt_eval: EvalPair,
     game_phase: u8,
+    zobrist: Zobrist,
 }
 
 /// Default implementation for the GameState struct.
@@ -122,6 +125,7 @@ impl Default for GameState {
             side_to_move_blockers: Bitboard::EMPTY,
             psqt_eval: EvalPair::default(),
             game_phase: 0,
+            zobrist: 0,
         }
     }
 }
@@ -241,11 +245,11 @@ impl Position {
     }
 
     fn read_active_color(&mut self, active_color: &str) -> Result<(), FenError> {
-        self.state.side_to_move = match active_color {
+        self.set_side_to_move(match active_color {
             "w" => Color::White,
             "b" => Color::Black,
             _ => return Err(FenError::InvalidActiveColor),
-        };
+        });
         Ok(())
     }
 
@@ -322,13 +326,17 @@ impl Position {
             file_set[usize::from(castling_side)] = Some(castling_file);
         }
 
+        self.state.zobrist ^= zobrist_castling(self.state.castling_rights);
+
         Ok(())
     }
 
     fn read_en_passant_square(&mut self, en_passant_square: &str) -> Result<(), FenError> {
-        self.state.en_passant_square = match en_passant_square {
-            "-" => None,
-            _ => Some(Square::try_from(en_passant_square).map_err(|_| FenError::InvalidEnPassantSquare)?),
+        match en_passant_square {
+            "-" => {}
+            _ => self.set_en_passant(Some(
+                Square::try_from(en_passant_square).map_err(|_| FenError::InvalidEnPassantSquare)?,
+            )),
         };
         Ok(())
     }
@@ -681,6 +689,18 @@ impl Position {
         }
     }
 
+    fn set_side_to_move(&mut self, color: Color) {
+        if self.state.side_to_move != color {
+            self.state.zobrist ^= zobrist_black_to_move();
+            self.state.side_to_move = color;
+        }
+    }
+
+    fn switch_side_to_move(&mut self) {
+        self.state.zobrist ^= zobrist_black_to_move();
+        self.state.side_to_move = !self.state.side_to_move;
+    }
+
     /// Returns the color of the side to move.
     pub fn side_to_move(&self) -> Color {
         self.state.side_to_move
@@ -775,6 +795,11 @@ impl Position {
         self.state.game_phase
     }
 
+    /// Returns the current Zobrist hash of the position.
+    pub fn hash(&self) -> Zobrist {
+        self.state.zobrist
+    }
+
     /// Places a chess piece on a specific square on the board.
     ///
     /// # Purpose
@@ -793,6 +818,7 @@ impl Position {
 
         self.state.psqt_eval += get_piece_square_value(piece, square);
         self.state.game_phase += get_piece_type_game_phase(piece);
+        self.state.zobrist ^= zobrist_piece_square(piece, square);
     }
 
     /// Places a chess piece on a specific square on the board without updating the game state.
@@ -836,6 +862,7 @@ impl Position {
 
         self.state.psqt_eval -= get_piece_square_value(piece, square);
         self.state.game_phase -= get_piece_type_game_phase(piece);
+        self.state.zobrist ^= zobrist_piece_square(piece, square);
     }
 
     /// Removes a piece from a specific square without updating the game state.
@@ -879,6 +906,7 @@ impl Position {
         self.move_piece_only(piece, from, to);
 
         self.state.psqt_eval += get_piece_square_value(piece, to) - get_piece_square_value(piece, from);
+        self.state.zobrist ^= zobrist_piece_square(piece, from) ^ zobrist_piece_square(piece, to);
     }
 
     /// Moves a known chess piece from one square to another without updating the game state.
@@ -907,6 +935,13 @@ impl Position {
         let bb = from | to;
         self.bb_color[usize::from(piece.color())] ^= bb;
         self.bb_piece[usize::from(piece)] ^= bb;
+    }
+
+    /// Sets the en passant square for the position.
+    fn set_en_passant(&mut self, square: Option<Square>) {
+        self.state.zobrist ^= zobrist_en_passant(self.state.en_passant_square);
+        self.state.en_passant_square = square;
+        self.state.zobrist ^= zobrist_en_passant(square);
     }
 
     /// Returns a bitboard representing all pieces of a specific color that are attacking a specific square.
@@ -960,14 +995,14 @@ impl Position {
     /// * `bool` - Returns `true` if any piece of the specified color attacks the target square, `false` otherwise
     pub fn is_attacked(&self, sq: Square, occupied: Bitboard, color: Color) -> bool {
         let queens_rooks = self.occupied((color, PieceType::Rook, PieceType::Queen));
-        if attacks_from_rooks(sq).has_any()
+        if (attacks_from_rooks(sq) & queens_rooks).has_any()
             && (attacks_from::<{ PieceType::ROOK_VALUE }>(occupied, sq) & queens_rooks).has_any()
         {
             return true;
         }
 
         let queens_bishops = self.occupied((color, PieceType::Bishop, PieceType::Queen));
-        if attacks_from_bishops(sq).has_any()
+        if (attacks_from_bishops(sq) & queens_bishops).has_any()
             && (attacks_from::<{ PieceType::BISHOP_VALUE }>(occupied, sq) & queens_bishops).has_any()
         {
             return true;
@@ -1133,7 +1168,6 @@ impl Position {
 
         self.move_piece(mv.piece(), mv.from_square(), mv.to_square());
 
-        self.state.en_passant_square = None;
         if mv.piece().piece_type() == PieceType::Pawn {
             self.state.halfmove_clock = 0;
         } else {
@@ -1147,15 +1181,20 @@ impl Position {
         self.remove_piece(mv.to_square());
         self.move_piece(mv.piece(), mv.from_square(), mv.to_square());
 
-        self.state.en_passant_square = None;
         self.state.halfmove_clock = 0;
     }
 
     fn make_two_square_pawn_push(&mut self, mv: Move) {
         self.move_piece(mv.piece(), mv.from_square(), mv.to_square());
 
-        // safe because en passant is never on the edge
-        self.state.en_passant_square = Some(unsafe { mv.to_square().down_unchecked(self.side_to_move().forward()) });
+        // If there is a possibility that the pawn can be captured en passant, we set the en passant square.
+        let side_to_move = self.side_to_move();
+        let en_passant_square = unsafe { mv.to_square().down_unchecked(side_to_move.forward()) };
+        let other_pawns = self.occupied((!side_to_move, PieceType::Pawn));
+        if (attacks_from_pawns(!side_to_move, en_passant_square) & other_pawns).has_any() {
+            self.set_en_passant(Some(en_passant_square));
+        }
+
         self.state.halfmove_clock = 0;
     }
 
@@ -1166,7 +1205,6 @@ impl Position {
         self.remove_piece(mv.from_square());
         self.put_piece(promotion, mv.to_square());
 
-        self.state.en_passant_square = None;
         self.state.halfmove_clock = 0;
     }
 
@@ -1177,7 +1215,6 @@ impl Position {
         self.remove_piece(mv.to_square());
         self.make_promotion(mv, promotion);
 
-        self.state.en_passant_square = None;
         self.state.halfmove_clock = 0;
     }
 
@@ -1185,17 +1222,12 @@ impl Position {
         debug_assert!(self[mv.from_square()].is_some_and(|piece| piece == mv.piece())); // TODO : Should be in a pseudo-legal check
         debug_assert!(self[mv.to_square()].is_none()); // TODO : Should be in a pseudo-legal check
 
-        let direction = match self.side_to_move() {
-            Color::White => -1,
-            Color::Black => 1,
-        };
-        let capture_sq = unsafe { mv.to_square().up_unchecked(direction) }; // Safe because prise en passant square is never on edge.
+        let capture_sq = unsafe { mv.to_square().down_unchecked(self.side_to_move().forward()) }; // Safe because prise en passant square is never on edge.
         debug_assert!(self[capture_sq].is_some_and(|piece| piece == Piece::new(!self.side_to_move(), PieceType::Pawn))); // TODO : Should be in a pseudo-legal check
 
         self.remove_piece(capture_sq);
         self.move_piece(mv.piece(), mv.from_square(), mv.to_square());
 
-        self.state.en_passant_square = None;
         self.state.halfmove_clock = 0;
     }
 
@@ -1215,7 +1247,6 @@ impl Position {
         self.put_piece(mv.piece(), mv.to_square());
         self.put_piece(rook, rook_to);
 
-        self.state.en_passant_square = None;
         self.state.halfmove_clock += 1
     }
 
@@ -1240,6 +1271,8 @@ impl Position {
 
         self.history.push(self.state);
 
+        self.set_en_passant(None);
+
         match mv.move_type() {
             MoveType::Basic => self.make_basic(mv),
             MoveType::Capture(capture) => self.make_capture(mv, capture),
@@ -1254,14 +1287,16 @@ impl Position {
         let rights = self.castling_rights_mask[usize::from(mv.from_square())]
             | self.castling_rights_mask[usize::from(mv.to_square())];
         if !(self.state.castling_rights & rights).is_empty() {
+            self.state.zobrist ^= zobrist_castling(self.state.castling_rights);
             self.state.castling_rights &= !rights;
+            self.state.zobrist ^= zobrist_castling(self.state.castling_rights);
         }
 
         if self.side_to_move() == Color::Black {
             self.state.fullmove_number += 1;
         }
 
-        self.state.side_to_move = !self.state.side_to_move;
+        self.switch_side_to_move();
 
         self.state.last_move = Some(mv);
 

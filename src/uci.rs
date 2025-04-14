@@ -613,7 +613,7 @@ struct UciEngine {
 
     /// The active search process (None when not searching)
     search: Option<Search>,
-} // NEXT : Clean : let mut search = Search::new(position, depth as u16, TimeManager::new(TimeControl::Infinite), report_progress);
+}
 
 impl UciEngine {
     /// Creates a new UCI engine instance with default settings.

@@ -6,6 +6,7 @@ use oxide9::{
     piece::{Piece, PieceType},
     position::Position,
     r#move::{CastlingSide, Move},
+    zobrist::{self, Zobrist},
 };
 use serde::Deserialize;
 use std::{collections::HashSet, fs::File, io::BufReader, path::PathBuf, time::Instant};
@@ -67,6 +68,12 @@ enum TestFailureError {
 
     #[error("Unexpected position after unmaking a move ({mv:?})\n\nOriginal:\n{original}\n\nActual:\n{actual}\n")]
     UnexpectedPositionAfterUnmake { mv: Move, original: String, actual: String },
+
+    #[error("Unexpected hash after making a move ({mv:?})\n\nOriginal:\n{original}\n\nExpected:\n{expected}\n\nActual:\n{actual}\n")]
+    UnexpectedHashAfterMake { mv: Move, original: Zobrist, expected: Zobrist, actual: Zobrist },
+
+    #[error("Unexpected hash after unmaking a move ({mv:?})\n\nOriginal:\n{original}\n\nActual:\n{actual}\n")]
+    UnexpectedHashAfterUnmake { mv: Move, original: Zobrist, actual: Zobrist },
 
     #[error("Error generating UCI notation for move ({mv:?})\n\nExpected: {expected}\n\nActual: {actual}")]
     ErrorGeneratingUciNotation { mv: Move, expected: String, actual: String },
@@ -269,9 +276,9 @@ fn test_move_execution(test: &Test) -> Result<(), MoveGeneratorTestError> {
         // Make the move
         position.make(mv);
         let actual_fen = position.to_fen();
+        let expected_position =
+            Position::new_from_fen(&test_move.fen).or(Err(TestDataError::UnableToParseFen(test_move.fen.clone())))?;
         if test_move.fen != actual_fen {
-            let expected_position = Position::new_from_fen(&test_move.fen)
-                .or(Err(TestDataError::UnableToParseFen(test_move.fen.clone())))?;
             return Err(MoveGeneratorTestError::TestFailed {
                 test_name: test.description.clone(),
                 test_failure_error: TestFailureError::UnexpectedPositionAfterMake {
@@ -279,6 +286,18 @@ fn test_move_execution(test: &Test) -> Result<(), MoveGeneratorTestError> {
                     original: test_position.to_compact_string() + "\n" + &test_position.to_fen(),
                     expected: expected_position.to_compact_string() + "\n" + &test_move.fen,
                     actual: position.to_compact_string() + "\n" + &actual_fen,
+                },
+            });
+        }
+
+        if expected_position.hash() != position.hash() {
+            return Err(MoveGeneratorTestError::TestFailed {
+                test_name: test.description.clone(),
+                test_failure_error: TestFailureError::UnexpectedHashAfterMake {
+                    mv,
+                    original: test_position.hash(),
+                    expected: expected_position.hash(),
+                    actual: position.hash(),
                 },
             });
         }
@@ -293,6 +312,17 @@ fn test_move_execution(test: &Test) -> Result<(), MoveGeneratorTestError> {
                     mv,
                     original: test_position.to_compact_string() + "\n" + &test_position.to_fen(),
                     actual: position.to_compact_string() + "\n" + &actual_fen,
+                },
+            });
+        }
+
+        if test_position.hash() != position.hash() {
+            return Err(MoveGeneratorTestError::TestFailed {
+                test_name: test.description.clone(),
+                test_failure_error: TestFailureError::UnexpectedHashAfterUnmake {
+                    mv,
+                    original: test_position.hash(),
+                    actual: position.hash(),
                 },
             });
         }

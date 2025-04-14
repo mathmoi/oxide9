@@ -306,7 +306,7 @@ pub fn perft(fen: &str, depth: u16) -> Result<(), PerftError> {
 
     let mut position = Position::new_from_fen(fen).map_err(|e| PerftError::InvalidFen(fen.to_string(), e))?;
 
-    println!("Perft ({}) for position:\n\n{}\n", depth, position.to_compact_string());
+    println!("Perft ({}) for position:\n\n{}\n", depth, position.to_string());
 
     let start = Instant::now();
     let nodes =

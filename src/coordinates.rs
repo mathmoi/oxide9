@@ -44,6 +44,9 @@ pub enum File {
 }
 
 impl File {
+    /// Represents the total number of files on a chess board.
+    pub const COUNT: usize = 8;
+
     /// Represents all files on a chess board.
     pub const ALL: [File; 8] = [File::A, File::B, File::C, File::D, File::E, File::F, File::G, File::H];
 
@@ -177,6 +180,9 @@ pub enum Rank {
 }
 
 impl Rank {
+    /// Represents the total number of ranks on a chess board.
+    pub const COUNT: usize = 8;
+
     /// Represents all ranks on a chess board.
     pub const ALL: [Rank; 8] = [Rank::R1, Rank::R2, Rank::R3, Rank::R4, Rank::R5, Rank::R6, Rank::R7, Rank::R8];
 

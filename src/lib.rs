@@ -14,6 +14,7 @@ pub mod position;
 pub mod search;
 pub mod time;
 pub mod uci;
+pub mod zobrist;
 
 static INIT: Once = Once::new();
 
@@ -28,5 +29,6 @@ pub fn initialize_with_args(perft_threads: Option<u32>, precise: bool) {
         bitboard::initialize();
         move_gen::attacks::initialize();
         eval::initialize();
+        zobrist::initialize();
     });
 }

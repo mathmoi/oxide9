@@ -75,6 +75,9 @@ bitflags! {
 }
 
 impl CastlingRight {
+    /// The number of possible combinations of castling rights.
+    pub const COUNT: usize = 16;
+
     /// Creates a new castling right from a color and a side.
     pub fn new(color: Color, side: CastlingSide) -> Self {
         match (color, side) {

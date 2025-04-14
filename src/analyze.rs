@@ -48,14 +48,8 @@ pub fn analyze(fen: &str, depth: u16) -> Result<(), AnalyzeError> {
     println!("Analyzing position:\n\n{}\n\n{}\n", position.to_compact_string(), fen);
     print_header();
 
-    let mut search = Search::new(position, depth as u16, TimeManager::new(TimeControl::Infinite), report_progress);
-
-    let start = std::time::Instant::now();
-    search.start();
-    let elapsed = start.elapsed();
-
-    let stats = search.stats();
-    print_stats(elapsed, stats);
+    let handle = Search::new(position, depth as u16, TimeManager::new(TimeControl::Infinite), report_progress);
+    handle.join();
 
     Ok(())
 }
@@ -191,7 +185,10 @@ fn report_progress(progress_type: ProgressType) {
             nodes,
             vec![format!("{} ({})", mv.to_uci_string(), (nodes as f64 / elapsed.as_secs_f64()).human_count("nps"))],
         ),
-        _ => return,
+        ProgressType::SearchFinished { mv: _, elapsed, stats } => {
+            print_stats(elapsed, &stats);
+            return;
+        }
     };
 
     // Return to the beginning of the line

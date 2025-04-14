@@ -94,7 +94,7 @@ impl Uci {
                 Some(&"quit") => break,
                 Some(&"position") => self.handle_position(tokens.as_slice()),
                 Some(&"go") => self.handle_go(tokens.as_slice()),
-                Some(&"stop") => Ok(()), // NEXT : Implement this
+                Some(&"stop") => self.handle_stop(),
                 Some(&command) => {
                     Self::send_unknown_command(command);
                     Ok(())
@@ -389,6 +389,14 @@ impl Uci {
         )
     }
 
+    /// Processes the "stop" command from the GUI to stop the engine search.
+    ///
+    /// # Returns
+    /// `Ok(())` if the command was processed successfully, or an `UciError` if a problem occurred.
+    fn handle_stop(&mut self) -> Result<(), UciError> {
+        self.engine.handle_stop()
+    }
+
     //==================================================================================================================
     // UCI commands from the engine to the GUI
     //==================================================================================================================
@@ -605,7 +613,7 @@ struct UciEngine {
 
     /// The active search process (None when not searching)
     search: Option<Search>,
-}
+} // NEXT : Clean : let mut search = Search::new(position, depth as u16, TimeManager::new(TimeControl::Infinite), report_progress);
 
 impl UciEngine {
     /// Creates a new UCI engine instance with default settings.
@@ -656,7 +664,7 @@ impl UciEngine {
                     ..Default::default()
                 });
             }
-            ProgressType::SearchFinished { mv } => {
+            ProgressType::SearchFinished { mv, elapsed: _, stats: _ } => {
                 let mv_str = mv.to_uci_string();
                 Uci::send_bestmove(&mv_str, None);
             }
@@ -766,8 +774,19 @@ impl UciEngine {
         let time_manager = TimeManager::new(TimeControl::new(time, inc, moves_to_go, move_time, infinite));
 
         self.search = Some(Search::new(self.position.clone(), 100, time_manager, Self::report_progress));
-        if let Some(search) = &mut self.search {
-            search.start();
+        Ok(())
+    }
+
+    /// Handles the UCI 'stop' command from the GUI.
+    ///
+    /// This function attempts to stop any ongoing search operation. If a search is in progress, signals it to terminate
+    /// as soon as possible. If no search is active, this function does nothing.
+    ///
+    /// # Returns
+    /// `Ok(())` if the command was processed successfully, or an `UciError` if a problem occurred.
+    fn handle_stop(&mut self) -> Result<(), UciError> {
+        if let Some(search) = self.search.take() {
+            search.stop();
         }
         Ok(())
     }

@@ -1,4 +1,11 @@
-use std::time::{Duration, Instant};
+use std::{
+    sync::{
+        atomic::{AtomicBool, Ordering},
+        Arc,
+    },
+    thread::{self, JoinHandle},
+    time::{Duration, Instant},
+};
 
 use crate::{
     eval::{evaluate, Eval},
@@ -9,6 +16,7 @@ use crate::{
 };
 
 /// The SearchStats struct holds statistics about the search process.
+#[derive(Debug)]
 pub struct SearchStats {
     /// The number of nodes searched. This excludes quiescence nodes.
     pub total_nodes: u64,
@@ -56,13 +64,76 @@ pub enum ProgressType<'a> {
     Iteration { depth: u16, elapsed: Duration, score: Eval, nodes: u64, pv: &'a [Move] },
     NewBestMove { depth: u16, elapsed: Duration, score: Eval, nodes: u64, pv: &'a [Move] },
     NewMoveAtRoot { depth: u16, elapsed: Duration, nodes: u64, move_number: u64, move_count: u64, mv: Move },
-    SearchFinished { mv: Move },
+    SearchFinished { mv: Move, elapsed: Duration, stats: &'a SearchStats },
 }
 
 pub type ProgressCallback = fn(progress_type: ProgressType);
 
-/// Represents a chess position search operation.
+/// Represents a search operation that can be monitored and controlled.
+///
+/// Maintains a handle to an ongoing search process along with the ability to signal cancellation. This structure allows
+/// for asynchronous search operations that can be interrupted when needed.
+///
+/// # Fields
+/// * `cancelation_token` - Shared atomic flag that can signal the search to terminate
+/// * `join_handle` - Handle to the thread where the search is executing
 pub struct Search {
+    cancelation_token: Arc<AtomicBool>,
+    join_handle: JoinHandle<()>,
+}
+
+impl Search {
+    /// Creates a new asynchronous search operation.
+    ///
+    /// Initializes a search in a separate thread based on the provided parameters. The search begins immediately upon
+    /// creation and runs in the background.
+    ///
+    /// # Parameters
+    /// * `position` - The chess position to analyze
+    /// * `max_depth` - Maximum search depth in plies
+    /// * `time_manager` - Controls time allocation for the search
+    /// * `progress` - Callback to receive progress updates during the search
+    ///
+    /// # Returns
+    /// A `Search` instance that allows monitoring and controlling the background search operation
+    pub fn new(position: Position, max_depth: u16, time_manager: TimeManager, progress: ProgressCallback) -> Self {
+        let cancelation_token = Arc::new(AtomicBool::new(false));
+
+        let mut search_thread =
+            SearchThread::new(position, max_depth, time_manager, progress, cancelation_token.clone());
+
+        let join_handle = thread::spawn(move || {
+            search_thread.run();
+        });
+
+        Search { cancelation_token, join_handle }
+    }
+
+    /// Signals the search to stop as soon as possible.
+    ///
+    /// Sets the cancellation flag that will be detected by the search algorithm, allowing it to terminate at the next
+    /// convenient opportunity. This method returns immediately and does not wait for the search to actually terminate.
+    ///
+    /// This is a non-blocking operation; to wait for the search to complete after stopping, call `join()`.
+    pub fn stop(&self) {
+        self.cancelation_token.store(true, Ordering::Relaxed);
+    }
+
+    /// Waits for the search thread to complete.
+    ///
+    /// Blocks the current thread until the search operation has fully terminated. If the search is still running, this
+    /// will wait until it finishes or is stopped. This method consumes the Search object, making it unavailable after
+    /// joining.
+    ///
+    /// # Panics
+    /// Panics if the search thread has panicked or cannot be joined for any reason.
+    pub fn join(self) {
+        self.join_handle.join().expect("It should be possible to join the thread");
+    }
+}
+
+/// Represents a search thread.
+struct SearchThread {
     /// Mutable reference to the chess position being searched. While the position is mutated during search, it will be
     /// restored to its original state after the search is complete.
     position: Position,
@@ -86,27 +157,41 @@ pub struct Search {
     /// Time manager to control the search time
     time_manager: TimeManager,
 
-    /// Indicate that the search should stop
-    stop_search: bool,
-
     /// Number of nodes searched before checking the time
     nodes_at_next_check: u64,
+
+    /// Cancelation token that indicated if the search should be stopped. The search thread needs to check this token
+    /// periodically and abort the search if it is set to true.
+    cancelation_token: Arc<AtomicBool>,
+
+    /// Indicate that the search is in the process of stopping.
+    stopping: bool,
 }
 
-impl Search {
-    /// Creates a new search instance with the given position and depth.
+impl SearchThread {
+    /// Creates a new search thread with the given parameters.
+    ///
+    /// Initializes a search thread that will analyze the provided position up to the specified depth. The search can be
+    /// controlled via the cancellation token and will report progress through the provided callback.
     ///
     /// # Parameters
-    /// * `position` - A mutable reference to the chess position to be searched. While the position will be mutated
-    ///   during search it will be restored to its original state after the search is complete.
-    /// * `time_manager` - The time manager to control the search time
-    /// * `max_depth` - The maximum depth (in half-moves) to search to
+    /// * `position` - The chess position to analyze
+    /// * `max_depth` - Maximum search depth in plies
+    /// * `time_manager` - Controls time allocation for the search
+    /// * `progress` - Callback function that receives search progress updates
+    /// * `cancelation_token` - Shared atomic flag that can signal the search to terminate
     ///
     /// # Returns
-    /// A new Search instance configured with the specified position and depth
-    pub fn new(position: Position, max_depth: u16, time_manager: TimeManager, progress: ProgressCallback) -> Search {
+    /// A configured `SearchThread` instance ready to execute the search
+    pub fn new(
+        position: Position,
+        max_depth: u16,
+        time_manager: TimeManager,
+        progress: ProgressCallback,
+        cancelation_token: Arc<AtomicBool>,
+    ) -> SearchThread {
         let moves_at_root = Self::generate_moves_at_root(&position);
-        Search {
+        SearchThread {
             position,
             moves_at_root,
             stats: SearchStats::default(),
@@ -114,8 +199,9 @@ impl Search {
             progress,
             start_time: None,
             time_manager,
-            stop_search: false,
             nodes_at_next_check: 300000,
+            cancelation_token,
+            stopping: false,
         }
     }
 
@@ -128,22 +214,16 @@ impl Search {
         move_generator.filter(|mv| position.is_legal(*mv)).collect()
     }
 
-    /// Returns the search statistics.
-    pub fn stats(&self) -> &SearchStats {
-        &self.stats
-    }
-
-    /// Starts the search for the best moves from the current position.
-    pub fn start(&mut self) {
-        self.start_time = Some(Instant::now());
-        self.run();
-    }
-
     /// Executes the search process and reports the final result.
     fn run(&mut self) {
+        self.start_time = Some(Instant::now());
         let pv = self.iterative_deepening();
         if let Some(best_move) = pv.last() {
-            (self.progress)(ProgressType::SearchFinished { mv: *best_move });
+            (self.progress)(ProgressType::SearchFinished {
+                mv: *best_move,
+                elapsed: self.start_time.expect("The time should be started").elapsed(),
+                stats: &self.stats,
+            });
         }
     }
 
@@ -170,7 +250,7 @@ impl Search {
             let score = self.search_root(depth, &mut local_pv);
 
             // If we are aborting the search we break out of the loop immediately
-            if self.stop_search {
+            if self.stopping {
                 break;
             }
             pv = local_pv;
@@ -227,7 +307,7 @@ impl Search {
             self.position.unmake();
 
             // If we are aborting the search we return immediately
-            if self.stop_search {
+            if self.stopping {
                 return Eval::default();
             }
 
@@ -282,8 +362,8 @@ impl Search {
 
         // Here we check if we need to stop the search because of time constraints.
         if self.nodes_at_next_check <= self.stats.total_nodes {
-            self.stop_search = !self.time_manager.can_continue();
-            if self.stop_search {
+            self.stopping = !self.time_manager.can_continue() || self.cancelation_token.load(Ordering::Relaxed);
+            if self.stopping {
                 return Eval::default();
             }
             self.update_nodes_at_next_check();
@@ -304,7 +384,7 @@ impl Search {
                 self.position.unmake();
 
                 // If we are aborting the search we return immediately
-                if self.stop_search {
+                if self.stopping {
                     return Eval::default();
                 }
 

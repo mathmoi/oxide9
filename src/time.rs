@@ -104,7 +104,7 @@ impl TimeManager {
     const MAX_TIME_RATIO_PER_MOVE: f32 = 0.8;
     const MIN_ITERATIONS: u16 = 2;
     const MIN_DURATION_BETWEEN_CHECKS: Duration = Duration::from_millis(10);
-    const MAX_DURATION_BETWEEN_CHECKS: Duration = Duration::from_millis(1000);
+    const MAX_DURATION_BETWEEN_CHECKS: Duration = Duration::from_millis(250);
 
     /// Creates a new TimeManager instance with the specified time control.
     ///

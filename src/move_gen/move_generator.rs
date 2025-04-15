@@ -64,8 +64,7 @@ impl Iterator for MoveGenerator {
                         unsafe { &*self.position },
                         &mut self.list,
                     );
-                    let color_factor = if unsafe { &*self.position }.side_to_move() == Color::White { 1 } else { -1 };
-                    self.list.iter_mut().for_each(|mv| mv.set_eval(color_factor * mvv_lva(*mv)));
+                    self.list.iter_mut().for_each(|mv| mv.set_eval(mvv_lva(*mv)));
                     self.step = GenerationStep::DistributeCaptures;
                 }
 

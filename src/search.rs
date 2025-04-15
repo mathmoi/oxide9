@@ -375,12 +375,16 @@ impl SearchThread {
             if self.position.is_legal(mv) {
                 has_legal_move = true;
                 self.position.make(mv);
+
                 let mut local_pv = Vec::new();
-                let score = if depth == 1 {
+                let score = if self.position.is_draw() {
+                    Eval::DRAW
+                } else if depth == 1 {
                     -self.qsearch(-beta, -alpha)
                 } else {
                     -self.search(depth - 1, ply + 1, -beta, -alpha, &mut local_pv)
                 };
+
                 self.position.unmake();
 
                 // If we are aborting the search we return immediately

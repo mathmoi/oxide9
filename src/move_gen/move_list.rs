@@ -142,7 +142,7 @@ impl MoveList {
     /// # Parameters
     /// * `mv` - The move to be brought to the front of the list
     pub fn move_front(&mut self, mv: Move) {
-        let maybe_position = self.moves[0..self.count - 1].iter().position(|x| *x == mv);
+        let maybe_position = self.moves[1..self.count].iter().position(|x| *x == mv);
         if let Some(position) = maybe_position {
             self.moves.copy_within(0..position, 1);
             self.moves[0] = mv;

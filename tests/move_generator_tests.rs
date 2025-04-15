@@ -6,7 +6,7 @@ use oxide9::{
     piece::{Piece, PieceType},
     position::Position,
     r#move::{CastlingSide, Move},
-    zobrist::{self, Zobrist},
+    zobrist::Zobrist,
 };
 use serde::Deserialize;
 use std::{collections::HashSet, fs::File, io::BufReader, path::PathBuf, time::Instant};

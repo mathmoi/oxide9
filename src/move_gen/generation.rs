@@ -128,6 +128,13 @@ fn generate_pawn_moves<const TYPE: u8, const COLOR: u8>(position: &Position, tar
         );
     }
 
+    // If we are generating captures we also generate promitions, so we need to had the eight rank to the targets.
+    // This is not the case for evasions, because we don't want to generate moves that leave the king in check.
+    let mut targets = targets;
+    if generation_type == MoveGenerationType::Captures {
+        targets |= Rank::R8 | Rank::R1;
+    }
+
     if matches!(generation_type, MoveGenerationType::All | MoveGenerationType::Evasions | MoveGenerationType::Captures)
     {
         // Captures towards file A

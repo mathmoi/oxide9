@@ -147,7 +147,7 @@ impl Default for GameState {
 #[derive(Clone)]
 pub struct History {
     pub states: [GameState; 2048],
-    pub count: usize,
+    pub len: usize,
 }
 
 impl Default for History {
@@ -165,7 +165,7 @@ impl Default for History {
                 let block = MaybeUninit::uninit();
                 block.assume_init()
             },
-            count: 0,
+            len: 0,
         }
     }
 }
@@ -180,10 +180,10 @@ impl History {
     /// In debug builds, panics if the history is full (count >= 2048). In release builds, this check is omitted for
     /// performance.
     pub fn push(&mut self, state: GameState) {
-        debug_assert!(self.count < self.states.len());
+        debug_assert!(self.len < self.states.len());
 
-        self.states[self.count] = state;
-        self.count += 1;
+        self.states[self.len] = state;
+        self.len += 1;
     }
 
     /// Removes and returns the most recent game state from the history.
@@ -195,14 +195,26 @@ impl History {
     /// In debug builds, panics if the history is empty (count == 0). In release builds, this check is omitted for
     /// performance.
     pub fn pop(&mut self) -> GameState {
-        debug_assert!(self.count > 0);
+        debug_assert!(self.len > 0);
 
-        self.count -= 1;
-        self.states[self.count]
+        self.len -= 1;
+        self.states[self.len]
+    }
+
+    /// Returns the current length of the history.
+    pub fn len(&self) -> usize {
+        self.len
     }
 }
 
-impl History {}
+impl Index<usize> for History {
+    type Output = GameState;
+
+    fn index(&self, index: usize) -> &Self::Output {
+        debug_assert!(index < self.len);
+        &self.states[index]
+    }
+}
 
 //======================================================================================================================
 // Position implementation
@@ -1045,6 +1057,36 @@ impl Position {
             self.occupied(OccupancyFilter::All),
             !self.side_to_move(),
         )
+    }
+
+    /// Determines if the current position is a draw.
+    ///
+    /// Checks for draws based on the 50-move rule and position repetition:
+    ///
+    /// - 50-move rule: Returns true if 50 moves (100 half-moves) have been made without a pawn move or a capture.
+    ///
+    /// - Position repetition: Returns true if the current position has appeared at least once before in the game
+    ///   history (this detects repetitions earlier than the traditional threefold repetition rule to optimize search).
+    ///
+    /// This implementation only checks positions with the same side to move by stepping through the history in
+    /// increments of 2.
+    pub fn is_draw(&self) -> bool {
+        // 50 moves rule
+        if self.state.halfmove_clock >= 100 {
+            return true;
+        }
+
+        // Threefold repetition. We actually return true if the position is repeated twice, this way repetition are
+        // detected sooner during the search. There is no benefit to wait for the third repetition.
+        let last = self.history.len();
+        let first = last - ((self.state.halfmove_clock as usize) & !1);
+        for index in (first..last).step_by(2).rev() {
+            if self.history[index].zobrist == self.state.zobrist {
+                return true;
+            }
+        }
+
+        false
     }
 
     /// Returns a bitboard of all enemy pieces that are currently checking the king of the side to move.

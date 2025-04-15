@@ -38,7 +38,13 @@
                     "kind": "bin"
                 }
             },
-            "args": [],
+            "args": [
+                "analyze",
+                "--fen",
+                "8/5P2/8/8/8/8/5Kpp/7k b - - 8 80",
+                "--depth",
+                "11"
+            ],
             "cwd": "${workspaceFolder}"
         },
         {

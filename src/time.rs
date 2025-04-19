@@ -105,6 +105,7 @@ impl TimeManager {
     const MIN_ITERATIONS: u16 = 2;
     const MIN_DURATION_BETWEEN_CHECKS: Duration = Duration::from_millis(10);
     const MAX_DURATION_BETWEEN_CHECKS: Duration = Duration::from_millis(250);
+    const MIN_TIME_ITERATIONS_FOR_ESTIMATE: Duration = Duration::from_millis(20);
 
     /// Creates a new TimeManager instance with the specified time control.
     ///
@@ -216,6 +217,12 @@ impl TimeManager {
         let elapsed = self.search_start.elapsed();
         if self.target <= elapsed {
             return false;
+        }
+
+        // If the previous iterations were too fast, we can't estimate the next iteration correctly so we just return
+        // true
+        if self.last_iteration_duration[0] < Self::MIN_TIME_ITERATIONS_FOR_ESTIMATE {
+            return true;
         }
 
         // Return true if we expect to finish at least half of the next iteration before the target time

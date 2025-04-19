@@ -1,4 +1,4 @@
-use rand::random;
+use rand::{rngs::StdRng, Rng, SeedableRng};
 
 use crate::{
     coordinates::{File, Square},
@@ -17,41 +17,42 @@ static mut ZOBRIST_CASTLING: [Zobrist; CastlingRight::COUNT] = [0; 16];
 /// Initializes all Zobrist hash keys used throughout the engine. Must be called once before using any Zobrist hashing
 /// functions.
 pub fn initialize() {
-    initialize_zobrist_piece_square();
-    initialize_zobrist_en_passant();
-    initialize_zobrist_black_to_move();
-    initialize_zobrist_castling();
+    let mut rng = StdRng::seed_from_u64(0x4242424242424242);
+    initialize_zobrist_piece_square(&mut rng);
+    initialize_zobrist_en_passant(&mut rng);
+    initialize_zobrist_black_to_move(&mut rng);
+    initialize_zobrist_castling(&mut rng);
 }
 
-fn initialize_zobrist_piece_square() {
+fn initialize_zobrist_piece_square(rng: &mut StdRng) {
     for piece in Piece::ALL {
         for sq in Square::ALL {
             unsafe {
-                ZOBRIST_PIECE_SQUARE[usize::from(piece) * Square::COUNT + usize::from(sq)] = random();
+                ZOBRIST_PIECE_SQUARE[usize::from(piece) * Square::COUNT + usize::from(sq)] = rng.random();
             }
         }
     }
 }
 
-fn initialize_zobrist_en_passant() {
+fn initialize_zobrist_en_passant(rng: &mut StdRng) {
     for file in File::ALL {
         unsafe {
-            ZOBRIST_EN_PASSANT[usize::from(file)] = random();
+            ZOBRIST_EN_PASSANT[usize::from(file)] = rng.random();
         }
     }
 }
 
-fn initialize_zobrist_black_to_move() {
+fn initialize_zobrist_black_to_move(rng: &mut StdRng) {
     unsafe {
-        ZOBRIST_BLACK_TO_MOVE = random();
+        ZOBRIST_BLACK_TO_MOVE = rng.random();
     }
 }
 
-fn initialize_zobrist_castling() {
+fn initialize_zobrist_castling(rng: &mut StdRng) {
     // We let the index zero to the default value (0) so that the default zobrist value of an empty board is zero.
     for index in 1..CastlingRight::COUNT {
         unsafe {
-            ZOBRIST_CASTLING[index] = random();
+            ZOBRIST_CASTLING[index] = rng.random();
         }
     }
 }

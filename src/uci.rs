@@ -1,5 +1,6 @@
 use std::{
     io::{self, BufRead},
+    sync::Arc,
     time::Duration,
 };
 
@@ -13,6 +14,7 @@ use crate::{
     position::Position,
     search::{ProgressType, Search},
     time::{TimeControl, TimeManager},
+    tt::TranspositionTable,
 };
 
 /// Entry point for the UCI (Universal Chess Interface) protocol.
@@ -613,6 +615,9 @@ struct UciEngine {
 
     /// The active search process (None when not searching)
     search: Option<Search>,
+
+    /// The transposition table used for storing previously evaluated positions
+    transposition_table: Arc<TranspositionTable>,
 }
 
 impl UciEngine {
@@ -624,7 +629,8 @@ impl UciEngine {
     /// # Returns
     /// A new `UciEngine` instance with the default chess starting position.
     fn new() -> Self {
-        UciEngine { position: Position::new(), search: None }
+        let transposition_table = Arc::new(TranspositionTable::new(32 * 1024 * 1024)); // NEXT : Choose a size more wisely
+        UciEngine { position: Position::new(), search: None, transposition_table }
     }
 
     /// Processes and reports search progress information to the UCI interface.
@@ -773,7 +779,13 @@ impl UciEngine {
         };
         let time_manager = TimeManager::new(TimeControl::new(time, inc, moves_to_go, move_time, infinite));
 
-        self.search = Some(Search::new(self.position.clone(), 100, time_manager, Self::report_progress));
+        self.search = Some(Search::new(
+            self.position.clone(),
+            100,
+            time_manager,
+            Self::report_progress,
+            self.transposition_table.clone(),
+        ));
         Ok(())
     }
 

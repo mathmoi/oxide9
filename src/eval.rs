@@ -12,7 +12,7 @@ use crate::{
 pub struct Eval(i16);
 
 impl Eval {
-    const MAX_MAT_DEPTH: u16 = 2000;
+    const MAX_MAT_DEPTH: u16 = 10000;
 
     /// The minimum possible evaluation score
     pub const MIN: Eval = Eval(-i16::MAX); // We use the negative of the maximum value to represent the minimum because
@@ -22,7 +22,7 @@ impl Eval {
     pub const MAX: Eval = Eval(i16::MAX);
 
     /// The evaluation score for a mat.
-    pub const MAT: Eval = Eval(-30000);
+    pub const MAT: Eval = Eval(30000);
 
     /// The evaluation score for a draw.
     pub const DRAW: Eval = Eval(0);
@@ -38,7 +38,29 @@ impl Eval {
     pub const fn new_mat(depth: u16) -> Self {
         debug_assert!(depth <= Self::MAX_MAT_DEPTH);
 
-        Eval(Self::MAT.0 + (depth as i16))
+        Eval(Self::MAT.0 - (depth as i16))
+    }
+
+    /// Removes the given number of ply to a mate evaluation. If the evaluation is not a mat it does nothing.
+    pub fn remove_ply_from_mat(self, ply: u16) -> Self {
+        debug_assert!(ply <= Self::MAX_MAT_DEPTH);
+        self.remove_ply_from_mat_signed(ply as i16)
+    }
+
+    /// Removes the given number of ply to a mate evaluation. If the evaluation is not a mat it does nothing.
+    pub fn add_ply_to_mat(self, ply: u16) -> Self {
+        debug_assert!(ply <= Self::MAX_MAT_DEPTH);
+        self.remove_ply_from_mat_signed(-(ply as i16))
+    }
+
+    fn remove_ply_from_mat_signed(self, ply: i16) -> Self {
+        if self.0 > Eval::MAT.0 - Self::MAX_MAT_DEPTH as i16 {
+            Eval(self.0 + ply as i16)
+        } else if self.0 < -Eval::MAT.0 + Self::MAX_MAT_DEPTH as i16 {
+            Eval(self.0 - ply as i16)
+        } else {
+            self
+        }
     }
 }
 
@@ -353,4 +375,16 @@ pub fn evaluate(position: &Position) -> Eval {
         (mg_phase * i32::from(incremental_eval.mg) + eg_phase * i32::from(incremental_eval.eg))
             / unsafe { MAX_GAME_PHASE as i32 },
     )
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_remove_ply_from_mat() {
+        assert_eq!(Eval::new_mat(2), Eval::new_mat(5).remove_ply_from_mat(3));
+        assert_eq!(-Eval::new_mat(2), (-Eval::new_mat(5)).remove_ply_from_mat(3));
+        assert_eq!(Eval::new(-30), Eval::new(-30).remove_ply_from_mat(3));
+    }
 }

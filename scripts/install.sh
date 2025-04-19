@@ -20,5 +20,5 @@ sed -i "s/name\s*=\s*\".*\"/name = \"Oxide9-${NICKNAME}\"/" ${INSTALL_DIR}/oxide
 # Create a launcher script
 LAUNCHER="${BIN_DIR}/o9-${NICKNAME}"
 echo "#!/usr/bin/env bash
-(cd ${INSTALL_DIR} && ./oxide9 \$@)" >> $LAUNCHER
+(cd ${INSTALL_DIR} && ./oxide9 \"\$@\")" >> $LAUNCHER
 chmod +x $LAUNCHER

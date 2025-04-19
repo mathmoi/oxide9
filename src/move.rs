@@ -229,9 +229,7 @@ impl Move {
         };
         format!("{}{}{}", self.from_square, self.to_square, promotion)
     }
-}
 
-impl From<Move> for u32 {
     /// Converts a `Move` to a `u32` value.
     ///
     /// The `u32` value is packed as follows:
@@ -242,31 +240,35 @@ impl From<Move> for u32 {
     /// 10 - 15  To square
     /// 16 - 19  Moved piece
     /// 20 - 27  Payload (depends on the move type, at most 8 bits are necessary)
-    fn from(mv: Move) -> u32 {
-        let from = u8::from(mv.from_square()) as u32;
-        let to = u8::from(mv.to_square()) as u32;
-        let piece = u8::from(mv.piece()) as u32;
-        let move_type = u8::from(mv.move_type()) as u32;
-        let payload = match mv.move_type() {
-            MoveType::Capture(capture) => u8::from(capture) as u32,
-            MoveType::Promotion(promotion) => u8::from(promotion) as u32,
-            MoveType::CapturePromotion { capture, promotion } => {
-                u8::from(capture) as u32 | ((u8::from(promotion) as u32) << 4)
+    pub fn pack(maybe_move: Option<Self>) -> u32 {
+        match maybe_move {
+            Some(mv) => {
+                let from = u8::from(mv.from_square()) as u32;
+                let to = u8::from(mv.to_square()) as u32;
+                let piece = u8::from(mv.piece()) as u32;
+                let move_type = u8::from(mv.move_type()) as u32;
+                let payload = match mv.move_type() {
+                    MoveType::Capture(capture) => u8::from(capture) as u32,
+                    MoveType::Promotion(promotion) => u8::from(promotion) as u32,
+                    MoveType::CapturePromotion { capture, promotion } => {
+                        u8::from(capture) as u32 | ((u8::from(promotion) as u32) << 4)
+                    }
+                    MoveType::Castling(side) => u8::from(side) as u32,
+                    _ => 0,
+                };
+
+                move_type | (from << 3) | (to << 10) | (piece << 16) | (payload << 20)
             }
-            MoveType::Castling(side) => u8::from(side) as u32,
-            _ => 0,
-        };
-
-        move_type | (from << 3) | (to << 10) | (piece << 16) | (payload << 20)
+            None => 0,
+        }
     }
-}
 
-impl From<u32> for Move {
-    /// Converts a `u32` value to a `Move`.
-    ///
-    /// Looks for the documentation of the `from` method for more information on how the `u32` value
-    /// is packed.
-    fn from(value: u32) -> Self {
+    /// Converts a `u32` value back to a `Move`.
+    pub fn unpack(value: u32) -> Option<Self> {
+        if value == 0 {
+            return None;
+        }
+
         let from = Square::from(((value >> 3) & 0b111111) as u8);
         let to = Square::from(((value >> 10) & 0b111111) as u8);
         let piece = Piece::from(((value >> 16) & 0b1111) as u8);
@@ -284,7 +286,7 @@ impl From<u32> for Move {
             _ => unreachable!(),
         };
 
-        Self { from_square: from, to_square: to, piece, move_type, eval: Eval::default() }
+        Some(Self { from_square: from, to_square: to, piece, move_type, eval: Eval::default() })
     }
 }
 
@@ -424,7 +426,7 @@ mod tests {
         }
 
         #[test]
-        fn test_move_into_and_from_u32() {
+        fn test_pack_and_unpack() {
             let basic = Move::new(Square::A1, Square::A2, Piece::WHITE_ROOK);
             let capture = Move::new_capture(Square::A1, Square::B2, Piece::WHITE_QUEEN, Piece::BLACK_KNIGHT);
             let promotion = Move::new_promotion(Square::A7, Square::A8, Piece::WHITE_PAWN, Piece::WHITE_QUEEN);
@@ -442,14 +444,15 @@ mod tests {
             let queenside_castling =
                 Move::new_castling(Square::E1, Square::C1, Piece::WHITE_KING, CastlingSide::Queenside);
 
-            assert_eq!(basic, Move::from(u32::from(basic)));
-            assert_eq!(capture, Move::from(u32::from(capture)));
-            assert_eq!(promotion, Move::from(u32::from(promotion)));
-            assert_eq!(capture_promotion, Move::from(u32::from(capture_promotion)));
-            assert_eq!(two_square_pawn_push, Move::from(u32::from(two_square_pawn_push)));
-            assert_eq!(en_passant, Move::from(u32::from(en_passant)));
-            assert_eq!(kingside_castling, Move::from(u32::from(kingside_castling)));
-            assert_eq!(queenside_castling, Move::from(u32::from(queenside_castling)));
+            assert_eq!(Some(basic), Move::unpack(Move::pack(Some(basic))));
+            assert_eq!(Some(capture), Move::unpack(Move::pack(Some(capture))));
+            assert_eq!(Some(promotion), Move::unpack(Move::pack(Some(promotion))));
+            assert_eq!(Some(capture_promotion), Move::unpack(Move::pack(Some(capture_promotion))));
+            assert_eq!(Some(two_square_pawn_push), Move::unpack(Move::pack(Some(two_square_pawn_push))));
+            assert_eq!(Some(en_passant), Move::unpack(Move::pack(Some(en_passant))));
+            assert_eq!(Some(kingside_castling), Move::unpack(Move::pack(Some(kingside_castling))));
+            assert_eq!(Some(queenside_castling), Move::unpack(Move::pack(Some(queenside_castling))));
+            assert_eq!(None, Move::unpack(Move::pack(None)));
         }
     }
 }

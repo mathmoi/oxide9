@@ -1,4 +1,4 @@
-use std::time::Duration;
+use std::{sync::Arc, time::Duration};
 
 use human_repr::{HumanCount, HumanDuration};
 use terminal_size::{terminal_size, Height, Width};
@@ -10,6 +10,7 @@ use crate::{
     r#move::Move,
     search::{ProgressType, Search, SearchStats},
     time::{TimeControl, TimeManager},
+    tt::TranspositionTable,
 };
 
 /// Represents errors that can occur while analyzing a chess position.
@@ -48,7 +49,9 @@ pub fn analyze(fen: &str, depth: u16) -> Result<(), AnalyzeError> {
     println!("Analyzing position:\n\n{}\n\n{}\n", position.to_string(), fen);
     print_header();
 
-    let handle = Search::new(position, depth as u16, TimeManager::new(TimeControl::Infinite), report_progress);
+    let tt = Arc::new(TranspositionTable::new(128 * 1024 * 1024)); // NEXT : Choose a size more wisely
+
+    let handle = Search::new(position, depth as u16, TimeManager::new(TimeControl::Infinite), report_progress, tt);
     handle.join();
 
     Ok(())
@@ -186,7 +189,7 @@ fn report_progress(progress_type: ProgressType) {
             vec![format!("{} ({})", mv.to_uci_string(), (nodes as f64 / elapsed.as_secs_f64()).human_count("nps"))],
         ),
         ProgressType::SearchFinished { mv: _, elapsed, stats } => {
-            print_stats(elapsed, &stats);
+            print_stats(elapsed, stats);
             return;
         }
     };

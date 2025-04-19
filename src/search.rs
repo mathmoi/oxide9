@@ -13,6 +13,7 @@ use crate::{
     position::Position,
     r#move::Move,
     time::TimeManager,
+    tt::{EntryType, TranspositionTable},
 };
 
 /// The SearchStats struct holds statistics about the search process.
@@ -93,14 +94,29 @@ impl Search {
     /// * `max_depth` - Maximum search depth in plies
     /// * `time_manager` - Controls time allocation for the search
     /// * `progress` - Callback to receive progress updates during the search
+    /// * `transposition_table` - Transposition table for storing and retrieving previously evaluated positions
     ///
     /// # Returns
     /// A `Search` instance that allows monitoring and controlling the background search operation
-    pub fn new(position: Position, max_depth: u16, time_manager: TimeManager, progress: ProgressCallback) -> Self {
+    pub fn new(
+        position: Position,
+        max_depth: u16,
+        time_manager: TimeManager,
+        progress: ProgressCallback,
+        transposition_table: Arc<TranspositionTable>,
+    ) -> Self {
         let cancelation_token = Arc::new(AtomicBool::new(false));
 
-        let mut search_thread =
-            SearchThread::new(position, max_depth, time_manager, progress, cancelation_token.clone());
+        transposition_table.increment_generation();
+
+        let mut search_thread = SearchThread::new(
+            position,
+            max_depth,
+            time_manager,
+            progress,
+            cancelation_token.clone(),
+            transposition_table,
+        );
 
         let join_handle = thread::spawn(move || {
             search_thread.run();
@@ -166,6 +182,9 @@ struct SearchThread {
 
     /// Indicate that the search is in the process of stopping.
     stopping: bool,
+
+    /// Transposition table used for storing and retrieving previously evaluated positions.
+    transposition_table: Arc<TranspositionTable>,
 }
 
 impl SearchThread {
@@ -180,6 +199,7 @@ impl SearchThread {
     /// * `time_manager` - Controls time allocation for the search
     /// * `progress` - Callback function that receives search progress updates
     /// * `cancelation_token` - Shared atomic flag that can signal the search to terminate
+    /// * `transposition_table` - Transposition table for storing and retrieving previously evaluated positions
     ///
     /// # Returns
     /// A configured `SearchThread` instance ready to execute the search
@@ -189,6 +209,7 @@ impl SearchThread {
         time_manager: TimeManager,
         progress: ProgressCallback,
         cancelation_token: Arc<AtomicBool>,
+        transposition_table: Arc<TranspositionTable>,
     ) -> SearchThread {
         let moves_at_root = Self::generate_moves_at_root(&position);
         SearchThread {
@@ -202,6 +223,7 @@ impl SearchThread {
             nodes_at_next_check: 300000,
             cancelation_token,
             stopping: false,
+            transposition_table,
         }
     }
 
@@ -303,7 +325,7 @@ impl SearchThread {
 
             self.position.make(mv);
             let mut local_pv = Vec::new();
-            let score = -self.search(depth - 1, 1, Eval::MIN, -alpha, &mut local_pv);
+            let eval = -self.search(depth - 1, 1, Eval::MIN, -alpha, &mut local_pv);
             self.position.unmake();
 
             // If we are aborting the search we return immediately
@@ -311,8 +333,8 @@ impl SearchThread {
                 return Eval::default();
             }
 
-            if score > alpha {
-                alpha = score;
+            if eval > alpha {
+                alpha = eval;
                 *pv = local_pv;
                 pv.push(mv);
 
@@ -320,7 +342,7 @@ impl SearchThread {
                     (self.progress)(ProgressType::NewBestMove {
                         depth,
                         elapsed: self.start_time.expect("The timer should be started").elapsed(),
-                        score,
+                        score: eval,
                         nodes: self.stats.total_nodes,
                         pv: &pv,
                     });
@@ -351,9 +373,7 @@ impl SearchThread {
     ///
     /// # Note
     /// This is an internal recursive method used by the `start` method.
-    fn search(&mut self, depth: u16, ply: u16, alpha: Eval, beta: Eval, pv: &mut Vec<Move>) -> Eval {
-        let mut alpha = alpha; // Make alpha mutable locally
-
+    fn search(&mut self, depth: u16, ply: u16, mut alpha: Eval, mut beta: Eval, pv: &mut Vec<Move>) -> Eval {
         // TODO : Is Vec really performant for pv structure?
         // TODO : Should we use a stack to store the PV and others things?
 
@@ -369,15 +389,43 @@ impl SearchThread {
             self.update_nodes_at_next_check();
         }
 
+        // In internal search nodes we probe the transposition table. If we find an acceptable exact score or a lower
+        // bound better than beta we might cut the search imediately. If we find a lower bound better than alpha but not
+        // better than beta we can immediately raise alpha.
+        let key = self.position.hash();
+        let tt_ref = self.transposition_table.probe(key);
+        if let Some(tt_entry) = tt_ref.get(key) {
+            if depth <= tt_entry.depth() {
+                let tt_eval = tt_entry.get_eval(ply);
+                match tt_entry.entry_type() {
+                    EntryType::Exact => {
+                        return tt_eval;
+                    }
+                    EntryType::LowerBound => {
+                        if tt_eval >= beta {
+                            return tt_eval;
+                        }
+                    }
+                    EntryType::UpperBound => {
+                        if tt_eval <= alpha {
+                            return tt_eval;
+                        }
+                    }
+                }
+            }
+        }
+
         let move_generator = MoveGenerator::new(&self.position, false);
         let mut has_legal_move = false;
+        let mut best_eval = Eval::MIN;
+        let mut best_move: Option<Move> = None;
         for mv in move_generator {
             if self.position.is_legal(mv) {
                 has_legal_move = true;
                 self.position.make(mv);
 
                 let mut local_pv = Vec::new();
-                let score = if self.position.is_draw() {
+                let eval = if self.position.is_draw() {
                     Eval::DRAW
                 } else if depth == 1 {
                     -self.qsearch(-beta, -alpha)
@@ -392,14 +440,20 @@ impl SearchThread {
                     return Eval::default();
                 }
 
-                if score >= beta {
-                    return beta;
-                }
+                if eval > best_eval {
+                    best_eval = eval;
 
-                if score > alpha {
-                    alpha = score;
-                    *pv = local_pv;
-                    pv.push(mv);
+                    if eval > alpha {
+                        best_move = Some(mv);
+
+                        if eval >= beta {
+                            break; // Beta cut-off
+                        }
+
+                        alpha = eval;
+                        *pv = local_pv;
+                        pv.push(mv);
+                    }
                 }
             }
         }
@@ -407,13 +461,25 @@ impl SearchThread {
         // If we have not legal move we are in checkmate or stalemate
         if !has_legal_move {
             if self.position.is_check() {
-                return Eval::new_mat(ply);
+                return -Eval::new_mat(ply);
             }
 
             return Eval::DRAW;
         }
 
-        alpha
+        // Write the information in the transposition table
+        let entry_type = if best_eval >= beta {
+            EntryType::LowerBound
+        } else if best_move.is_some() {
+            EntryType::Exact
+        } else {
+            EntryType::UpperBound
+        };
+
+        // TODO : When we have a multithreaded search, check if the read_generation cost is impacting the performance.
+        tt_ref.store(key, best_move, self.transposition_table.read_generation(), entry_type, depth, ply, best_eval);
+
+        best_eval
     }
 
     fn update_nodes_at_next_check(&mut self) {
@@ -455,15 +521,15 @@ impl SearchThread {
         for mv in move_generator {
             if self.position.is_legal(mv) {
                 self.position.make(mv);
-                let score = -self.qsearch(-beta, -alpha);
+                let eval = -self.qsearch(-beta, -alpha);
                 self.position.unmake();
 
-                if score >= beta {
+                if eval >= beta {
                     return beta;
                 }
 
-                if score > alpha {
-                    alpha = score;
+                if eval > alpha {
+                    alpha = eval;
                 }
             }
         }

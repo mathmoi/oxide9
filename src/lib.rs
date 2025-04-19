@@ -13,6 +13,7 @@ pub mod piece;
 pub mod position;
 pub mod search;
 pub mod time;
+pub mod tt;
 pub mod uci;
 pub mod zobrist;
 

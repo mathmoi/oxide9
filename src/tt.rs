@@ -1,5 +1,6 @@
 use std::{
     cell::UnsafeCell,
+    cmp::min,
     mem,
     sync::atomic::{AtomicU8, Ordering},
 };
@@ -232,6 +233,28 @@ impl TranspositionTable {
     /// The current generation counter value
     pub fn read_generation(&self) -> Generation {
         self.generation.load(Ordering::Acquire)
+    }
+
+    /// Calculates an approximate load factor of the transposition table.
+    ///
+    /// The load factor is the ratio of occupied entries (with the current generation) to the total capacity. This
+    /// method samples up to the first 1024 entries to estimate the overall utilization without scanning the entire
+    /// table.
+    ///
+    /// # Returns
+    /// A value between 0.0 and 1.0 representing the estimated percentage of table slots that contain current generation
+    /// entries.
+    pub fn load_factor(&self) -> f64 {
+        let max_index = min(self.table.len(), 1024);
+        let mut used_count: usize = 0;
+        let generation = self.read_generation();
+        for index in 0..max_index {
+            let entry = unsafe { &*self.table[index].get() };
+            if entry.key() != 0 && entry.generation() == generation {
+                used_count += 1;
+            }
+        }
+        used_count as f64 / max_index as f64
     }
 }
 

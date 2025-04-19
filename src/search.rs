@@ -24,6 +24,18 @@ pub struct SearchStats {
 
     /// The number of quiescence nodes searched
     pub nodes: u64,
+
+    /// The number of transposition table probes
+    pub tt_probes: u64,
+
+    /// The number of transposition table hits
+    pub tt_probes_hit: u64,
+
+    /// The of cuts due to transposition table
+    pub tt_cuts: u64,
+
+    /// The factor of used entries in the transposition table
+    pub tt_load_factor: f64,
 }
 
 /// Represents different types of search progress to be reported in the console or to the GUI.
@@ -235,6 +247,7 @@ impl SearchThread {
         self.start_time = Some(Instant::now());
         let pv = self.iterative_deepening();
         if let Some(best_move) = pv.last() {
+            self.stats.tt_load_factor = self.transposition_table.load_factor();
             (self.progress)(ProgressType::SearchFinished {
                 mv: *best_move,
                 elapsed: self.start_time.expect("The time should be started").elapsed(),
@@ -385,20 +398,25 @@ impl SearchThread {
         // better than beta we can immediately raise alpha.
         let key = self.position.hash();
         let tt_ref = self.transposition_table.probe(key);
+        self.stats.tt_probes += 1;
         if let Some(tt_entry) = tt_ref.get(key) {
+            self.stats.tt_probes_hit += 1;
             if depth <= tt_entry.depth() {
                 let tt_eval = tt_entry.get_eval(ply);
                 match tt_entry.entry_type() {
                     EntryType::Exact => {
+                        self.stats.tt_cuts += 1;
                         return tt_eval;
                     }
                     EntryType::LowerBound => {
                         if tt_eval >= beta {
+                            self.stats.tt_cuts += 1;
                             return tt_eval;
                         }
                     }
                     EntryType::UpperBound => {
                         if tt_eval <= alpha {
+                            self.stats.tt_cuts += 1;
                             return tt_eval;
                         }
                     }

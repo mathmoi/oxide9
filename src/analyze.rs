@@ -252,19 +252,31 @@ fn print_stats(elapsed: Duration, stats: &SearchStats) {
     let config = get_config();
     let stats_line = if config.precise {
         format!(
-            "time={} nodes={} qnodes={} nps={}",
+            "time={} nodes={} qnodes={} nps={} tt_probes={} tt_hit={}({:.3}%) tt_cut={}({:.3}%) tt_load={:.3}%",
             elapsed.as_secs_f64(),
             stats.nodes,
             stats.total_nodes - stats.nodes,
-            stats.total_nodes as f64 / elapsed.as_secs_f64()
+            stats.total_nodes as f64 / elapsed.as_secs_f64(),
+            stats.tt_probes,
+            stats.tt_probes_hit,
+            stats.tt_probes_hit as f64 / stats.tt_probes as f64 * 100.0,
+            stats.tt_cuts,
+            stats.tt_cuts as f64 / stats.tt_probes as f64 * 100.0,
+            stats.tt_load_factor * 100.0,
         )
     } else {
         format!(
-            "time={} nodes={} qnodes={} nps={}",
+            "time={} nodes={} qnodes={} nps={} tt_probes={} tt_hit={}({:.0}%) tt_cut={}({:.0}%) tt_load={:.0}%",
             elapsed.human_duration(),
             stats.nodes.human_count_bare(),
             (stats.total_nodes - stats.nodes).human_count_bare(),
-            (stats.total_nodes as f64 / elapsed.as_secs_f64()).human_count_bare()
+            (stats.total_nodes as f64 / elapsed.as_secs_f64()).human_count_bare(),
+            stats.tt_probes.human_count_bare(),
+            stats.tt_probes_hit.human_count_bare(),
+            stats.tt_probes_hit as f64 / stats.tt_probes as f64 * 100.0,
+            stats.tt_cuts.human_count_bare(),
+            stats.tt_cuts as f64 / stats.tt_probes as f64 * 100.0,
+            stats.tt_load_factor * 100.0,
         )
     };
 

@@ -49,7 +49,7 @@ impl MoveGenerator {
     pub fn new(position: &Position, qsearch: bool) -> Self {
         let step = if position.is_check() { GenerationStep::GenerateEvasion } else { GenerationStep::GenerateCaptures };
 
-        MoveGenerator { position: position as *const Position, list: MoveList::new(), step, qsearch }
+        MoveGenerator { position: position as *const Position, list: MoveList::default(), step, qsearch }
     }
 }
 
@@ -91,7 +91,7 @@ impl Iterator for MoveGenerator {
                 GenerationStep::DistributeCaptures
                 | GenerationStep::DistributeQuiet
                 | GenerationStep::DistributeEvasion => {
-                    if self.list.len() == 0 {
+                    if self.list.is_empty() {
                         self.step = self.step.next();
                         continue;
                     }

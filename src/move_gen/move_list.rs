@@ -22,7 +22,7 @@ pub struct MoveList {
     pub count: usize,
 }
 
-impl MoveList {
+impl Default for MoveList {
     /// Creates a new empty move list.
     ///
     /// Initializes a MoveList with count set to 0 and an uninitialized array of moves. This approach avoids the cost of
@@ -34,7 +34,7 @@ impl MoveList {
     /// # Safety
     /// Uses unsafe code to avoid initialization overhead. The `count` field ensures that only initialized elements are
     /// accessed during normal operation. The moves array contains uninitialized memory beyond the `count` value.
-    pub fn new() -> Self {
+    fn default() -> Self {
         Self {
             moves: unsafe {
                 let block = MaybeUninit::uninit();
@@ -43,7 +43,9 @@ impl MoveList {
             count: 0,
         }
     }
+}
 
+impl MoveList {
     /// Adds a move to the list.
     ///
     /// Places the move at the current count position and increments the counter.
@@ -94,6 +96,14 @@ impl MoveList {
         self.moves[best_index] = self.moves[self.count - 1];
         self.count -= 1;
         result
+    }
+
+    /// Checks if the list is empty.
+    ///
+    /// # Returns
+    /// `true` if the collection list no elements, `false` otherwise.
+    pub fn is_empty(&self) -> bool {
+        self.count == 0
     }
 
     /// Returns the number of moves currently in the list.
@@ -165,7 +175,7 @@ impl FromIterator<Move> for MoveList {
     /// # Panics
     /// If the number of moves exceeds MAX_MOVES, this method will panic.
     fn from_iter<I: IntoIterator<Item = Move>>(iter: I) -> Self {
-        let mut list = Self::new();
+        let mut list = Self::default();
         for mv in iter {
             list.push(mv);
         }

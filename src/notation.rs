@@ -56,12 +56,12 @@ pub fn parse_coordinate_notation(position: &Position, notation: &str) -> Result<
     let mut begin = 0;
     let end = notation.len() - 1;
 
-    let from = Square::try_from(&notation[begin..begin + 2]).map_err(|e| NotationError::InvalidFromSquare(e))?;
+    let from = Square::try_from(&notation[begin..begin + 2]).map_err(NotationError::InvalidFromSquare)?;
     begin += 2;
 
     let piece = position[from].ok_or(NotationError::NoPieceAtFromSquare(from))?;
 
-    let mut to = Square::try_from(&notation[begin..begin + 2]).map_err(|e| NotationError::InvalidFromSquare(e))?;
+    let mut to = Square::try_from(&notation[begin..begin + 2]).map_err(NotationError::InvalidFromSquare)?;
     begin += 2;
 
     let mut maybe_capture = position[to];
@@ -70,7 +70,7 @@ pub fn parse_coordinate_notation(position: &Position, notation: &str) -> Result<
         let promotion = Some(Piece::new(
             piece.color(),
             PieceType::try_from(notation.chars().nth(begin).expect("The value should have enough characters"))
-                .map_err(|e| NotationError::InvalidCaptureNotation(e))?,
+                .map_err(NotationError::InvalidCaptureNotation)?,
         ));
         begin += 1;
         promotion

@@ -1,4 +1,8 @@
-use std::{mem::MaybeUninit, ops::Index};
+use std::{
+    fmt::{Display, Formatter},
+    mem::MaybeUninit,
+    ops::Index,
+};
 
 use crate::{
     eval::{get_piece_square_value, get_piece_type_game_phase, EvalPair},
@@ -98,7 +102,7 @@ impl From<(Color, PieceType, PieceType)> for OccupancyFilter {
 // Game State implementation
 //======================================================================================================================
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct GameState {
     side_to_move: Color,
     castling_rights: CastlingRight,
@@ -144,7 +148,7 @@ impl Default for GameState {
 ///
 /// # Safety
 /// Does not perform bounds checking in release builds for performance reasons.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct History {
     pub states: [GameState; 2048],
     pub len: usize,
@@ -201,6 +205,14 @@ impl History {
         self.states[self.len]
     }
 
+    /// Checks if the history is empty.
+    ///
+    /// # Returns
+    /// `true` if the history contains no elements, `false` otherwise.
+    pub fn is_empty(&self) -> bool {
+        self.len == 0
+    }
+
     /// Returns the current length of the history.
     pub fn len(&self) -> usize {
         self.len
@@ -221,7 +233,7 @@ impl Index<usize> for History {
 //======================================================================================================================
 
 /// A chess position.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Position {
     board: [Option<Piece>; Square::COUNT],
     bb_color: [Bitboard; Color::COUNT],
@@ -377,7 +389,7 @@ impl Position {
     /// # Arguments
     ///
     /// * fen - A string containing the FEN representation of a chess position. FEN is a standard notation to describe a
-    ///         particular board position of a chess game.
+    ///   particular board position of a chess game.
     ///
     /// # See also
     /// [The PGN
@@ -543,87 +555,81 @@ impl Position {
     /// 2  P P P P P P P P
     /// 1  R N B Q K B N R
     ///    a b c d e f g h
-    pub fn to_compact_string(&self) -> String {
-        let mut board = String::with_capacity(171);
+    pub fn fmt_compact(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         for rank in Rank::ALL.iter().rev() {
-            board.push_str(&format!("{}  ", rank));
+            write!(f, "{rank}  ")?;
             for file in File::ALL {
                 let sq = Square::new(file, *rank);
                 match self[sq] {
-                    Some(piece) => board.push(piece.into()),
-                    None => board.push('.'),
+                    Some(piece) => write!(f, "{piece:#}")?,
+                    None => write!(f, ".")?,
                 }
                 if file != File::H {
-                    board.push(' ');
+                    write!(f, " ")?;
                 } else {
-                    board.push('\n');
+                    writeln!(f)?;
                 }
             }
         }
-        board.push_str("   a b c d e f g h");
-
-        board
+        write!(f, "   a b c d e f g h")?;
+        Ok(())
     }
 
-    pub fn to_string(&self) -> String {
-        let mut board = String::with_capacity(2000);
-
+    fn fmt_full(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         // Top border
-        board.push_str(self.generate_border_string(Color::Black, '┌', '┐', '~', '┬').as_str());
+        self.fmt_border(f, Color::Black, '┌', '┐', '~', '┬')?;
 
         // Add all the ranks
         for rank in Rank::ALL.iter().rev() {
-            board.push(char::from(*rank));
-            board.push_str(" │");
+            write!(f, "{rank} │")?;
             for file in File::ALL {
                 let square = Square::new(file, *rank);
                 if let Some(piece) = self[square] {
-                    board.push(if piece.color() == Color::Black { '░' } else { '▌' });
-                    board.push(piece.piece_type().into());
-                    board.push(if piece.color() == Color::Black { '░' } else { '▐' });
+                    match piece.color() {
+                        Color::White => write!(f, "▌{:#}▐", piece.piece_type())?,
+                        Color::Black => write!(f, "░{:#}░", piece.piece_type())?,
+                    }
+                } else if (u8::from(*rank) + u8::from(file)) % 2 == 0 {
+                    write!(f, "   ")?;
                 } else {
-                    board.push(' ');
-                    board.push(if u8::from(*rank) % 2 == u8::from(file) % 2 { '.' } else { ' ' });
-                    board.push(' ');
+                    write!(f, " . ")?;
                 }
+
                 if file < File::H {
-                    board.push('│');
+                    write!(f, "│")?;
                 }
             }
-            board.push_str("│\n");
+            writeln!(f, "│")?;
 
             if Rank::R1 < *rank {
-                board.push_str("  ├───┼───┼───┼───┼───┼───┼───┼───┤\n");
+                writeln!(f, "  ├───┼───┼───┼───┼───┼───┼───┼───┤")?;
             }
         }
 
         // Bottom border
-        board.push_str(self.generate_border_string(Color::White, '└', '┘', '~', '┴').as_str());
+        self.fmt_border(f, Color::White, '└', '┘', '~', '┴')?;
 
         // En passant indicator
         if let Some(en_passant_square) = self.en_passant_square() {
-            board.push_str(" ".repeat(4 + usize::from(en_passant_square.file()) * 4).as_str());
-            board.push_str("▲\n");
+            writeln!(f, "{}▲", " ".repeat(4 + usize::from(en_passant_square.file()) * 4))?;
         }
 
         // file letters
-        board.push_str("    a   b   c   d   e   f   g   h");
+        write!(f, "    a   b   c   d   e   f   g   h")?;
 
-        board
+        Ok(())
     }
 
-    fn generate_border_string(
+    fn fmt_border(
         &self,
+        f: &mut Formatter<'_>,
         color: Color,
         left_corner: char,
         right_corner: char,
         castling_indicator: char,
         column_separator: char,
-    ) -> String {
-        let mut line = String::with_capacity(40);
-
-        line.push_str(if self.side_to_move() == color { "=>" } else { "  " });
-        line.push(left_corner);
+    ) -> std::fmt::Result {
+        write!(f, "{}{left_corner}", if self.side_to_move() == color { "=>" } else { "  " })?;
 
         let queenside_castling_file = self.castling_file(CastlingSide::Queenside);
         let kingside_castling_file = self.castling_file(CastlingSide::Kingside);
@@ -632,24 +638,21 @@ impl Position {
         let can_castle_kingside =
             self.castling_availability().contains(CastlingRight::new(color, CastlingSide::Kingside));
         for file in File::ALL {
-            line.push('─');
             if (can_castle_queenside && file == queenside_castling_file)
                 || (can_castle_kingside && file == kingside_castling_file)
             {
-                line.push(castling_indicator);
+                write!(f, "─{castling_indicator}─")?;
             } else {
-                line.push('─');
+                write!(f, "───")?;
             }
-            line.push('─');
 
             if file < File::H {
-                line.push(column_separator);
+                write!(f, "{column_separator}")?;
             }
         }
-        line.push(right_corner);
-        line.push('\n');
+        writeln!(f, "{right_corner}")?;
 
-        line
+        Ok(())
     }
 
     /// Returns a bitboard of squares occupied by pieces matching the specified filter.
@@ -1441,6 +1444,22 @@ impl Index<Square> for Position {
     }
 }
 
+impl Display for Position {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        if f.alternate() {
+            self.fmt_compact(f)?;
+        } else {
+            self.fmt_full(f)?;
+        }
+
+        if f.sign_plus() {
+            write!(f, "\n\n{}", self.to_fen())?;
+        }
+
+        Ok(())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1754,11 +1773,13 @@ mod tests {
     }
 
     #[test]
-    fn test_to_compact_string() {
+    fn test_display_compact() {
         let position = Position::new_from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1").unwrap();
 
+        let result = format!("{:#}", position);
+
         assert_eq!(
-            position.to_compact_string(),
+            result,
             "8  r n b q k b n r\n7  p p p p p p p p\n6  . . . . . . . .\n5  . . . . . . . .\n4  . . . . . . . .\n3  . . . . . . . .\n2  P P P P P P P P\n1  R N B Q K B N R\n   a b c d e f g h"
         );
     }

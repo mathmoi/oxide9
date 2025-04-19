@@ -34,6 +34,7 @@ pub fn run_uci() {
 /// These errors represent various failure conditions when parsing and executing UCI commands from the GUI. Each variant
 /// includes contextual information to help diagnose the issue.
 #[derive(Error, Debug)]
+#[allow(clippy::enum_variant_names)]
 enum UciError {
     /// Returned when the "position" command has invalid syntax or arguments.
     #[error("Invalid position command: {0}")]
@@ -220,7 +221,7 @@ impl Uci {
     /// A vector of validated chess move strings
     fn read_search_moves(tokens: &[&str]) -> Vec<String> {
         let re = Regex::new(r"^([a-h][1-8]){2}[qrbn]?$").expect("The regex should be valid");
-        tokens.iter().take_while(|mv_str| re.is_match(&mv_str)).map(|str| str.to_string()).collect()
+        tokens.iter().take_while(|mv_str| re.is_match(mv_str)).map(|str| str.to_string()).collect()
     }
 
     /// Processes the "go" command from the GUI to start the engine search.
@@ -757,7 +758,7 @@ impl UciEngine {
     ///
     /// # Returns
     /// `Result<(), UciError>` - Ok if the search was started successfully
-    #[allow(unused_variables)]
+    #[allow(unused_variables, clippy::too_many_arguments)]
     fn handle_go(
         &mut self,
         search_moves: Option<Vec<String>>,

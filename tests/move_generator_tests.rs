@@ -215,7 +215,7 @@ fn read_tests_data() -> Result<Vec<Test>, MoveGeneratorTestError> {
     let tests_file_path = get_resource_path("assets/tests/move_generator_tests.json")?;
     let file = File::open(&tests_file_path).map_err(|_| TestHarnessError::CannotReadTestDataFile(tests_file_path))?;
     let reader = BufReader::new(file);
-    let tests: Vec<Test> = serde_json::from_reader(reader).map_err(|e| TestHarnessError::CannotParseTestDataFile(e))?;
+    let tests: Vec<Test> = serde_json::from_reader(reader).map_err(TestHarnessError::CannotParseTestDataFile)?;
     Ok(tests)
 }
 
@@ -242,7 +242,7 @@ fn test_move_generation(test: &Test) -> Result<(), MoveGeneratorTestError> {
     let expected_moves = expected_moves?;
 
     // Generate the moves
-    let mut pseudo_legal_moves = MoveList::new();
+    let mut pseudo_legal_moves = MoveList::default();
     generate_all_moves(&position, &mut pseudo_legal_moves);
     let legal_moves: Vec<Move> = pseudo_legal_moves.iter().filter(|m| position.is_legal(*m)).collect();
 
@@ -283,9 +283,9 @@ fn test_move_execution(test: &Test) -> Result<(), MoveGeneratorTestError> {
                 test_name: test.description.clone(),
                 test_failure_error: TestFailureError::UnexpectedPositionAfterMake {
                     mv,
-                    original: test_position.to_compact_string() + "\n" + &test_position.to_fen(),
-                    expected: expected_position.to_compact_string() + "\n" + &test_move.fen,
-                    actual: position.to_compact_string() + "\n" + &actual_fen,
+                    original: format!("{test_position:+#}"),
+                    expected: format!("{expected_position:#}") + "\n" + &test_move.fen,
+                    actual: format!("{position:#}") + "\n\n" + &actual_fen,
                 },
             });
         }
@@ -310,8 +310,8 @@ fn test_move_execution(test: &Test) -> Result<(), MoveGeneratorTestError> {
                 test_name: test.description.clone(),
                 test_failure_error: TestFailureError::UnexpectedPositionAfterUnmake {
                     mv,
-                    original: test_position.to_compact_string() + "\n" + &test_position.to_fen(),
-                    actual: position.to_compact_string() + "\n" + &actual_fen,
+                    original: format!("{test_position:+#}"),
+                    actual: format!("{position:#}") + "\n\n" + &actual_fen,
                 },
             });
         }

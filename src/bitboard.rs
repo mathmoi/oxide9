@@ -50,8 +50,11 @@ fn initialize_between_lookup() {
 }
 
 fn initialize_line_lookup() {
+    type NextSqFn = fn(Square) -> CoordinatesResult<Square>;
+    type GetLineFn = fn(Square) -> Bitboard;
+
     #[rustfmt::skip]
-    let directions: [(fn(Square) -> CoordinatesResult<Square>, fn(Square) -> Bitboard); 4] = [
+    let directions: [(NextSqFn, GetLineFn); 4] = [
         (|sq| sq.right(1),                           |sq| Bitboard::from(sq.rank())),
         (|sq| sq.up(1),                              |sq| Bitboard::from(sq.file())),
         (|sq| sq.right(1).and_then(|sq| sq.up(1)),   |sq| Bitboard::from(sq.diagonal())),
@@ -702,8 +705,7 @@ mod tests {
 
     #[test]
     fn test_bitor_and_bitorassign_to_set_bit() {
-        let mut bb = Bitboard::EMPTY;
-        bb = bb | Square::E2;
+        let mut bb = Bitboard::EMPTY | Square::E2;
         assert_eq!(bb, Bitboard(0x0000000000001000));
 
         bb |= Square::E4;
@@ -718,8 +720,7 @@ mod tests {
 
     #[test]
     fn test_bitxor_and_bitxorassign_to_toggle_bit() {
-        let mut bb = Bitboard::ALL;
-        bb = bb ^ Square::E2;
+        let mut bb = Bitboard::ALL ^ Square::E2;
         assert_eq!(bb, Bitboard(0xffffffffffffefff));
 
         bb ^= Square::E2;

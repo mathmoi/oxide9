@@ -14,6 +14,10 @@ pub enum PieceError {
 /// Result type for the piece module.
 pub type PieceResult<T> = Result<T, PieceError>;
 
+//======================================================================================================================
+// Color
+//======================================================================================================================
+
 /// Represents the color of a chess piece.
 #[repr(u8)]
 #[derive(Copy, Clone, Debug, PartialEq)]
@@ -111,6 +115,10 @@ impl std::ops::Not for Color {
     }
 }
 
+//======================================================================================================================
+// PieceType
+//======================================================================================================================
+
 #[repr(u8)]
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum PieceType {
@@ -195,6 +203,10 @@ impl TryFrom<char> for PieceType {
 impl Display for PieceType {
     /// Formats the PieceType as a single character.
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        if f.alternate() {
+            return write!(f, "{}", char::from(*self));
+        }
+
         match self {
             PieceType::Pawn => write!(f, "Pawn"),
             PieceType::Knight => write!(f, "Knight"),
@@ -205,6 +217,10 @@ impl Display for PieceType {
         }
     }
 }
+
+//======================================================================================================================
+// Piece
+//======================================================================================================================
 
 /// Represents a chess piece.
 ///
@@ -320,7 +336,11 @@ impl TryFrom<char> for Piece {
 impl Display for Piece {
     /// Formats the piece as a string.
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{} {}", self.color(), self.piece_type())
+        if f.alternate() {
+            write!(f, "{}", char::from(*self))
+        } else {
+            write!(f, "{} {}", self.color(), self.piece_type())
+        }
     }
 }
 
@@ -473,6 +493,22 @@ mod tests {
             assert_eq!(format!("{}", Piece::BLACK_ROOK), "Black Rook");
             assert_eq!(format!("{}", Piece::BLACK_QUEEN), "Black Queen");
             assert_eq!(format!("{}", Piece::BLACK_KING), "Black King");
+        }
+
+        #[test]
+        fn test_alternate_display_for_piece() {
+            assert_eq!(format!("{:#}", Piece::WHITE_PAWN), "P");
+            assert_eq!(format!("{:#}", Piece::WHITE_KNIGHT), "N");
+            assert_eq!(format!("{:#}", Piece::WHITE_BISHOP), "B");
+            assert_eq!(format!("{:#}", Piece::WHITE_ROOK), "R");
+            assert_eq!(format!("{:#}", Piece::WHITE_QUEEN), "Q");
+            assert_eq!(format!("{:#}", Piece::WHITE_KING), "K");
+            assert_eq!(format!("{:#}", Piece::BLACK_PAWN), "p");
+            assert_eq!(format!("{:#}", Piece::BLACK_KNIGHT), "n");
+            assert_eq!(format!("{:#}", Piece::BLACK_BISHOP), "b");
+            assert_eq!(format!("{:#}", Piece::BLACK_ROOK), "r");
+            assert_eq!(format!("{:#}", Piece::BLACK_QUEEN), "q");
+            assert_eq!(format!("{:#}", Piece::BLACK_KING), "k");
         }
 
         #[test]

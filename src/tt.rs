@@ -145,6 +145,7 @@ impl TTRef {
     ///
     /// # Panics
     /// Panics in debug builds if attempting to store an entry with a zero key.
+    #[allow(clippy::too_many_arguments)]
     pub fn store(
         &self,
         key: Zobrist,
@@ -294,7 +295,7 @@ mod tests {
             let entry = Entry { data: 0, key };
             let ttref = TTRef::new(&entry as *const _ as *mut _);
 
-            assert_eq!(ttref.get(key).unwrap().key(), 0);
+            assert_eq!(ttref.get(key).unwrap().key(), key);
         }
 
         #[test]

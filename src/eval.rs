@@ -8,7 +8,7 @@ use crate::{
 };
 
 /// A simple wrapper around a 16-bit integer that represents the evaluation of a position.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct Eval(i16);
 
 impl Eval {
@@ -29,8 +29,6 @@ impl Eval {
 
     /// Creates a new Eval instance with the given value.
     pub const fn new(value: i16) -> Self {
-        debug_assert!(value >= i16::MIN && value <= i16::MAX);
-
         Eval(value)
     }
 
@@ -55,18 +53,12 @@ impl Eval {
 
     fn remove_ply_from_mat_signed(self, ply: i16) -> Self {
         if self.0 > Eval::MAT.0 - Self::MAX_MAT_DEPTH as i16 {
-            Eval(self.0 + ply as i16)
+            Eval(self.0 + ply)
         } else if self.0 < -Eval::MAT.0 + Self::MAX_MAT_DEPTH as i16 {
-            Eval(self.0 - ply as i16)
+            Eval(self.0 - ply)
         } else {
             self
         }
-    }
-}
-
-impl Default for Eval {
-    fn default() -> Self {
-        Eval(0)
     }
 }
 
@@ -121,13 +113,13 @@ impl From<i32> for Eval {
 
 impl From<Eval> for i16 {
     fn from(value: Eval) -> Self {
-        value.0 as i16
+        value.0
     }
 }
 
 impl From<i16> for Eval {
     fn from(value: i16) -> Self {
-        Eval(value as i16)
+        Eval(value)
     }
 }
 
@@ -142,19 +134,13 @@ impl Display for Eval {
 }
 
 /// A pair of evaluations for the middle game and the end game
-#[derive(Clone, Copy)]
+#[derive(Default, Clone, Copy, Debug)]
 pub struct EvalPair {
     /// Evaluation for the middle game
     mg: Eval,
 
     /// Evaluation for the end game
     eg: Eval,
-}
-
-impl Default for EvalPair {
-    fn default() -> Self {
-        EvalPair { mg: Eval::default(), eg: Eval::default() }
-    }
 }
 
 impl EvalPair {

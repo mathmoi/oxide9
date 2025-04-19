@@ -46,12 +46,12 @@ pub enum AnalyzeError {
 pub fn analyze(fen: &str, depth: u16) -> Result<(), AnalyzeError> {
     let position = Position::new_from_fen(fen).map_err(|e| AnalyzeError::InvalidFen(fen.to_string(), e))?;
 
-    println!("Analyzing position:\n\n{}\n\n{}\n", position.to_string(), fen);
+    println!("Analyzing position:\n\n{}\n\n{}\n", position, fen);
     print_header();
 
     let tt = Arc::new(TranspositionTable::new(128 * 1024 * 1024)); // NEXT : Choose a size more wisely
 
-    let handle = Search::new(position, depth as u16, TimeManager::new(TimeControl::Infinite), report_progress, tt);
+    let handle = Search::new(position, depth, TimeManager::new(TimeControl::Infinite), report_progress, tt);
     handle.join();
 
     Ok(())

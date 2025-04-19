@@ -290,7 +290,7 @@ mod pext_sliders {
 
         for sq in Square::ALL {
             let mask = ((sq.file() & !first_and_last_rank) | (sq.rank() & !first_and_last_file)) & !Bitboard::from(sq);
-            let lookup_size = (1 as usize) << mask.popcnt();
+            let lookup_size = 1 << mask.popcnt();
             for index in 0..lookup_size {
                 unsafe {
                     PEXT_DATA[offset + index] = super::naive_sliders::attacks_from_rook(mask.pdep(index as u64), sq);
@@ -342,7 +342,7 @@ mod pext_sliders {
 
         for sq in Square::ALL {
             let mask = (Bitboard::from(sq.diagonal()) ^ Bitboard::from(sq.antidiagonal())) & !border;
-            let lookup_size = (1 as usize) << mask.popcnt();
+            let lookup_size = 1 << mask.popcnt();
             for index in 0..lookup_size {
                 unsafe {
                     PEXT_DATA[offset + index] = super::naive_sliders::attacks_from_bishop(mask.pdep(index as u64), sq);

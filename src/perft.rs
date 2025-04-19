@@ -199,8 +199,8 @@ impl PerftNode {
         let mut status = self.status.write().unwrap();
 
         if let PerftNodeStatus::New = *status {
-            let mut moves = MoveList::new();
-            generate_all_moves(&position, &mut moves);
+            let mut moves = MoveList::default();
+            generate_all_moves(position, &mut moves);
             let children: Vec<(Move, PerftNode)> =
                 moves.iter().filter(|mv| position.is_legal(*mv)).map(|mv| (mv, PerftNode::new())).collect();
             *status = PerftNodeStatus::Shared { children };
@@ -306,7 +306,7 @@ pub fn perft(fen: &str, depth: u16) -> Result<(), PerftError> {
 
     let mut position = Position::new_from_fen(fen).map_err(|e| PerftError::InvalidFen(fen.to_string(), e))?;
 
-    println!("Perft ({}) for position:\n\n{}\n", depth, position.to_string());
+    println!("Perft ({}) for position:\n\n{}\n", depth, position);
 
     let start = Instant::now();
     let nodes =
@@ -338,7 +338,7 @@ pub fn perft(fen: &str, depth: u16) -> Result<(), PerftError> {
 fn divide(position: &mut Position, depth: u16) -> u64 {
     let mut total_nodes = 0;
 
-    let mut moves = MoveList::new();
+    let mut moves = MoveList::default();
     generate_all_moves(position, &mut moves);
 
     for mv in moves.iter() {
@@ -377,7 +377,7 @@ fn divide(position: &mut Position, depth: u16) -> u64 {
 fn recursive_perft(position: &mut Position, depth: u16) -> u64 {
     let mut nodes = 0;
 
-    let mut moves = MoveList::new();
+    let mut moves = MoveList::default();
     generate_all_moves(position, &mut moves);
 
     if depth == 1 {
@@ -431,7 +431,7 @@ fn parallel_perft(position: &mut Position, depth: u16) -> u64 {
         handle.join().unwrap();
     }
 
-    return root.get_nodes();
+    root.get_nodes()
 }
 
 /// Processes a shared node in the parallel perft work distribution system.
@@ -494,11 +494,9 @@ fn work_shared_node(node: PerftNode, position: &mut Position, depth: u16, ply: u
     }
 
     // Finally we check if we can make the node done
-    if node.try_make_done() {
-        if ply == 1 {
-            let mv = position.last_move().expect("There should always be a last move at ply 1.");
-            println!("{}\t{}", mv.to_uci_string(), node.get_nodes());
-        }
+    if node.try_make_done() && ply == 1 {
+        let mv = position.last_move().expect("There should always be a last move at ply 1.");
+        println!("{}\t{}", mv.to_uci_string(), node.get_nodes());
     }
 }
 

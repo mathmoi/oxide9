@@ -17,19 +17,13 @@ use crate::{
 };
 
 /// The SearchStats struct holds statistics about the search process.
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct SearchStats {
     /// The number of nodes searched. This excludes quiescence nodes.
     pub total_nodes: u64,
 
     /// The number of quiescence nodes searched
     pub nodes: u64,
-}
-
-impl Default for SearchStats {
-    fn default() -> Self {
-        SearchStats { total_nodes: 0, nodes: 0 }
-    }
 }
 
 /// Represents different types of search progress to be reported in the console or to the GUI.
@@ -64,7 +58,7 @@ impl Default for SearchStats {
 pub enum ProgressType<'a> {
     Iteration { depth: u16, elapsed: Duration, score: Eval, nodes: u64, pv: &'a [Move] },
     NewBestMove { depth: u16, elapsed: Duration, score: Eval, nodes: u64, pv: &'a [Move] },
-    NewMoveAtRoot { depth: u16, elapsed: Duration, nodes: u64, move_number: u64, move_count: u64, mv: Move },
+    NewMoveAtRoot { depth: u16, elapsed: Duration, nodes: u64, move_number: usize, move_count: u64, mv: Move },
     SearchFinished { mv: Move, elapsed: Duration, stats: &'a SearchStats },
 }
 
@@ -310,9 +304,8 @@ impl SearchThread {
     /// The evaluation score of the best move found. Higher positive values indicate an advantage for the side to move.
     fn search_root(&mut self, depth: u16, pv: &mut Vec<Move>) -> Eval {
         let mut alpha = Eval::MIN;
-        let mut move_searched: u64 = 0;
 
-        for mv in self.moves_at_root.clone().iter() {
+        for (move_searched, mv) in self.moves_at_root.clone().iter().enumerate() {
             // We let the gui know that we are searching a new move at the root
             (self.progress)(ProgressType::NewMoveAtRoot {
                 depth,
@@ -344,12 +337,10 @@ impl SearchThread {
                         elapsed: self.start_time.expect("The timer should be started").elapsed(),
                         score: eval,
                         nodes: self.stats.total_nodes,
-                        pv: &pv,
+                        pv,
                     });
                 }
             }
-
-            move_searched += 1;
         }
 
         alpha
@@ -373,7 +364,7 @@ impl SearchThread {
     ///
     /// # Note
     /// This is an internal recursive method used by the `start` method.
-    fn search(&mut self, depth: u16, ply: u16, mut alpha: Eval, mut beta: Eval, pv: &mut Vec<Move>) -> Eval {
+    fn search(&mut self, depth: u16, ply: u16, mut alpha: Eval, beta: Eval, pv: &mut Vec<Move>) -> Eval {
         // TODO : Is Vec really performant for pv structure?
         // TODO : Should we use a stack to store the PV and others things?
 

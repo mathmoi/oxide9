@@ -50,9 +50,10 @@ fn initialize_zobrist_black_to_move(rng: &mut StdRng) {
 
 fn initialize_zobrist_castling(rng: &mut StdRng) {
     // We let the index zero to the default value (0) so that the default zobrist value of an empty board is zero.
-    for index in 1..CastlingRight::COUNT {
+    #[allow(clippy::needless_range_loop)]
+    for i in 1..CastlingRight::COUNT {
         unsafe {
-            ZOBRIST_CASTLING[index] = rng.random();
+            ZOBRIST_CASTLING[i] = rng.random();
         }
     }
 }

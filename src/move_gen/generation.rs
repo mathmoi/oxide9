@@ -364,9 +364,9 @@ pub fn generate_moves<const TYPE: u8>(position: &Position, list: &mut MoveList) 
 /// The function does not return a new list but updates the provided `list` in-place.
 pub fn generate_all_moves(position: &Position, list: &mut MoveList) {
     if position.is_check() {
-        generate_moves::<{ MoveGenerationType::EVASIONS_VALUE }>(&position, list);
+        generate_moves::<{ MoveGenerationType::EVASIONS_VALUE }>(position, list);
     } else {
-        generate_moves::<{ MoveGenerationType::ALL_VALUE }>(&position, list);
+        generate_moves::<{ MoveGenerationType::ALL_VALUE }>(position, list);
     }
 }
 
@@ -386,8 +386,8 @@ pub fn generate_all_moves(position: &Position, list: &mut MoveList) {
 /// search to evaluate tactically active positions.
 pub fn generate_qsearch(position: &Position, list: &mut MoveList) {
     if position.is_check() {
-        generate_moves::<{ MoveGenerationType::EVASIONS_VALUE }>(&position, list);
+        generate_moves::<{ MoveGenerationType::EVASIONS_VALUE }>(position, list);
     } else {
-        generate_moves::<{ MoveGenerationType::CAPTURES_VALUE }>(&position, list);
+        generate_moves::<{ MoveGenerationType::CAPTURES_VALUE }>(position, list);
     }
 }

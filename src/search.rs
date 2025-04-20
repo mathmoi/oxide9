@@ -238,7 +238,7 @@ impl SearchThread {
     /// This method populates the internal `moves_at_root` collection with all legal moves that can be made from the
     /// current position.
     fn generate_moves_at_root(position: &Position) -> MoveList {
-        let move_generator = MoveGenerator::new(position, false);
+        let move_generator = MoveGenerator::new(position, None, false);
         move_generator.filter(|mv| position.is_legal(*mv)).collect()
     }
 
@@ -399,7 +399,7 @@ impl SearchThread {
         let key = self.position.hash();
         let tt_ref = self.transposition_table.probe(key);
         self.stats.tt_probes += 1;
-        if let Some(tt_entry) = tt_ref.get(key) {
+        let tt_move = if let Some(tt_entry) = tt_ref.get(key) {
             self.stats.tt_probes_hit += 1;
             if depth <= tt_entry.depth() {
                 let tt_eval = tt_entry.get_eval(ply);
@@ -422,9 +422,12 @@ impl SearchThread {
                     }
                 }
             }
-        }
+            tt_entry.mv()
+        } else {
+            None
+        };
 
-        let move_generator = MoveGenerator::new(&self.position, false);
+        let move_generator = MoveGenerator::new(&self.position, tt_move, false);
         let mut has_legal_move = false;
         let mut best_eval = Eval::MIN;
         let mut best_move: Option<Move> = None;
@@ -526,7 +529,7 @@ impl SearchThread {
         }
 
         // TODO : If we are in check we should probably search all moves? How to prevent perpetual check?
-        let move_generator = MoveGenerator::new(&self.position, true);
+        let move_generator = MoveGenerator::new(&self.position, None, true);
         for mv in move_generator {
             if self.position.is_legal(mv) {
                 self.position.make(mv);

@@ -98,6 +98,22 @@ impl MoveList {
         result
     }
 
+    /// Removes the move at the specified index from the list by swapping it with the last move.
+    ///
+    /// This operation replaces the move at the specified index with the last move in the list and then decreases the
+    /// count. This is more efficient than shifting elements but does not preserve the order of moves.
+    ///
+    /// # Parameters
+    /// * `index` - The index of the move to remove
+    ///
+    /// # Panics
+    /// Panics in debug builds if the index is out of bounds.
+    pub fn swap_remove(&mut self, index: usize) {
+        debug_assert!(index < self.count);
+        self.moves[index] = self.moves[self.count - 1];
+        self.count -= 1;
+    }
+
     /// Checks if the list is empty.
     ///
     /// # Returns
@@ -115,6 +131,12 @@ impl MoveList {
     /// The count of valid moves in the list.
     pub fn len(&self) -> usize {
         self.count
+    }
+
+    /// Returns a mutable reference to a move at a specific index.
+    pub fn get_mut(&mut self, index: usize) -> &mut Move {
+        debug_assert!(index < self.count);
+        &mut self.moves[index]
     }
 
     /// Returns an iterator over the valid moves in the list.

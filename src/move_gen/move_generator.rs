@@ -11,6 +11,8 @@ use super::{
 };
 
 enum GenerationStep {
+    TTMove,
+
     GenerateCaptures,
     DistributeCaptures,
 
@@ -26,6 +28,7 @@ enum GenerationStep {
 impl GenerationStep {
     fn next(&self) -> Self {
         match self {
+            GenerationStep::TTMove => GenerationStep::GenerateCaptures,
             GenerationStep::GenerateCaptures => GenerationStep::DistributeCaptures,
             GenerationStep::DistributeCaptures => GenerationStep::GenerateQuiet,
             GenerationStep::GenerateQuiet => GenerationStep::DistributeQuiet,
@@ -43,13 +46,18 @@ pub struct MoveGenerator {
     list: MoveList,
     step: GenerationStep,
     qsearch: bool,
+    tt_move: Option<Move>,
 }
 
 impl MoveGenerator {
-    pub fn new(position: &Position, qsearch: bool) -> Self {
-        let step = if position.is_check() { GenerationStep::GenerateEvasion } else { GenerationStep::GenerateCaptures };
-
-        MoveGenerator { position: position as *const Position, list: MoveList::default(), step, qsearch }
+    pub fn new(position: &Position, tt_move: Option<Move>, qsearch: bool) -> Self {
+        MoveGenerator {
+            position: position as *const Position,
+            list: MoveList::default(),
+            step: GenerationStep::TTMove,
+            qsearch,
+            tt_move,
+        }
     }
 }
 
@@ -59,12 +67,42 @@ impl Iterator for MoveGenerator {
     fn next(&mut self) -> Option<Self::Item> {
         loop {
             match self.step {
+                GenerationStep::TTMove => {
+                    self.step = if unsafe { &*self.position }.is_check() {
+                        GenerationStep::GenerateEvasion
+                    } else {
+                        GenerationStep::GenerateCaptures
+                    };
+                    if let Some(mv) = self.tt_move {
+                        if unsafe { &*self.position }.is_pseudo_legal(mv) {
+                            return Some(mv);
+                        }
+                    }
+                }
+
                 GenerationStep::GenerateCaptures => {
                     generate_moves::<{ MoveGenerationType::CAPTURES_VALUE }>(
                         unsafe { &*self.position },
                         &mut self.list,
                     );
-                    self.list.iter_mut().for_each(|mv| mv.set_eval(mvv_lva(*mv)));
+
+                    // Loop to evaluate mvv_lva and remove the tt_move.
+                    let mut index = 0;
+                    loop {
+                        if index >= self.list.len() {
+                            break;
+                        }
+                        let mv = self.list.get_mut(index);
+
+                        if Some(*mv) == self.tt_move {
+                            self.list.swap_remove(index);
+                            continue;
+                        }
+
+                        mv.set_eval(mvv_lva(*mv));
+                        index += 1;
+                    }
+
                     self.step = GenerationStep::DistributeCaptures;
                 }
 
@@ -75,8 +113,25 @@ impl Iterator for MoveGenerator {
                     }
 
                     generate_moves::<{ MoveGenerationType::QUIET_VALUE }>(unsafe { &*self.position }, &mut self.list);
+
+                    // Loop to evaluate the moves and remove the tt_move.
                     let color_factor = if unsafe { &*self.position }.side_to_move() == Color::White { 1 } else { -1 };
-                    self.list.iter_mut().for_each(|mv| mv.set_eval(color_factor * evaluate_quiet_move(*mv)));
+                    let mut index = 0;
+                    loop {
+                        if index >= self.list.len() {
+                            break;
+                        }
+                        let mv = self.list.get_mut(index);
+
+                        if Some(*mv) == self.tt_move {
+                            self.list.swap_remove(index);
+                            continue;
+                        }
+
+                        mv.set_eval(color_factor * evaluate_quiet_move(*mv));
+                        index += 1;
+                    }
+
                     self.step = GenerationStep::DistributeQuiet;
                 }
 
@@ -131,7 +186,6 @@ fn mvv_lva(mv: Move) -> Eval {
         MoveType::Promotion(promotion) => VALUES[usize::from(promotion.piece_type())],
         MoveType::CapturePromotion { capture, promotion } => {
             VALUES[usize::from(capture.piece_type())] + VALUES[usize::from(promotion.piece_type())]
-            // TODO: Is this correct?
         }
         _ => unreachable!(),
     };

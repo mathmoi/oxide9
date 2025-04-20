@@ -1,7 +1,7 @@
 use crate::{
     bitboard::Bitboard,
     coordinates::{File, Square},
-    piece::{Color, PieceType},
+    piece::{Color, Piece, PieceType},
 };
 
 /// Initializes the attack generation module. This function must be called before using any other functions in this module.
@@ -487,9 +487,9 @@ fn attacks_from_knight(square: Square) -> Bitboard {
 pub fn attacks_from_pawns(color: Color, sq: Square) -> Bitboard {
     let sq_bb = Bitboard::from(sq);
     if color == Color::White {
-        ((sq_bb & !Bitboard::from(File::A)) >> 9) | ((sq_bb & !Bitboard::from(File::H)) >> 7)
-    } else {
         ((sq_bb & !Bitboard::from(File::A)) << 7) | ((sq_bb & !Bitboard::from(File::H)) << 9)
+    } else {
+        ((sq_bb & !Bitboard::from(File::A)) >> 9) | ((sq_bb & !Bitboard::from(File::H)) >> 7)
     }
 }
 
@@ -517,6 +517,7 @@ pub fn attacks_from_pawns(color: Color, sq: Square) -> Bitboard {
 /// # Note
 /// For sliding pieces (rook, bishop, queen), the occupied squares are considered to block the attack rays.
 pub fn attacks_from<const PIECE_TYPE_VALUE: u8>(occupied: Bitboard, sq: Square) -> Bitboard {
+    // TODO: Should this be a generic? If so can we make it better?
     match PIECE_TYPE_VALUE {
         PieceType::KING_VALUE => attacks_from_kings(sq),
         PieceType::KNIGHT_VALUE => attacks_from_knight(sq),
@@ -526,6 +527,31 @@ pub fn attacks_from<const PIECE_TYPE_VALUE: u8>(occupied: Bitboard, sq: Square) 
             pext_sliders::attacks_from_rook(occupied, sq) | pext_sliders::attacks_from_bishop(occupied, sq)
         }
         _ => unimplemented!("Piece type not implemented"),
+    }
+}
+
+/// Returns a bitboard with all squares attacked by a given piece from a specified square.
+///
+/// Calculates all legal attack targets for any piece type, considering both piece movement patterns and blocking pieces
+/// on the board.
+///
+/// # Parameters
+/// * `piece` - The attacking piece (including both piece type and color)
+/// * `sq` - The square from which the piece is attacking
+/// * `occupied` - Bitboard representing all occupied squares on the board
+///
+/// # Returns
+/// A bitboard where each set bit represents a square that is attacked by the given piece
+pub fn attacks_from_piece(piece: Piece, sq: Square, occupied: Bitboard) -> Bitboard {
+    match piece.piece_type() {
+        PieceType::King => attacks_from_kings(sq),
+        PieceType::Knight => attacks_from_knight(sq),
+        PieceType::Rook => pext_sliders::attacks_from_rook(occupied, sq),
+        PieceType::Bishop => pext_sliders::attacks_from_bishop(occupied, sq),
+        PieceType::Queen => {
+            pext_sliders::attacks_from_rook(occupied, sq) | pext_sliders::attacks_from_bishop(occupied, sq)
+        }
+        PieceType::Pawn => attacks_from_pawns(piece.color(), sq),
     }
 }
 
@@ -576,5 +602,17 @@ mod tests {
             | Square::H7;
         let attacks = attacks_from_bishops(Square::E4);
         assert_eq!(expected, attacks);
+    }
+
+    #[test]
+    fn test_attacks_from_pawns() {
+        let expected_white = Square::D5 | Square::F5;
+        let expected_black = Square::D3 | Square::F3;
+
+        let attacks_white = attacks_from_pawns(Color::White, Square::E4);
+        let attacks_black = attacks_from_pawns(Color::Black, Square::E4);
+
+        assert_eq!(expected_white, attacks_white);
+        assert_eq!(expected_black, attacks_black);
     }
 }

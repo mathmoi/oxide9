@@ -6,6 +6,7 @@ use std::{
 
 use crate::{
     eval::{get_piece_square_value, get_piece_type_game_phase, EvalPair},
+    move_gen::attacks::attacks_from_piece,
     zobrist::{zobrist_black_to_move, zobrist_castling, zobrist_en_passant, zobrist_piece_square, Zobrist},
 };
 
@@ -66,6 +67,12 @@ pub enum OccupancyFilter {
     ByPiece(Piece),
     ByColorAndType(Color, PieceType),
     ByColorAndTwoTypes(Color, PieceType, PieceType),
+}
+
+impl From<()> for OccupancyFilter {
+    fn from(_: ()) -> Self {
+        Self::All
+    }
 }
 
 impl From<Color> for OccupancyFilter {
@@ -672,7 +679,7 @@ impl Position {
     /// any runtime overhead from the filter selection.
     ///
     /// # Example Usage Contexts
-    /// - Get all occupied squares with `position.occupied(OccupancyFilter::All)`
+    /// - Get all occupied squares with `position.occupied(())`
     /// - Get only white pieces with `position.occupied(Color::White)`
     /// - Get all knights with `position.occupied(PieceType::Knight)`
     /// - Get black queens with `position.occupied(Piece::BlackQueen)`
@@ -988,7 +995,7 @@ impl Position {
             | attacks_from::<{ PieceType::BISHOP_VALUE }>(occupied, sq) & queens_bishops
             | attacks_from::<{ PieceType::KNIGHT_VALUE }>(Bitboard::EMPTY, sq) & knights
             | attacks_from::<{ PieceType::KING_VALUE }>(Bitboard::EMPTY, sq) & king
-            | attacks_from_pawns(color, sq) & pawns
+            | attacks_from_pawns(!color, sq) & pawns
     }
 
     /// Determines whether a square on the chess board is under attack by pieces of a specific color.
@@ -1034,7 +1041,7 @@ impl Position {
         }
 
         let pawns = self.occupied((color, PieceType::Pawn));
-        if (attacks_from_pawns(color, sq) & pawns).has_any() {
+        if (attacks_from_pawns(!color, sq) & pawns).has_any() {
             return true;
         }
 
@@ -1055,11 +1062,7 @@ impl Position {
     /// Panics if the king of the side to move is not present on the board, which indicates an invalid board state. In
     /// standard chess, both kings must always be present.
     pub fn is_check(&self) -> bool {
-        self.is_attacked(
-            self.king_square(self.side_to_move()),
-            self.occupied(OccupancyFilter::All),
-            !self.side_to_move(),
-        )
+        self.is_attacked(self.king_square(self.side_to_move()), self.occupied(()), !self.side_to_move())
     }
 
     /// Determines if the current position is a draw.
@@ -1108,11 +1111,7 @@ impl Position {
     /// # Note
     /// Multiple pieces may be giving check simultaneously (e.g., in a discovered check scenario).
     pub fn checkers(&self) -> Bitboard {
-        self.attacks_to(
-            self.king_square(self.side_to_move()),
-            self.occupied(OccupancyFilter::All),
-            !self.side_to_move(),
-        )
+        self.attacks_to(self.king_square(self.side_to_move()), self.occupied(()), !self.side_to_move())
     }
 
     /// Returns a bitboard of all pieces that are blocking a check on the king of the specified color.
@@ -1142,7 +1141,7 @@ impl Position {
         snipers |= attacks_from_bishops(king_sq) & (bishops | queens);
         snipers &= self.occupied(!color);
 
-        let occupancy = self.occupied(OccupancyFilter::All) ^ snipers;
+        let occupancy = self.occupied(()) ^ snipers;
 
         let mut blockers = Bitboard::EMPTY;
         for sniper_sq in snipers {
@@ -1154,6 +1153,109 @@ impl Position {
         }
 
         blockers
+    }
+
+    fn is_castling_pseudo_legal(&self, mv: Move, side: CastlingSide) -> bool {
+        // Check that the castling right is available.
+        if !self.castling_availability().contains(CastlingRight::new(mv.piece().color(), side)) {
+            return false;
+        }
+
+        // Check that the intervening squares are empty.
+        let color = mv.piece().color();
+        let rank = Rank::R1.relative_to_color(color);
+        let king_final_file = match side {
+            CastlingSide::Kingside => File::G,
+            CastlingSide::Queenside => File::C,
+        };
+        let king_final_sq = Square::new(king_final_file, rank);
+        let rook_file = self.castling_file(side);
+        let rook_sq = Square::new(rook_file, rank);
+        let rook_final_file = match side {
+            CastlingSide::Kingside => File::F,
+            CastlingSide::Queenside => File::D,
+        };
+        let rook_final_sq = Square::new(rook_final_file, rank);
+        let king_bb = Bitboard::from(mv.from_square());
+        let king_travel_bb = Bitboard::between(mv.from_square(), king_final_sq);
+        let rook_travel_bb = Bitboard::between(rook_sq, rook_final_sq);
+        let occupied_bb = self.occupied(()) ^ (king_bb | rook_sq);
+        if ((king_travel_bb | rook_travel_bb) & occupied_bb).has_any() {
+            return false;
+        }
+
+        // Check if any of the squares traveled by the king are attacked.
+        for sq in king_travel_bb | king_bb {
+            if self.is_attacked(sq, occupied_bb, !color) {
+                return false;
+            }
+        }
+
+        true
+    }
+
+    /// Checks if a move is pseudo-legal in the current position.
+    ///
+    /// A pseudo-legal move respects the current board state but may still leave the king in check. This function
+    /// verifies:
+    /// - The move is made by a piece of the correct color (side to move)
+    /// - The piece exists on the specified from-square
+    /// - The destination conditions are valid (empty square or valid capture)
+    /// - Special move conditions (castling, en passant, etc.) are satisfied
+    ///
+    /// This function does not check if the move leaves the king in check, which would make it illegal. It also assumes
+    /// the move follows normal chess movement rules.
+    ///
+    /// # Parameters
+    /// * `mv` - The move to validate
+    ///
+    /// # Returns
+    /// `true` if the move is pseudo-legal, `false` otherwise
+    pub fn is_pseudo_legal(&self, mv: Move) -> bool {
+        // Check that the correct side is moving.
+        if mv.piece().color() != self.side_to_move() {
+            return false;
+        }
+
+        // Check that the piece is on the from square.
+        if self[mv.from_square()] != Some(mv.piece()) {
+            return false;
+        }
+
+        match mv.move_type() {
+            MoveType::Basic => {
+                // The destination square must be empty. Also the piece must be attacking the destination square unlest
+                // it's a pawn move. Check that the to square is empty.
+                self[mv.to_square()].is_none()
+                    && (mv.piece().piece_type() == PieceType::Pawn
+                        || (attacks_from_piece(mv.piece(), mv.from_square(), self.occupied(())) & mv.to_square())
+                            .has_any())
+            }
+            MoveType::Capture(capture) => {
+                // Check that the capture square is occupied by the correct piece and the piece is attacking the
+                // destination square.
+                self[mv.to_square()] == Some(capture)
+                    && (attacks_from_piece(mv.piece(), mv.from_square(), self.occupied(())) & mv.to_square()).has_any()
+            }
+            MoveType::TwoSquarePawnPush => {
+                // Check that the to square and the square behind is empty.
+                let behind = unsafe { mv.to_square().down_unchecked(mv.piece().color().forward()) };
+                self[mv.to_square()].is_none() && self[behind].is_none()
+            }
+            MoveType::Promotion(_promotion) => {
+                // Check that the to square is empty.
+                self[mv.to_square()].is_none()
+            }
+            MoveType::CapturePromotion { capture, promotion: _ } => {
+                // Check that the capture square is occupied by the correct piece.
+                self[mv.to_square()] == Some(capture)
+            }
+            MoveType::EnPassant => {
+                // Check that a prise en passant is possible on this column.
+                self.en_passant_square() == Some(mv.to_square())
+            }
+            MoveType::Castling(side) => self.is_castling_pseudo_legal(mv, side),
+        }
     }
 
     /// Determines if a pseudo-legal move is actually legal in the current position.
@@ -1174,27 +1276,19 @@ impl Position {
     /// This function assumes the provided move is already pseudo-legal (follows basic movement rules for the piece).
     /// Behavior is undefined if called with an invalid or non-pseudo-legal move.
     pub fn is_legal(&self, mv: Move) -> bool {
-        // TODO : Add an assert to check if the move is pseudo-legal when we implement that functionality.
-
-        // TODO : Stockfish checs if the traveled square are attacked during castling here instead of during move
-        // generation. Should we to that?
+        debug_assert!(self.is_pseudo_legal(mv));
 
         // If it is a king move and the king moves into check the move is illegal.
         if mv.piece().piece_type() == PieceType::King {
             let bb_king = self.occupied(mv.piece());
-            return !self.is_attacked(
-                mv.to_square(),
-                self.occupied(OccupancyFilter::All) ^ bb_king,
-                !mv.piece().color(),
-            );
+            return !self.is_attacked(mv.to_square(), self.occupied(()) ^ bb_king, !mv.piece().color());
         }
 
         // We have a special case for en passant captures, because it has a special behavior of removig pieces from two
         // squares.
         if mv.move_type() == MoveType::EnPassant {
             let en_passant_capture_sq = Square::new(mv.to_square().file(), mv.from_square().rank());
-            let occupied =
-                self.occupied(OccupancyFilter::All) ^ mv.to_square() ^ mv.from_square() ^ en_passant_capture_sq;
+            let occupied = self.occupied(()) ^ mv.to_square() ^ mv.from_square() ^ en_passant_capture_sq;
             let them = !self.side_to_move();
             let queens_rooks = self.occupied((them, PieceType::Rook, PieceType::Queen));
             let queens_bishops = self.occupied((them, PieceType::Bishop, PieceType::Queen));
@@ -1209,7 +1303,7 @@ impl Position {
     }
 
     fn make_basic(&mut self, mv: Move) {
-        debug_assert!(self[mv.to_square()].is_none()); // TODO : Should be in a pseudo-legal check
+        debug_assert!(self[mv.to_square()].is_none());
 
         self.move_piece(mv.piece(), mv.from_square(), mv.to_square());
 
@@ -1221,7 +1315,7 @@ impl Position {
     }
 
     fn make_capture(&mut self, mv: Move, capture: Piece) {
-        debug_assert!(self[mv.to_square()].is_some_and(|piece| piece == capture)); // TODO : Should be in a pseudo-legal check
+        debug_assert!(self[mv.to_square()].is_some_and(|piece| piece == capture));
 
         self.remove_piece(mv.to_square());
         self.move_piece(mv.piece(), mv.from_square(), mv.to_square());
@@ -1236,7 +1330,7 @@ impl Position {
         let side_to_move = self.side_to_move();
         let en_passant_square = unsafe { mv.to_square().down_unchecked(side_to_move.forward()) };
         let other_pawns = self.occupied((!side_to_move, PieceType::Pawn));
-        if (attacks_from_pawns(!side_to_move, en_passant_square) & other_pawns).has_any() {
+        if (attacks_from_pawns(side_to_move, en_passant_square) & other_pawns).has_any() {
             self.set_en_passant(Some(en_passant_square));
         }
 
@@ -1244,8 +1338,8 @@ impl Position {
     }
 
     fn make_promotion(&mut self, mv: Move, promotion: Piece) {
-        debug_assert!(self[mv.from_square()].is_some_and(|piece| piece == mv.piece())); // TODO : Should be in a pseudo-legal check
-        debug_assert!(self[mv.to_square()].is_none()); // TODO : Should be in a pseudo-legal check
+        debug_assert!(self[mv.from_square()].is_some_and(|piece| piece == mv.piece()));
+        debug_assert!(self[mv.to_square()].is_none());
 
         self.remove_piece(mv.from_square());
         self.put_piece(promotion, mv.to_square());
@@ -1254,8 +1348,8 @@ impl Position {
     }
 
     fn make_capture_promotion(&mut self, mv: Move, capture: Piece, promotion: Piece) {
-        debug_assert!(self[mv.from_square()].is_some_and(|piece| piece == mv.piece())); // TODO : Should be in a pseudo-legal check
-        debug_assert!(self[mv.to_square()].is_some_and(|piece| piece == capture)); // TODO : Should be in a pseudo-legal check
+        debug_assert!(self[mv.from_square()].is_some_and(|piece| piece == mv.piece()));
+        debug_assert!(self[mv.to_square()].is_some_and(|piece| piece == capture));
 
         self.remove_piece(mv.to_square());
         self.make_promotion(mv, promotion);
@@ -1264,11 +1358,11 @@ impl Position {
     }
 
     fn make_en_passant(&mut self, mv: Move) {
-        debug_assert!(self[mv.from_square()].is_some_and(|piece| piece == mv.piece())); // TODO : Should be in a pseudo-legal check
-        debug_assert!(self[mv.to_square()].is_none()); // TODO : Should be in a pseudo-legal check
+        debug_assert!(self[mv.from_square()].is_some_and(|piece| piece == mv.piece()));
+        debug_assert!(self[mv.to_square()].is_none());
 
         let capture_sq = unsafe { mv.to_square().down_unchecked(self.side_to_move().forward()) }; // Safe because prise en passant square is never on edge.
-        debug_assert!(self[capture_sq].is_some_and(|piece| piece == Piece::new(!self.side_to_move(), PieceType::Pawn))); // TODO : Should be in a pseudo-legal check
+        debug_assert!(self[capture_sq].is_some_and(|piece| piece == Piece::new(!self.side_to_move(), PieceType::Pawn)));
 
         self.remove_piece(capture_sq);
         self.move_piece(mv.piece(), mv.from_square(), mv.to_square());
@@ -1674,49 +1768,49 @@ mod tests {
     fn test_is_attacked_by_rook() {
         let position = Position::new_from_fen("4k3/8/8/8/8/8/8/1R2K3 w - - 0 1").unwrap();
 
-        assert!(position.is_attacked(Square::B5, position.occupied(OccupancyFilter::All), Color::White));
-        assert!(!position.is_attacked(Square::B5, position.occupied(OccupancyFilter::All), Color::Black));
-        assert!(!position.is_attacked(Square::C2, position.occupied(OccupancyFilter::All), Color::White));
+        assert!(position.is_attacked(Square::B5, position.occupied(()), Color::White));
+        assert!(!position.is_attacked(Square::B5, position.occupied(()), Color::Black));
+        assert!(!position.is_attacked(Square::C2, position.occupied(()), Color::White));
     }
 
     #[test]
     fn test_is_attacked_by_bishop() {
         let position = Position::new_from_fen("4k3/8/8/8/8/8/8/1B2K3 w - - 0 1").unwrap();
 
-        assert!(position.is_attacked(Square::H7, position.occupied(OccupancyFilter::All), Color::White));
-        assert!(!position.is_attacked(Square::H7, position.occupied(OccupancyFilter::All), Color::Black));
-        assert!(!position.is_attacked(Square::H6, position.occupied(OccupancyFilter::All), Color::White));
+        assert!(position.is_attacked(Square::H7, position.occupied(()), Color::White));
+        assert!(!position.is_attacked(Square::H7, position.occupied(()), Color::Black));
+        assert!(!position.is_attacked(Square::H6, position.occupied(()), Color::White));
     }
 
     #[test]
     fn test_is_attacked_by_queen() {
         let position = Position::new_from_fen("4k3/8/8/8/8/8/8/1Q2K3 w - - 0 1").unwrap();
 
-        assert!(position.is_attacked(Square::B5, position.occupied(OccupancyFilter::All), Color::White));
-        assert!(!position.is_attacked(Square::B5, position.occupied(OccupancyFilter::All), Color::Black));
-        assert!(position.is_attacked(Square::C2, position.occupied(OccupancyFilter::All), Color::White));
-        assert!(position.is_attacked(Square::H7, position.occupied(OccupancyFilter::All), Color::White));
-        assert!(!position.is_attacked(Square::H7, position.occupied(OccupancyFilter::All), Color::Black));
-        assert!(!position.is_attacked(Square::H6, position.occupied(OccupancyFilter::All), Color::White));
+        assert!(position.is_attacked(Square::B5, position.occupied(()), Color::White));
+        assert!(!position.is_attacked(Square::B5, position.occupied(()), Color::Black));
+        assert!(position.is_attacked(Square::C2, position.occupied(()), Color::White));
+        assert!(position.is_attacked(Square::H7, position.occupied(()), Color::White));
+        assert!(!position.is_attacked(Square::H7, position.occupied(()), Color::Black));
+        assert!(!position.is_attacked(Square::H6, position.occupied(()), Color::White));
     }
 
     #[test]
     fn test_is_attacked_by_knight() {
         let position = Position::new_from_fen("4k3/8/8/3n4/8/8/8/4K3 b - - 0 1").unwrap();
 
-        assert!(position.is_attacked(Square::E3, position.occupied(OccupancyFilter::All), Color::Black));
-        assert!(!position.is_attacked(Square::D4, position.occupied(OccupancyFilter::All), Color::Black));
-        assert!(!position.is_attacked(Square::E3, position.occupied(OccupancyFilter::All), Color::White));
+        assert!(position.is_attacked(Square::E3, position.occupied(()), Color::Black));
+        assert!(!position.is_attacked(Square::D4, position.occupied(()), Color::Black));
+        assert!(!position.is_attacked(Square::E3, position.occupied(()), Color::White));
     }
 
     #[test]
     fn test_is_attacked_by_king() {
         let position = Position::new_from_fen("4k3/8/8/8/8/8/8/4K3 b - - 0 1").unwrap();
 
-        assert!(position.is_attacked(Square::E7, position.occupied(OccupancyFilter::All), Color::Black));
-        assert!(!position.is_attacked(Square::G6, position.occupied(OccupancyFilter::All), Color::Black));
+        assert!(position.is_attacked(Square::E7, position.occupied(()), Color::Black));
+        assert!(!position.is_attacked(Square::G6, position.occupied(()), Color::Black));
 
-        assert!(!position.is_attacked(Square::E7, position.occupied(OccupancyFilter::All), Color::White));
+        assert!(!position.is_attacked(Square::E7, position.occupied(()), Color::White));
     }
 
     #[test]
@@ -1738,13 +1832,13 @@ mod tests {
     fn test_attacks_to() {
         let position = Position::new_from_fen("3r4/b7/2n3r1/2p1pn2/q2Nk1q1/3n4/3r1b2/1K6 b - - 0 1").unwrap();
 
-        let attacks_black = position.attacks_to(Square::D4, position.occupied(OccupancyFilter::All), Color::Black);
+        let attacks_black = position.attacks_to(Square::D4, position.occupied(()), Color::Black);
         assert_eq!(
             attacks_black,
             Square::A4 | Square::C5 | Square::C6 | Square::D8 | Square::E5 | Square::E4 | Square::F5 | Square::F2
         );
 
-        let attacks_white = position.attacks_to(Square::D4, position.occupied(OccupancyFilter::All), Color::White);
+        let attacks_white = position.attacks_to(Square::D4, position.occupied(()), Color::White);
         assert_eq!(attacks_white, Bitboard::EMPTY);
     }
 
@@ -1782,5 +1876,84 @@ mod tests {
             result,
             "8  r n b q k b n r\n7  p p p p p p p p\n6  . . . . . . . .\n5  . . . . . . . .\n4  . . . . . . . .\n3  . . . . . . . .\n2  P P P P P P P P\n1  R N B Q K B N R\n   a b c d e f g h"
         );
+    }
+
+    #[test]
+    fn test_is_pseudo_legal() {
+        // 8  r . . . k . . r
+        // 7  p . . p q p b .
+        // 6  b n . . p n . .
+        // 5  . . p P N P p .
+        // 4  . p . . P . . .
+        // 3  . . N . . Q . p
+        // 2  P P P B B . P P
+        // 1  R . . . K . . R
+        //    a b c d e f g h
+        let fen = "r3k2r/p2pqpb1/bn2pn2/2pPNPp1/1p2P3/2N2Q1p/PPPBB1PP/R3K2R w KQkq c6 0 1";
+        let position = Position::new_from_fen(fen).unwrap();
+
+        // A move by the side that is not the next to play is not pseudo-legal.
+        assert!(!position.is_pseudo_legal(Move::new(Square::G6, Square::G5, Piece::BLACK_PAWN)));
+
+        // The piece moved must be on the original square.
+        assert!(!position.is_pseudo_legal(Move::new(Square::G3, Square::G4, Piece::WHITE_PAWN)));
+
+        // Check that the taken piece is on the board
+        assert!(!position.is_pseudo_legal(Move::new_capture(
+            Square::E2,
+            Square::B5,
+            Piece::WHITE_BISHOP,
+            Piece::BLACK_BISHOP
+        )));
+
+        // Check that the target square is empty for non-capture moves
+        assert!(!position.is_pseudo_legal(Move::new(Square::E2, Square::A6, Piece::WHITE_BISHOP)));
+
+        // Check that the prise en passant is possible and the pawn is on the right square
+        assert!(!position.is_pseudo_legal(Move::new_en_passant(Square::F5, Square::G6, Piece::WHITE_PAWN)));
+
+        // If it is a two square pawn push, check that the square in front of the pawn is empty.
+        assert!(!position.is_pseudo_legal(Move::new_two_square_pawn_push(Square::H2, Square::H4, Piece::WHITE_PAWN)));
+
+        // Check that the moving piece is attacking the target square.
+        assert!(!position.is_pseudo_legal(Move::new(Square::D2, Square::A5, Piece::WHITE_BISHOP)));
+
+        // Check that the moving piece is attacking the target square in the case of a capture.
+        assert!(!position.is_pseudo_legal(Move::new_capture(
+            Square::D2,
+            Square::B3,
+            Piece::WHITE_BISHOP,
+            Piece::BLACK_PAWN
+        )));
+    }
+
+    #[test]
+    fn test_is_pseudo_legal_castling() {
+        // Castlling is not lefal if the right is not available
+        let position = Position::new_from_fen("4k3/8/8/8/8/8/8/4K2R w - - 0 1").unwrap();
+        assert!(!position.is_pseudo_legal(Move::new_castling(
+            Square::E1,
+            Square::G1,
+            Piece::WHITE_KING,
+            CastlingSide::Kingside
+        )));
+
+        // Castling is not legal if any of the intervening squares are occupied
+        let position = Position::new_from_fen("4k3/8/8/8/8/8/8/4K1NR w K - 0 1").unwrap();
+        assert!(!position.is_pseudo_legal(Move::new_castling(
+            Square::E1,
+            Square::G1,
+            Piece::WHITE_KING,
+            CastlingSide::Kingside
+        )));
+
+        // castling is not legal if any of the squares where the king travels are attacked
+        let position = Position::new_from_fen("3qk3/8/8/8/8/8/8/R3K3 w Q - 0 1").unwrap();
+        assert!(!position.is_pseudo_legal(Move::new_castling(
+            Square::E1,
+            Square::C1,
+            Piece::WHITE_KING,
+            CastlingSide::Queenside
+        )));
     }
 }

@@ -2,7 +2,7 @@ use crate::{
     bitboard::Bitboard,
     coordinates::{File, Rank, Square},
     piece::{Color, Piece, PieceType},
-    position::{OccupancyFilter, Position},
+    position::Position,
     r#move::{CastlingRight, CastlingSide, Move},
 };
 
@@ -101,7 +101,7 @@ fn generate_pawn_moves<const TYPE: u8, const COLOR: u8>(position: &Position, tar
     let bb_rank_8: Bitboard = Bitboard::from(Rank::R8.relative_to_color(color));
     let bb_file_a: Bitboard = Bitboard::from(File::A);
     let bb_file_h: Bitboard = Bitboard::from(File::H);
-    let bb_occupied: Bitboard = position.occupied(OccupancyFilter::All);
+    let bb_occupied: Bitboard = position.occupied(());
     let bb_them: Bitboard = position.occupied(!color);
     let piece = Piece::new(COLOR.into(), PieceType::Pawn);
     let bb_from = position.occupied(piece);
@@ -229,7 +229,7 @@ fn generate_piece_moves<const COLOR: u8, const PIECE_TYPE: u8>(
     let bb_from = position.occupied(piece);
 
     for from_sq in bb_from {
-        let bb_to = attacks_from::<PIECE_TYPE>(position.occupied(OccupancyFilter::All), from_sq) & targets;
+        let bb_to = attacks_from::<PIECE_TYPE>(position.occupied(()), from_sq) & targets;
         for to_sq in bb_to {
             let capture = position[to_sq];
             match capture {
@@ -282,16 +282,15 @@ fn generate_castlings<const COLOR: u8, const SIDE: u8>(position: &Position, list
     let king_bb = Bitboard::from(king_sq);
     let king_travel_bb = Bitboard::between(king_sq, king_final_sq);
     let rook_travel_bb = Bitboard::between(rook_sq, rook_final_sq);
-    let occupied_bb = position.occupied(OccupancyFilter::All) ^ (king_bb | rook_sq);
+    let occupied_bb = position.occupied(()) ^ (king_bb | rook_sq);
 
     // If any of the travel squares are occupied, it is not possible to castle.
     if !((king_travel_bb | rook_travel_bb) & occupied_bb).has_none() {
         return;
     }
 
-    // TODO : Stockfish checks for this in the legality check. Should we be doing the same?
     // If any of the travel squares are attacked, it is not possible to castle.
-    for sq in king_travel_bb | king_bb | king_final_sq {
+    for sq in king_travel_bb | king_bb {
         if position.is_attacked(sq, occupied_bb, !color) {
             return;
         }
@@ -314,7 +313,7 @@ fn generate_moves_color<const TYPE: u8, const COLOR: u8>(position: &Position, li
     if TYPE != MoveGenerationType::EVASIONS_VALUE || !checkers.has_many() {
         targets = match TYPE {
             MoveGenerationType::ALL_VALUE => !position.occupied(color),
-            MoveGenerationType::QUIET_VALUE => !position.occupied(OccupancyFilter::All),
+            MoveGenerationType::QUIET_VALUE => !position.occupied(()),
             MoveGenerationType::CAPTURES_VALUE => position.occupied(!color),
             MoveGenerationType::EVASIONS_VALUE => {
                 Bitboard::between(

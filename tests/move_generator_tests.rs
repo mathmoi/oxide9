@@ -83,6 +83,9 @@ enum TestFailureError {
 
     #[error("Error parsing UCI notation ({uci:?})\n\nExpected: {expected:?}\n\nActual: {actual:?}")]
     ErrorParsingUciNotation { uci: String, expected: Move, actual: Move },
+
+    #[error("Moved considered illegal in the position ({mv:?})\n\nPosition:\n{position}")]
+    MoveConsideredIllegalInPosition { mv: Move, position: String },
 }
 
 /// Global errors for this module.
@@ -376,12 +379,32 @@ fn test_uci_notation_parser(test: &Test) -> Result<(), MoveGeneratorTestError> {
     Ok(())
 }
 
+fn test_is_pseudo_legal(test: &Test) -> Result<(), MoveGeneratorTestError> {
+    let position = Position::new_from_fen(&test.fen).or(Err(TestDataError::UnableToParseFen(test.fen.clone())))?;
+
+    for test_move in test.moves.iter() {
+        let mv = Move::try_from(&test_move.details)?;
+        if !position.is_pseudo_legal(mv) {
+            return Err(MoveGeneratorTestError::TestFailed {
+                test_name: test.description.clone(),
+                test_failure_error: TestFailureError::MoveConsideredIllegalInPosition {
+                    mv,
+                    position: format!("{position:#}"),
+                },
+            });
+        }
+    }
+
+    Ok(())
+}
+
 /// Run a single test case.
 fn run_test(test: Test) -> Result<(), MoveGeneratorTestError> {
     test_move_generation(&test)?;
     test_move_execution(&test)?;
     test_uci_notation_generation(&test)?;
     test_uci_notation_parser(&test)?;
+    test_is_pseudo_legal(&test)?;
     Ok(())
 }
 

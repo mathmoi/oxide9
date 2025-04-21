@@ -1,6 +1,6 @@
 use std::{
     io::{self, BufRead},
-    sync::Arc,
+    sync::{atomic::AtomicBool, Arc},
     time::Duration,
 };
 
@@ -630,7 +630,8 @@ impl UciEngine {
     /// # Returns
     /// A new `UciEngine` instance with the default chess starting position.
     fn new() -> Self {
-        let transposition_table = Arc::new(TranspositionTable::new(32 * 1024 * 1024)); // NEXT : Choose a size more wisely
+        let config = get_config();
+        let transposition_table = Arc::new(TranspositionTable::new(config.tt_size as usize * 1024 * 1024));
         UciEngine { position: Position::new(), search: None, transposition_table }
     }
 
@@ -650,26 +651,30 @@ impl UciEngine {
     fn report_progress(progress_type: ProgressType) {
         match progress_type {
             ProgressType::Iteration { depth, elapsed, score, nodes, pv } => {
-                let pv_as_string: Vec<String> = pv.iter().rev().map(|m| m.to_uci_string()).collect();
-                Uci::send_info(SendInfoOptions {
-                    depth: Some(depth),
-                    time: Some(elapsed),
-                    nodes: Some(nodes),
-                    pv: Some(pv_as_string),
-                    score: Some(score.into()),
-                    ..Default::default()
-                });
+                if elapsed > Duration::from_millis(100) {
+                    let pv_as_string: Vec<String> = pv.iter().rev().map(|m| m.to_uci_string()).collect();
+                    Uci::send_info(SendInfoOptions {
+                        depth: Some(depth),
+                        time: Some(elapsed),
+                        nodes: Some(nodes),
+                        pv: Some(pv_as_string),
+                        score: Some(score.into()),
+                        ..Default::default()
+                    });
+                }
             }
             ProgressType::NewBestMove { depth, elapsed, score, nodes, pv } => {
-                let pv_as_string: Vec<String> = pv.iter().rev().map(|m| m.to_uci_string()).collect();
-                Uci::send_info(SendInfoOptions {
-                    depth: Some(depth),
-                    time: Some(elapsed),
-                    nodes: Some(nodes),
-                    pv: Some(pv_as_string),
-                    score: Some(score.into()),
-                    ..Default::default()
-                });
+                if elapsed > Duration::from_millis(1000) {
+                    let pv_as_string: Vec<String> = pv.iter().rev().map(|m| m.to_uci_string()).collect();
+                    Uci::send_info(SendInfoOptions {
+                        depth: Some(depth),
+                        time: Some(elapsed),
+                        nodes: Some(nodes),
+                        pv: Some(pv_as_string),
+                        score: Some(score.into()),
+                        ..Default::default()
+                    });
+                }
             }
             ProgressType::SearchFinished { mv, elapsed: _, stats: _ } => {
                 let mv_str = mv.to_uci_string();
@@ -786,6 +791,7 @@ impl UciEngine {
             time_manager,
             Self::report_progress,
             self.transposition_table.clone(),
+            Arc::new(AtomicBool::new(false)),
         ));
         Ok(())
     }

@@ -110,9 +110,8 @@ impl Search {
         time_manager: TimeManager,
         progress: ProgressCallback,
         transposition_table: Arc<TranspositionTable>,
+        cancelation_token: Arc<AtomicBool>,
     ) -> Self {
-        let cancelation_token = Arc::new(AtomicBool::new(false));
-
         transposition_table.increment_generation();
 
         let mut search_thread = SearchThread::new(

@@ -30,6 +30,9 @@ pub struct Oxide9Config {
 
     /// Name of the engine. Should be "Oxide9" except for testing versions.
     pub name: String,
+
+    /// Size of the transposition table in megabytes
+    pub tt_size: u32,
 }
 /// Evaluation parameters for the engine
 #[derive(Debug, serde::Deserialize)]
@@ -82,13 +85,14 @@ fn get_config_path() -> Result<PathBuf, ConfigError> {
 }
 
 /// Initialize the configuration of the engine
-pub fn initialize(perft_threads: Option<u32>, precise: bool) -> Result<(), ConfigError> {
+pub fn initialize(perft_threads: Option<u32>, tt_size: Option<u32>, precise: bool) -> Result<(), ConfigError> {
     let path = get_config_path()?;
     let settings = Config::builder().add_source(File::from(path.clone())).build()?;
     let mut config: Oxide9Config = settings.try_deserialize()?;
 
     config.perft_threads = perft_threads.unwrap_or(config.perft_threads);
     config.precise = config.precise || precise;
+    config.tt_size = tt_size.unwrap_or(config.tt_size);
 
     CONFIG.set(config).expect("It should be possible to initialize the configuration");
 

@@ -34,6 +34,10 @@ mod arguments {
         /// The number of threads to use for the perft calculation
         #[arg(short, long)]
         pub threads: Option<u32>,
+
+        /// The size of the transposition table in megabytes (this must be a power of 2)
+        #[arg(short, long)]
+        pub tt_size: Option<u32>,
     }
 
     #[derive(Debug, Clone, Subcommand)]
@@ -70,7 +74,7 @@ fn run() -> Result<(), Oxide9Error> {
     let args = arguments::Oxide9Args::parse();
 
     // Initialize the engine
-    oxide9::initialize_with_args(args.threads, args.precise);
+    oxide9::initialize_with_args(args.threads, args.tt_size, args.precise);
 
     // Run the command
     match args.command.unwrap_or(arguments::Commands::Uci) {

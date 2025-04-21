@@ -21,12 +21,12 @@ static INIT: Once = Once::new();
 
 /// Initialize the library, this function must be called before using any other functions.
 pub fn initialize() {
-    initialize_with_args(None, false);
+    initialize_with_args(None, None, false);
 }
 
-pub fn initialize_with_args(perft_threads: Option<u32>, precise: bool) {
+pub fn initialize_with_args(perft_threads: Option<u32>, tt_size: Option<u32>, precise: bool) {
     INIT.call_once(|| {
-        config::initialize(perft_threads, precise).unwrap();
+        config::initialize(perft_threads, tt_size, precise).unwrap();
         bitboard::initialize();
         move_gen::attacks::initialize();
         eval::initialize();

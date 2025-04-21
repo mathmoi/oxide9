@@ -1,4 +1,10 @@
-use std::{sync::Arc, time::Duration};
+use std::{
+    sync::{
+        atomic::{AtomicBool, Ordering},
+        Arc,
+    },
+    time::Duration,
+};
 
 use human_repr::{HumanCount, HumanDuration};
 use terminal_size::{terminal_size, Height, Width};
@@ -49,9 +55,24 @@ pub fn analyze(fen: &str, depth: u16) -> Result<(), AnalyzeError> {
     println!("Analyzing position:\n\n{}\n\n{}\n", position, fen);
     print_header();
 
-    let tt = Arc::new(TranspositionTable::new(128 * 1024 * 1024)); // NEXT : Choose a size more wisely
+    let config = get_config();
+    let tt = Arc::new(TranspositionTable::new(config.tt_size as usize * 1024 * 1024));
 
-    let handle = Search::new(position, depth, TimeManager::new(TimeControl::Infinite), report_progress, tt);
+    let cancellation_token = Arc::new(AtomicBool::new(false));
+    let handle = Search::new(
+        position,
+        depth,
+        TimeManager::new(TimeControl::Infinite),
+        report_progress,
+        tt,
+        cancellation_token.clone(),
+    );
+
+    ctrlc::set_handler(move || {
+        cancellation_token.store(true, Ordering::Relaxed);
+    })
+    .expect("Error setting Ctrl-C handler");
+
     handle.join();
 
     Ok(())
@@ -172,22 +193,33 @@ fn report_progress(progress_type: ProgressType) {
 
     let (new_line, depth, depth_suffix, elapsed, score, nodes, pv) = match progress_type {
         ProgressType::Iteration { depth, elapsed, score, nodes, pv } => {
+            if elapsed < Duration::from_millis(50) {
+                return;
+            }
             (true, depth, "-> ", elapsed, score.to_string(), nodes, get_pv_string(pv, pv_column_width))
         }
 
         ProgressType::NewBestMove { depth, elapsed, score, nodes, pv } => {
+            if elapsed < Duration::from_millis(250) {
+                return;
+            }
             (true, depth, "   ", elapsed, score.to_string(), nodes, get_pv_string(pv, pv_column_width))
         }
 
-        ProgressType::NewMoveAtRoot { depth, elapsed, nodes, move_number, move_count, mv } => (
-            false,
-            depth,
-            "...",
-            elapsed,
-            format!("{}/{}", move_number, move_count),
-            nodes,
-            vec![format!("{} ({})", mv.to_uci_string(), (nodes as f64 / elapsed.as_secs_f64()).human_count("nps"))],
-        ),
+        ProgressType::NewMoveAtRoot { depth, elapsed, nodes, move_number, move_count, mv } => {
+            if elapsed < Duration::from_millis(250) {
+                return;
+            }
+            (
+                false,
+                depth,
+                "...",
+                elapsed,
+                format!("{}/{}", move_number, move_count),
+                nodes,
+                vec![format!("{} ({})", mv.to_uci_string(), (nodes as f64 / elapsed.as_secs_f64()).human_count("nps"))],
+            )
+        }
         ProgressType::SearchFinished { mv: _, elapsed, stats } => {
             print_stats(elapsed, stats);
             return;
@@ -245,7 +277,7 @@ fn print_stats(elapsed: Duration, stats: &SearchStats) {
     let pv_column_width = get_pv_column_width(terminal_width);
 
     println!(
-        "├─{:─<DEPTH_COLUMN_WIDTH$}─┴─{:─<TIME_COLUMN_WIDTH$}─┴─{:─<SCORE_COLUMN_WIDTH$}─┴─{:─<NODES_COLUMN_WIDTH$}─┴─{:─<pv_column_width$}─┤",
+        "\r├─{:─<DEPTH_COLUMN_WIDTH$}─┴─{:─<TIME_COLUMN_WIDTH$}─┴─{:─<SCORE_COLUMN_WIDTH$}─┴─{:─<NODES_COLUMN_WIDTH$}─┴─{:─<pv_column_width$}─┤",
         "", "", "", "", ""
     );
 

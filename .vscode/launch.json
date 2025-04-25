@@ -38,7 +38,11 @@
                     "kind": "bin"
                 }
             },
-            "args": [],
+            "args": [
+                "analyze",
+                "-d",
+                "12"
+            ],
             "cwd": "${workspaceFolder}"
         },
         {

@@ -36,7 +36,7 @@ mod arguments {
         pub threads: Option<u32>,
 
         /// The size of the transposition table in megabytes (this must be a power of 2)
-        #[arg(short, long)]
+        #[arg(long)]
         pub tt_size: Option<u32>,
     }
 

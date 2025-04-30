@@ -76,6 +76,20 @@ impl std::ops::Sub for Eval {
     }
 }
 
+impl std::ops::Add<i16> for Eval {
+    type Output = Self;
+    fn add(self, rhs: i16) -> Self {
+        Eval(self.0 + rhs)
+    }
+}
+
+impl std::ops::Sub<i16> for Eval {
+    type Output = Self;
+    fn sub(self, rhs: i16) -> Self {
+        Eval(self.0 - rhs)
+    }
+}
+
 impl std::ops::Mul<i16> for Eval {
     type Output = Self;
     fn mul(self, rhs: i16) -> Self {

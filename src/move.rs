@@ -318,6 +318,7 @@ mod tests {
         #[test]
         fn test_size_of_move() {
             assert!(std::mem::size_of::<Move>() <= 8);
+            assert!(std::mem::size_of::<Option<Move>>() <= 8);
         }
 
         #[test]

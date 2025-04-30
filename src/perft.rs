@@ -347,7 +347,7 @@ fn divide(position: &mut Position, depth: u16) -> u64 {
             if depth == 1 {
                 nodes = 1;
             } else {
-                position.make(mv);
+                position.make(Some(mv));
                 nodes = recursive_perft(position, depth - 1);
                 position.unmake();
             };
@@ -385,7 +385,7 @@ fn recursive_perft(position: &mut Position, depth: u16) -> u64 {
     } else {
         for mv in moves.iter() {
             if position.is_legal(mv) {
-                position.make(mv);
+                position.make(Some(mv));
                 nodes += recursive_perft(position, depth - 1);
                 position.unmake();
             }
@@ -461,7 +461,7 @@ fn work_shared_node(node: PerftNode, position: &mut Position, depth: u16, ply: u
         let maybe_child = node.get_child(index);
         if let Some((mv, child)) = maybe_child {
             if child.is_new() {
-                position.make(mv);
+                position.make(Some(mv));
                 work_new_node(child, position, depth - 1, ply + 1, has_shared);
                 position.unmake();
             }
@@ -479,7 +479,7 @@ fn work_shared_node(node: PerftNode, position: &mut Position, depth: u16, ply: u
             if let Some((mv, child)) = maybe_child {
                 if child.is_shared() {
                     helped = true;
-                    position.make(mv);
+                    position.make(Some(mv));
                     work_shared_node(child, position, depth - 1, ply + 1, false);
                     position.unmake();
                 }

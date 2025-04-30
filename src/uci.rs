@@ -736,7 +736,7 @@ impl UciEngine {
         for mv_str in moves {
             let mv =
                 parse_coordinate_notation(&position, mv_str).map_err(|_| UciError::InvalidMove(mv_str.to_string()))?;
-            position.make(mv);
+            position.make(Some(mv));
         }
         self.position = position;
         Ok(())

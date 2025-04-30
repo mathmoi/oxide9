@@ -277,7 +277,7 @@ fn test_move_execution(test: &Test) -> Result<(), MoveGeneratorTestError> {
         let mv = Move::try_from(&test_move.details)?;
 
         // Make the move
-        position.make(mv);
+        position.make(Some(mv));
         let actual_fen = position.to_fen();
         let expected_position =
             Position::new_from_fen(&test_move.fen).or(Err(TestDataError::UnableToParseFen(test_move.fen.clone())))?;

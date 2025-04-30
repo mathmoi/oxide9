@@ -1114,6 +1114,13 @@ impl Position {
         self.attacks_to(self.king_square(self.side_to_move()), self.occupied(()), !self.side_to_move())
     }
 
+    /// Checks if the specified color has any pieces on the board. Pawns and kings are not considered.
+    pub fn has_pieces(&self, color: Color) -> bool {
+        // TODO : Would it be better to cache this in the position state?
+        (self.occupied(color) ^ self.occupied((color, PieceType::King)) ^ self.occupied((color, PieceType::Pawn)))
+            .has_any()
+    }
+
     /// Returns a bitboard of all pieces that are blocking a check on the king of the specified color.
     ///
     /// Identifies all pieces (of either color) that are currently preventing the king from being in check by standing
@@ -1389,6 +1396,10 @@ impl Position {
         self.state.halfmove_clock += 1
     }
 
+    fn make_null(&mut self) {
+        self.state.halfmove_clock += 1;
+    }
+
     /// Makes a move on the board and updates the game state.
     ///
     /// This function applies the given move to the board, updating all relevant game state including piece positions,
@@ -1405,39 +1416,45 @@ impl Position {
     /// # Note
     /// This function does not verify the legality of the move in release builds. Callers must ensure moves are legal
     /// before calling this function.
-    pub fn make(&mut self, mv: Move) {
-        debug_assert!(self.is_legal(mv), "Tried to make an illegal move: {:?}", mv);
+    pub fn make(&mut self, maybe_mv: Option<Move>) {
+        debug_assert!(maybe_mv.is_none_or(|mv| self.is_legal(mv)), "Tried to make an illegal move: {:?}", maybe_mv);
 
         self.history.push(self.state);
 
         self.set_en_passant(None);
 
-        match mv.move_type() {
-            MoveType::Basic => self.make_basic(mv),
-            MoveType::Capture(capture) => self.make_capture(mv, capture),
-            MoveType::TwoSquarePawnPush => self.make_two_square_pawn_push(mv),
-            MoveType::Promotion(promotion) => self.make_promotion(mv, promotion),
-            MoveType::CapturePromotion { capture, promotion } => self.make_capture_promotion(mv, capture, promotion),
-            MoveType::EnPassant => self.make_en_passant(mv),
-            MoveType::Castling(side) => self.make_castling(mv, side),
+        if let Some(mv) = maybe_mv {
+            match mv.move_type() {
+                MoveType::Basic => self.make_basic(mv),
+                MoveType::Capture(capture) => self.make_capture(mv, capture),
+                MoveType::TwoSquarePawnPush => self.make_two_square_pawn_push(mv),
+                MoveType::Promotion(promotion) => self.make_promotion(mv, promotion),
+                MoveType::CapturePromotion { capture, promotion } => {
+                    self.make_capture_promotion(mv, capture, promotion)
+                }
+                MoveType::EnPassant => self.make_en_passant(mv),
+                MoveType::Castling(side) => self.make_castling(mv, side),
+            }
+
+            // Update the castling rights if it's needed.
+            let rights = self.castling_rights_mask[usize::from(mv.from_square())]
+                | self.castling_rights_mask[usize::from(mv.to_square())];
+            if !(self.state.castling_rights & rights).is_empty() {
+                self.state.zobrist ^= zobrist_castling(self.state.castling_rights);
+                self.state.castling_rights &= !rights;
+                self.state.zobrist ^= zobrist_castling(self.state.castling_rights);
+            }
+
+            if self.side_to_move() == Color::Black {
+                self.state.fullmove_number += 1;
+            }
+
+            self.switch_side_to_move();
+        } else {
+            self.make_null();
         }
 
-        // Update the castling rights if it's needed.
-        let rights = self.castling_rights_mask[usize::from(mv.from_square())]
-            | self.castling_rights_mask[usize::from(mv.to_square())];
-        if !(self.state.castling_rights & rights).is_empty() {
-            self.state.zobrist ^= zobrist_castling(self.state.castling_rights);
-            self.state.castling_rights &= !rights;
-            self.state.zobrist ^= zobrist_castling(self.state.castling_rights);
-        }
-
-        if self.side_to_move() == Color::Black {
-            self.state.fullmove_number += 1;
-        }
-
-        self.switch_side_to_move();
-
-        self.state.last_move = Some(mv);
+        self.state.last_move = maybe_mv;
 
         // recompute the blockers for the side to move
         self.state.side_to_move_blockers = self.blockers(self.side_to_move());
@@ -1500,16 +1517,20 @@ impl Position {
     /// This function assumes that moves and states have been properly tracked and stored in the history. It should only
     /// be called if a previous move exists.
     pub fn unmake(&mut self) {
-        let mv = self.state.last_move.expect("There should be a last move.");
+        debug_assert!(!self.history.is_empty(), "Tried to unmake a move when there is no history.");
 
-        match mv.move_type() {
-            MoveType::Basic => self.unmake_basic(mv),
-            MoveType::Capture(capture) => self.unmake_capture(mv, capture),
-            MoveType::TwoSquarePawnPush => self.unmake_basic(mv),
-            MoveType::Promotion(promotion) => self.unmake_promotion(mv, promotion),
-            MoveType::CapturePromotion { capture, promotion } => self.unmake_capture_promotion(mv, capture, promotion),
-            MoveType::EnPassant => self.unmake_en_passant(mv),
-            MoveType::Castling(side) => self.unmake_castling(mv, side),
+        if let Some(mv) = self.state.last_move {
+            match mv.move_type() {
+                MoveType::Basic => self.unmake_basic(mv),
+                MoveType::Capture(capture) => self.unmake_capture(mv, capture),
+                MoveType::TwoSquarePawnPush => self.unmake_basic(mv),
+                MoveType::Promotion(promotion) => self.unmake_promotion(mv, promotion),
+                MoveType::CapturePromotion { capture, promotion } => {
+                    self.unmake_capture_promotion(mv, capture, promotion)
+                }
+                MoveType::EnPassant => self.unmake_en_passant(mv),
+                MoveType::Castling(side) => self.unmake_castling(mv, side),
+            }
         }
 
         self.state = self.history.pop();

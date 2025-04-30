@@ -328,7 +328,7 @@ impl SearchThread {
                 mv,
             });
 
-            self.position.make(mv);
+            self.position.make(Some(mv));
             let mut local_pv = Vec::new();
             let eval = -self.search(depth - 1, 1, Eval::MIN, -alpha, &mut local_pv);
             self.position.unmake();
@@ -426,6 +426,26 @@ impl SearchThread {
             None
         };
 
+        // Null move pruning
+        const NULL_MOVE_R: u16 = 3;
+        let is_check = self.position.is_check();
+        let current_eval = evaluate(&self.position);
+        if depth > NULL_MOVE_R + 1
+            && !is_check
+            && current_eval > beta
+            && self.position.last_move().is_some()
+            && self.position.has_pieces(self.position.side_to_move())
+        {
+            self.position.make(None);
+            let mut local_pv = Vec::new();
+            let null_eval = self.search(depth - NULL_MOVE_R, ply, beta - 1, beta, &mut local_pv);
+            self.position.unmake();
+            if null_eval >= beta {
+                return beta;
+            }
+        }
+
+        // Moves loop
         let move_generator = MoveGenerator::new(&self.position, tt_move, false);
         let mut has_legal_move = false;
         let mut best_eval = Eval::MIN;
@@ -433,7 +453,7 @@ impl SearchThread {
         for mv in move_generator {
             if self.position.is_legal(mv) {
                 has_legal_move = true;
-                self.position.make(mv);
+                self.position.make(Some(mv));
 
                 let mut local_pv = Vec::new();
                 let eval = if self.position.is_draw() {
@@ -454,14 +474,14 @@ impl SearchThread {
                 if eval > best_eval {
                     best_eval = eval;
 
-                    if eval > alpha {
+                    if best_eval > alpha {
                         best_move = Some(mv);
 
-                        if eval >= beta {
+                        if best_eval >= beta {
                             break; // Beta cut-off
                         }
 
-                        alpha = eval;
+                        alpha = best_eval;
                         *pv = local_pv;
                         pv.push(mv);
                     }
@@ -469,9 +489,9 @@ impl SearchThread {
             }
         }
 
-        // If we have not legal move we are in checkmate or stalemate
+        // Check for checkmate or stalemate
         if !has_legal_move {
-            if self.position.is_check() {
+            if is_check {
                 return -Eval::new_mat(ply);
             }
 
@@ -531,7 +551,7 @@ impl SearchThread {
         let move_generator = MoveGenerator::new(&self.position, None, true);
         for mv in move_generator {
             if self.position.is_legal(mv) {
-                self.position.make(mv);
+                self.position.make(Some(mv));
                 let eval = -self.qsearch(-beta, -alpha);
                 self.position.unmake();
 

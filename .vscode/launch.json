@@ -41,7 +41,7 @@
             "args": [
                 "analyze",
                 "-d",
-                "12"
+                "10"
             ],
             "cwd": "${workspaceFolder}"
         },

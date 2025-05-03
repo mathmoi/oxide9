@@ -17,7 +17,7 @@ use crate::{
 };
 
 /// The SearchStats struct holds statistics about the search process.
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone)]
 pub struct SearchStats {
     /// The number of nodes searched. This excludes quiescence nodes.
     pub total_nodes: u64,
@@ -67,11 +67,11 @@ pub struct SearchStats {
 ///   - `move_count`: Total number of moves to search
 ///   - `mv`: The move currently being searched
 #[derive(Debug)]
-pub enum ProgressType<'a> {
-    Iteration { depth: u16, elapsed: Duration, score: Eval, nodes: u64, pv: &'a [Move] },
-    NewBestMove { depth: u16, elapsed: Duration, score: Eval, nodes: u64, pv: &'a [Move] },
+pub enum ProgressType {
+    Iteration { depth: u16, elapsed: Duration, score: Eval, nodes: u64, pv: Vec<Move> },
+    NewBestMove { depth: u16, elapsed: Duration, score: Eval, nodes: u64, pv: Vec<Move> },
     NewMoveAtRoot { depth: u16, elapsed: Duration, nodes: u64, move_number: usize, move_count: u64, mv: Move },
-    SearchFinished { mv: Move, elapsed: Duration, stats: &'a SearchStats },
+    SearchFinished { mv: Move, elapsed: Duration, stats: SearchStats },
 }
 
 pub type ProgressCallback = fn(progress_type: ProgressType);
@@ -104,14 +104,17 @@ impl Search {
     ///
     /// # Returns
     /// A `Search` instance that allows monitoring and controlling the background search operation
-    pub fn new(
+    pub fn new<F>(
         position: Position,
         max_depth: u16,
         time_manager: TimeManager,
-        progress: ProgressCallback,
+        progress: Arc<F>,
         transposition_table: Arc<TranspositionTable>,
         cancelation_token: Arc<AtomicBool>,
-    ) -> Self {
+    ) -> Self
+    where
+        F: Fn(ProgressType) + Send + Sync + 'static,
+    {
         transposition_table.increment_generation();
 
         let mut search_thread = SearchThread::new(
@@ -154,7 +157,7 @@ impl Search {
 }
 
 /// Represents a search thread.
-struct SearchThread {
+struct SearchThread<F> {
     /// Mutable reference to the chess position being searched. While the position is mutated during search, it will be
     /// restored to its original state after the search is complete.
     position: Position,
@@ -170,7 +173,7 @@ struct SearchThread {
     max_depth: u16,
 
     /// Callback for reporting search progress
-    progress: ProgressCallback,
+    progress: Arc<F>,
 
     /// Timestamp when the search was started, it is Nonot when the search is not started yet.
     start_time: Option<Instant>,
@@ -192,7 +195,10 @@ struct SearchThread {
     transposition_table: Arc<TranspositionTable>,
 }
 
-impl SearchThread {
+impl<F> SearchThread<F>
+where
+    F: Fn(ProgressType) + Send + Sync + 'static,
+{
     /// Creates a new search thread with the given parameters.
     ///
     /// Initializes a search thread that will analyze the provided position up to the specified depth. The search can be
@@ -212,10 +218,13 @@ impl SearchThread {
         position: Position,
         max_depth: u16,
         time_manager: TimeManager,
-        progress: ProgressCallback,
+        progress: Arc<F>,
         cancelation_token: Arc<AtomicBool>,
         transposition_table: Arc<TranspositionTable>,
-    ) -> SearchThread {
+    ) -> Self
+    where
+        F: Fn(ProgressType) + Send + Sync + 'static,
+    {
         let moves_at_root = Self::generate_moves_at_root(&position);
         SearchThread {
             position,
@@ -250,7 +259,7 @@ impl SearchThread {
             (self.progress)(ProgressType::SearchFinished {
                 mv: *best_move,
                 elapsed: self.start_time.expect("The time should be started").elapsed(),
-                stats: &self.stats,
+                stats: self.stats.clone(),
             });
         }
     }
@@ -290,7 +299,7 @@ impl SearchThread {
                 elapsed: start_time.elapsed(),
                 score,
                 nodes: self.stats.total_nodes,
-                pv: &pv,
+                pv: pv.clone(),
             });
 
             // Put the best move at the beginning of the list
@@ -349,7 +358,7 @@ impl SearchThread {
                         elapsed: self.start_time.expect("The timer should be started").elapsed(),
                         score: eval,
                         nodes: self.stats.total_nodes,
-                        pv,
+                        pv: pv.clone(),
                     });
                 }
             }

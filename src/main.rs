@@ -1,5 +1,5 @@
 use clap::Parser;
-use oxide9::{analyze::analyze, perft::perft, uci::run_uci};
+use oxide9::{analyze::analyze, bench::bench, perft::perft, uci::run_uci};
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -66,6 +66,9 @@ mod arguments {
             #[arg(short, long)]
             depth: u16,
         },
+
+        /// Run a benchmark
+        Bench,
     }
 }
 
@@ -86,6 +89,9 @@ fn run() -> Result<(), Oxide9Error> {
         }
         arguments::Commands::Analyze { fen, depth } => {
             analyze(&fen, depth)?;
+        }
+        arguments::Commands::Bench => {
+            bench();
         }
     }
 

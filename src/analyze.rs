@@ -63,7 +63,7 @@ pub fn analyze(fen: &str, depth: u16) -> Result<(), AnalyzeError> {
         position,
         depth,
         TimeManager::new(TimeControl::Infinite),
-        report_progress,
+        Arc::new(move |progress: ProgressType| report_progress(progress)),
         tt,
         cancellation_token.clone(),
     );
@@ -196,14 +196,14 @@ fn report_progress(progress_type: ProgressType) {
             if elapsed < Duration::from_millis(50) {
                 return;
             }
-            (true, depth, "-> ", elapsed, score.to_string(), nodes, get_pv_string(pv, pv_column_width))
+            (true, depth, "-> ", elapsed, score.to_string(), nodes, get_pv_string(&pv, pv_column_width))
         }
 
         ProgressType::NewBestMove { depth, elapsed, score, nodes, pv } => {
             if elapsed < Duration::from_millis(250) {
                 return;
             }
-            (true, depth, "   ", elapsed, score.to_string(), nodes, get_pv_string(pv, pv_column_width))
+            (true, depth, "   ", elapsed, score.to_string(), nodes, get_pv_string(&pv, pv_column_width))
         }
 
         ProgressType::NewMoveAtRoot { depth, elapsed, nodes, move_number, move_count, mv } => {
@@ -221,7 +221,7 @@ fn report_progress(progress_type: ProgressType) {
             )
         }
         ProgressType::SearchFinished { mv: _, elapsed, stats } => {
-            print_stats(elapsed, stats);
+            print_stats(elapsed, &stats);
             return;
         }
     };

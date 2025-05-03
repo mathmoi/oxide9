@@ -48,10 +48,36 @@ enum UciError {
     #[error("Invalid move: {0}")]
     InvalidMove(String),
 
+    /// Returned when the size of the hash table is invalid or not supported.
+    #[error("Invalid hash size: {0}")]
+    InvalidHashSize(String),
+
     /// Returned when an unexpected token is encountered during command parsing. Includes the received token and what
     /// was expected instead.
     #[error("Invalid token: {token}, expected: {expected}")]
     InvalidToken { token: String, expected: &'static str },
+}
+
+/// Represents the different types of UCI options that can be set in a chess engine.
+///
+/// UCI (Universal Chess Interface) protocol defines various options that can be configured by the GUI or user. This
+/// enum encapsulates all possible option types with their associated data.
+#[allow(dead_code)]
+enum UciOptionType {
+    /// A boolean option (true/false) The wrapped value represents the default setting
+    Check(bool),
+
+    /// A numeric option with constraints Contains default value and allowed range (min/max)
+    Spin { default: u64, min: u64, max: u64 },
+
+    /// A selection from a predefined list of string values Contains the default value and all possible choices
+    Combo { default: String, values: Vec<String> },
+
+    /// A button-type option that can be "pressed" but has no value
+    Button,
+
+    /// A free-form text option The wrapped value represents the default string
+    String(String),
 }
 
 /// Handles the UCI protocol communication between a chess GUI and the engine.
@@ -93,11 +119,12 @@ impl Uci {
             let tokens: Vec<&str> = input.split_whitespace().collect();
             let result = match tokens.first() {
                 Some(&"uci") => self.handle_uci(),
+                Some(&"setoption") => self.handle_setoption(tokens.as_slice()),
                 Some(&"isready") => self.handle_isready(),
-                Some(&"quit") => break,
                 Some(&"position") => self.handle_position(tokens.as_slice()),
                 Some(&"go") => self.handle_go(tokens.as_slice()),
                 Some(&"stop") => self.handle_stop(),
+                Some(&"quit") => break,
                 Some(&command) => {
                     Self::send_unknown_command(command);
                     Ok(())
@@ -130,6 +157,54 @@ impl Uci {
     /// * `Err(UciError)` - If an error occurred during processing
     fn handle_uci(&mut self) -> Result<(), UciError> {
         self.engine.handle_uci()
+    }
+
+    /// Processes the "setoption" command from the GUI according to UCI protocol.
+    ///
+    /// Parses a sequence of tokens from a "setoption" UCI command to extract the option name and value. The format
+    /// expected is "setoption [name <option name>] [value <option value>]".
+    ///
+    /// # Parameters
+    /// * `tokens` - Slice of string slices containing the tokenized UCI command (first token should be "setoption")
+    ///
+    /// # Returns
+    /// * `Ok(())` if option was processed successfully
+    /// * `Err(UciError)` if an error occurred during processing
+    fn handle_setoption(&mut self, tokens: &[&str]) -> Result<(), UciError> {
+        debug_assert!(!tokens.is_empty(), "Tokens should not be empty");
+        debug_assert!(tokens[0] == "setoption", "First token should be 'setoption'");
+
+        let mut next_token_index = 1;
+
+        // Read the option name
+        let mut name = String::new();
+        loop {
+            if tokens.len() <= next_token_index || tokens[next_token_index] == "value" {
+                break;
+            }
+
+            if tokens[next_token_index] != "name" {
+                name.push_str(tokens[next_token_index]);
+            }
+
+            next_token_index += 1;
+        }
+
+        // Read the option value
+        let mut value = String::new();
+        loop {
+            if tokens.len() <= next_token_index {
+                break;
+            }
+
+            if tokens[next_token_index] != "value" {
+                value.push_str(tokens[next_token_index]);
+            }
+
+            next_token_index += 1;
+        }
+
+        self.engine.handle_setoption(name, value)
     }
 
     /// Processes the "isready" command from the GUI.
@@ -421,6 +496,32 @@ impl Uci {
         println!("id {} {}", id_type, value);
     }
 
+    /// Sends an engine option definition to the GUI following the UCI protocol format.
+    ///
+    /// This function formats and outputs a UCI option definition based on the provided option type and name. The output
+    /// strictly follows the UCI protocol standard for communicating available engine options to the GUI.
+    ///
+    /// # Parameters
+    /// * `name` - The name of the option as it will appear in the GUI
+    /// * `option_type` - The type and default values of the option as a `UciOptionType`
+    pub fn send_option(name: &str, option_type: UciOptionType) {
+        match option_type {
+            UciOptionType::Check(default) => println!("option name {name} type check default {default}"),
+            UciOptionType::Spin { default, min, max } => {
+                println!("option name {name} type spin default {default} min {min} max {max}")
+            }
+            UciOptionType::Combo { default, values } => {
+                let values_str = values.join(" var ");
+                println!("option name {name} type combo default {default} var {values_str}")
+            }
+            UciOptionType::Button => println!("option name {name} type button"),
+            UciOptionType::String(default) => println!(
+                "option name {name} type string default {}",
+                if default.is_empty() { String::from("<empty>") } else { default }
+            ),
+        }
+    }
+
     /// Signals to the GUI that the engine has completed UCI initialization.
     ///
     /// This method outputs the "uciok" message, indicating that the engine has finished
@@ -699,7 +800,31 @@ impl UciEngine {
         let config = get_config();
         Uci::send_id("name", &config.name);
         Uci::send_id("author", "Mathieu Pagé <m@mathieupage.com>");
+        Uci::send_option("Threads", UciOptionType::Spin { default: 1, min: 1, max: 1 });
+        Uci::send_option("Hash", UciOptionType::Spin { default: config.tt_size as u64, min: 1, max: 1024 * 1024 });
         Uci::send_uciok();
+        Ok(())
+    }
+
+    /// Handles the UCI 'setoption' command from the GUI by applying the requested option change.
+    ///
+    /// This function processes a parsed name-value pair from a UCI setoption command and updates the corresponding
+    /// engine setting. Currently supported options include:
+    ///
+    /// - "Hash": Sets the transposition table size in MB
+    ///
+    /// # Parameters
+    /// * `name` - The name of the option to set
+    /// * `value` - The value to set for the option
+    ///
+    /// # Returns
+    /// * `Ok(())` if the option was set successfully
+    /// * `Err(UciError::InvalidHashSize)` if the Hash value couldn't be parsed to a valid number
+    fn handle_setoption(&mut self, name: String, value: String) -> Result<(), UciError> {
+        if name == "Hash" {
+            let size = value.parse::<usize>().map_err(|_| UciError::InvalidHashSize(value))?;
+            self.transposition_table = Arc::new(TranspositionTable::new(size * 1024 * 1024));
+        }
         Ok(())
     }
 

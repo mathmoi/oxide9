@@ -1,6 +1,7 @@
 use std::sync::Once;
 
 pub mod analyze;
+pub mod bench;
 pub mod bitboard;
 pub mod config;
 pub mod coordinates;

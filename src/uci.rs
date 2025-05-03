@@ -914,7 +914,7 @@ impl UciEngine {
             self.position.clone(),
             100,
             time_manager,
-            Self::report_progress,
+            Arc::new(move |progress: ProgressType| Self::report_progress(progress)),
             self.transposition_table.clone(),
             Arc::new(AtomicBool::new(false)),
         ));

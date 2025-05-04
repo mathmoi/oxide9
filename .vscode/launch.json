@@ -38,7 +38,13 @@
                     "kind": "bin"
                 }
             },
-            "args": [],
+            "args": [
+                "analyze",
+                "-f",
+                "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQK1NR w KQkq - 0 1",
+                "-d",
+                "16"
+            ],
             "cwd": "${workspaceFolder}"
         },
         {

@@ -601,6 +601,11 @@ impl Square {
         self.left(-count)
     }
 
+    /// Returns a new square that is the horizontal mirror image of the current square.
+    pub fn mirror(self) -> Self {
+        Square(self.0 ^ 0b111000)
+    }
+
     /// Checks if three squares are aligned (on the same line).
     ///
     /// Determines whether all three squares lie on the same rank, file, diagonal, or antidiagonal.

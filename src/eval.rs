@@ -1,7 +1,6 @@
 use std::{cmp::min, fmt::Display};
 
 use crate::{
-    config::get_config,
     coordinates::Square,
     piece::{Color, Piece, PieceType},
     position::Position,
@@ -213,65 +212,424 @@ impl std::ops::Neg for EvalPair {
     }
 }
 
-static mut PIECES_GAME_PHASE: [u8; Piece::COUNT] = [0; Piece::COUNT];
-static mut MAX_GAME_PHASE: u8 = 0;
-static mut PIECES_VALUES: [EvalPair; Piece::COUNT] = [EvalPair { mg: Eval(0), eg: Eval(0) }; Piece::COUNT];
+const PIECES_GAME_PHASE: [u8; Piece::COUNT] = [0, 0, 1, 1, 1, 1, 2, 2, 4, 4, 0, 0];
+const MAX_GAME_PHASE: u8 = 24;
+#[rustfmt::skip]
+const PIECE_TYPE_VALUES: [EvalPair; PieceType::COUNT] = [
+    EvalPair { mg: Eval(   82), eg: Eval(  94) },
+    EvalPair { mg: Eval(  337), eg: Eval( 281) },
+    EvalPair { mg: Eval(  365), eg: Eval( 297) },
+    EvalPair { mg: Eval(  477), eg: Eval( 512) },
+    EvalPair { mg: Eval( 1025), eg: Eval( 936) },
+    EvalPair { mg: Eval(    0), eg: Eval(   0) },
+];
+
+#[rustfmt::skip]
+const PIECE_TYPE_SQUARE_TABLES: [[EvalPair; Square::COUNT]; PieceType::COUNT] = [
+    [
+        EvalPair { mg: Eval(   0), eg: Eval(   0) },
+        EvalPair { mg: Eval(   0), eg: Eval(   0) },
+        EvalPair { mg: Eval(   0), eg: Eval(   0) },
+        EvalPair { mg: Eval(   0), eg: Eval(   0) },
+        EvalPair { mg: Eval(   0), eg: Eval(   0) },
+        EvalPair { mg: Eval(   0), eg: Eval(   0) },
+        EvalPair { mg: Eval(   0), eg: Eval(   0) },
+        EvalPair { mg: Eval(   0), eg: Eval(   0) },
+        EvalPair { mg: Eval( -35), eg: Eval(  13) },
+        EvalPair { mg: Eval(  -1), eg: Eval(   8) },
+        EvalPair { mg: Eval( -20), eg: Eval(   8) },
+        EvalPair { mg: Eval( -23), eg: Eval(  10) },
+        EvalPair { mg: Eval( -15), eg: Eval(  13) },
+        EvalPair { mg: Eval(  24), eg: Eval(   0) },
+        EvalPair { mg: Eval(  38), eg: Eval(   2) },
+        EvalPair { mg: Eval( -22), eg: Eval(  -7) },
+        EvalPair { mg: Eval( -26), eg: Eval(   4) },
+        EvalPair { mg: Eval(  -4), eg: Eval(   7) },
+        EvalPair { mg: Eval(  -4), eg: Eval(  -6) },
+        EvalPair { mg: Eval( -10), eg: Eval(   1) },
+        EvalPair { mg: Eval(   3), eg: Eval(   0) },
+        EvalPair { mg: Eval(   3), eg: Eval(  -5) },
+        EvalPair { mg: Eval(  33), eg: Eval(  -1) },
+        EvalPair { mg: Eval( -12), eg: Eval(  -8) },
+        EvalPair { mg: Eval( -27), eg: Eval(  13) },
+        EvalPair { mg: Eval(  -2), eg: Eval(   9) },
+        EvalPair { mg: Eval(  -5), eg: Eval(  -3) },
+        EvalPair { mg: Eval(  12), eg: Eval(  -7) },
+        EvalPair { mg: Eval(  17), eg: Eval(  -7) },
+        EvalPair { mg: Eval(   6), eg: Eval(  -8) },
+        EvalPair { mg: Eval(  10), eg: Eval(   3) },
+        EvalPair { mg: Eval( -25), eg: Eval(  -1) },
+        EvalPair { mg: Eval( -14), eg: Eval(  32) },
+        EvalPair { mg: Eval(  13), eg: Eval(  24) },
+        EvalPair { mg: Eval(   6), eg: Eval(  13) },
+        EvalPair { mg: Eval(  21), eg: Eval(   5) },
+        EvalPair { mg: Eval(  23), eg: Eval(  -2) },
+        EvalPair { mg: Eval(  12), eg: Eval(   4) },
+        EvalPair { mg: Eval(  17), eg: Eval(  17) },
+        EvalPair { mg: Eval( -23), eg: Eval(  17) },
+        EvalPair { mg: Eval(  -6), eg: Eval(  94) },
+        EvalPair { mg: Eval(   7), eg: Eval( 100) },
+        EvalPair { mg: Eval(  26), eg: Eval(  85) },
+        EvalPair { mg: Eval(  31), eg: Eval(  67) },
+        EvalPair { mg: Eval(  65), eg: Eval(  56) },
+        EvalPair { mg: Eval(  56), eg: Eval(  53) },
+        EvalPair { mg: Eval(  25), eg: Eval(  82) },
+        EvalPair { mg: Eval( -20), eg: Eval(  84) },
+        EvalPair { mg: Eval(  98), eg: Eval( 178) },
+        EvalPair { mg: Eval( 134), eg: Eval( 173) },
+        EvalPair { mg: Eval(  61), eg: Eval( 158) },
+        EvalPair { mg: Eval(  95), eg: Eval( 134) },
+        EvalPair { mg: Eval(  68), eg: Eval( 147) },
+        EvalPair { mg: Eval( 126), eg: Eval( 132) },
+        EvalPair { mg: Eval(  34), eg: Eval( 165) },
+        EvalPair { mg: Eval( -11), eg: Eval( 187) },
+        EvalPair { mg: Eval(   0), eg: Eval(   0) },
+        EvalPair { mg: Eval(   0), eg: Eval(   0) },
+        EvalPair { mg: Eval(   0), eg: Eval(   0) },
+        EvalPair { mg: Eval(   0), eg: Eval(   0) },
+        EvalPair { mg: Eval(   0), eg: Eval(   0) },
+        EvalPair { mg: Eval(   0), eg: Eval(   0) },
+        EvalPair { mg: Eval(   0), eg: Eval(   0) },
+        EvalPair { mg: Eval(   0), eg: Eval(   0) },
+    ],
+    [
+        EvalPair { mg: Eval(-105), eg: Eval( -29) },
+        EvalPair { mg: Eval( -21), eg: Eval( -51) },
+        EvalPair { mg: Eval( -58), eg: Eval( -23) },
+        EvalPair { mg: Eval( -33), eg: Eval( -15) },
+        EvalPair { mg: Eval( -17), eg: Eval( -22) },
+        EvalPair { mg: Eval( -28), eg: Eval( -18) },
+        EvalPair { mg: Eval( -19), eg: Eval( -50) },
+        EvalPair { mg: Eval( -23), eg: Eval( -64) },
+        EvalPair { mg: Eval( -29), eg: Eval( -42) },
+        EvalPair { mg: Eval( -53), eg: Eval( -20) },
+        EvalPair { mg: Eval( -12), eg: Eval( -10) },
+        EvalPair { mg: Eval(  -3), eg: Eval(  -5) },
+        EvalPair { mg: Eval(  -1), eg: Eval(  -2) },
+        EvalPair { mg: Eval(  18), eg: Eval( -20) },
+        EvalPair { mg: Eval( -14), eg: Eval( -23) },
+        EvalPair { mg: Eval( -19), eg: Eval( -44) },
+        EvalPair { mg: Eval( -23), eg: Eval( -23) },
+        EvalPair { mg: Eval(  -9), eg: Eval(  -3) },
+        EvalPair { mg: Eval(  12), eg: Eval(  -1) },
+        EvalPair { mg: Eval(  10), eg: Eval(  15) },
+        EvalPair { mg: Eval(  19), eg: Eval(  10) },
+        EvalPair { mg: Eval(  17), eg: Eval(  -3) },
+        EvalPair { mg: Eval(  25), eg: Eval( -20) },
+        EvalPair { mg: Eval( -16), eg: Eval( -22) },
+        EvalPair { mg: Eval( -13), eg: Eval( -18) },
+        EvalPair { mg: Eval(   4), eg: Eval(  -6) },
+        EvalPair { mg: Eval(  16), eg: Eval(  16) },
+        EvalPair { mg: Eval(  13), eg: Eval(  25) },
+        EvalPair { mg: Eval(  28), eg: Eval(  16) },
+        EvalPair { mg: Eval(  19), eg: Eval(  17) },
+        EvalPair { mg: Eval(  21), eg: Eval(   4) },
+        EvalPair { mg: Eval(  -8), eg: Eval( -18) },
+        EvalPair { mg: Eval(  -9), eg: Eval( -17) },
+        EvalPair { mg: Eval(  17), eg: Eval(   3) },
+        EvalPair { mg: Eval(  19), eg: Eval(  22) },
+        EvalPair { mg: Eval(  53), eg: Eval(  22) },
+        EvalPair { mg: Eval(  37), eg: Eval(  22) },
+        EvalPair { mg: Eval(  69), eg: Eval(  11) },
+        EvalPair { mg: Eval(  18), eg: Eval(   8) },
+        EvalPair { mg: Eval(  22), eg: Eval( -18) },
+        EvalPair { mg: Eval( -47), eg: Eval( -24) },
+        EvalPair { mg: Eval(  60), eg: Eval( -20) },
+        EvalPair { mg: Eval(  37), eg: Eval(  10) },
+        EvalPair { mg: Eval(  65), eg: Eval(   9) },
+        EvalPair { mg: Eval(  84), eg: Eval(  -1) },
+        EvalPair { mg: Eval( 129), eg: Eval(  -9) },
+        EvalPair { mg: Eval(  73), eg: Eval( -19) },
+        EvalPair { mg: Eval(  44), eg: Eval( -41) },
+        EvalPair { mg: Eval( -73), eg: Eval( -25) },
+        EvalPair { mg: Eval( -41), eg: Eval(  -8) },
+        EvalPair { mg: Eval(  72), eg: Eval( -25) },
+        EvalPair { mg: Eval(  36), eg: Eval(  -2) },
+        EvalPair { mg: Eval(  23), eg: Eval(  -9) },
+        EvalPair { mg: Eval(  62), eg: Eval( -25) },
+        EvalPair { mg: Eval(   7), eg: Eval( -24) },
+        EvalPair { mg: Eval( -17), eg: Eval( -52) },
+        EvalPair { mg: Eval(-167), eg: Eval( -58) },
+        EvalPair { mg: Eval( -89), eg: Eval( -38) },
+        EvalPair { mg: Eval( -34), eg: Eval( -13) },
+        EvalPair { mg: Eval( -49), eg: Eval( -28) },
+        EvalPair { mg: Eval(  61), eg: Eval( -31) },
+        EvalPair { mg: Eval( -97), eg: Eval( -27) },
+        EvalPair { mg: Eval( -15), eg: Eval( -63) },
+        EvalPair { mg: Eval(-107), eg: Eval( -99) },
+    ],
+    [
+        EvalPair { mg: Eval( -33), eg: Eval( -23) },
+        EvalPair { mg: Eval(  -3), eg: Eval(  -9) },
+        EvalPair { mg: Eval( -14), eg: Eval( -23) },
+        EvalPair { mg: Eval( -21), eg: Eval(  -5) },
+        EvalPair { mg: Eval( -13), eg: Eval(  -9) },
+        EvalPair { mg: Eval( -12), eg: Eval( -16) },
+        EvalPair { mg: Eval( -39), eg: Eval(  -5) },
+        EvalPair { mg: Eval( -21), eg: Eval( -17) },
+        EvalPair { mg: Eval(   4), eg: Eval( -14) },
+        EvalPair { mg: Eval(  15), eg: Eval( -18) },
+        EvalPair { mg: Eval(  16), eg: Eval(  -7) },
+        EvalPair { mg: Eval(   0), eg: Eval(  -1) },
+        EvalPair { mg: Eval(   7), eg: Eval(   4) },
+        EvalPair { mg: Eval(  21), eg: Eval(  -9) },
+        EvalPair { mg: Eval(  33), eg: Eval( -15) },
+        EvalPair { mg: Eval(   1), eg: Eval( -27) },
+        EvalPair { mg: Eval(   0), eg: Eval( -12) },
+        EvalPair { mg: Eval(  15), eg: Eval(  -3) },
+        EvalPair { mg: Eval(  15), eg: Eval(   8) },
+        EvalPair { mg: Eval(  15), eg: Eval(  10) },
+        EvalPair { mg: Eval(  14), eg: Eval(  13) },
+        EvalPair { mg: Eval(  27), eg: Eval(   3) },
+        EvalPair { mg: Eval(  18), eg: Eval(  -7) },
+        EvalPair { mg: Eval(  10), eg: Eval( -15) },
+        EvalPair { mg: Eval(  -6), eg: Eval(  -6) },
+        EvalPair { mg: Eval(  13), eg: Eval(   3) },
+        EvalPair { mg: Eval(  13), eg: Eval(  13) },
+        EvalPair { mg: Eval(  26), eg: Eval(  19) },
+        EvalPair { mg: Eval(  34), eg: Eval(   7) },
+        EvalPair { mg: Eval(  12), eg: Eval(  10) },
+        EvalPair { mg: Eval(  10), eg: Eval(  -3) },
+        EvalPair { mg: Eval(   4), eg: Eval(  -9) },
+        EvalPair { mg: Eval(  -4), eg: Eval(  -3) },
+        EvalPair { mg: Eval(   5), eg: Eval(   9) },
+        EvalPair { mg: Eval(  19), eg: Eval(  12) },
+        EvalPair { mg: Eval(  50), eg: Eval(   9) },
+        EvalPair { mg: Eval(  37), eg: Eval(  14) },
+        EvalPair { mg: Eval(  37), eg: Eval(  10) },
+        EvalPair { mg: Eval(   7), eg: Eval(   3) },
+        EvalPair { mg: Eval(  -2), eg: Eval(   2) },
+        EvalPair { mg: Eval( -16), eg: Eval(   2) },
+        EvalPair { mg: Eval(  37), eg: Eval(  -8) },
+        EvalPair { mg: Eval(  43), eg: Eval(   0) },
+        EvalPair { mg: Eval(  40), eg: Eval(  -1) },
+        EvalPair { mg: Eval(  35), eg: Eval(  -2) },
+        EvalPair { mg: Eval(  50), eg: Eval(   6) },
+        EvalPair { mg: Eval(  37), eg: Eval(   0) },
+        EvalPair { mg: Eval(  -2), eg: Eval(   4) },
+        EvalPair { mg: Eval( -26), eg: Eval(  -8) },
+        EvalPair { mg: Eval(  16), eg: Eval(  -4) },
+        EvalPair { mg: Eval( -18), eg: Eval(   7) },
+        EvalPair { mg: Eval( -13), eg: Eval( -12) },
+        EvalPair { mg: Eval(  30), eg: Eval(  -3) },
+        EvalPair { mg: Eval(  59), eg: Eval( -13) },
+        EvalPair { mg: Eval(  18), eg: Eval(  -4) },
+        EvalPair { mg: Eval( -47), eg: Eval( -14) },
+        EvalPair { mg: Eval( -29), eg: Eval( -14) },
+        EvalPair { mg: Eval(   4), eg: Eval( -21) },
+        EvalPair { mg: Eval( -82), eg: Eval( -11) },
+        EvalPair { mg: Eval( -37), eg: Eval(  -8) },
+        EvalPair { mg: Eval( -25), eg: Eval(  -7) },
+        EvalPair { mg: Eval( -42), eg: Eval(  -9) },
+        EvalPair { mg: Eval(   7), eg: Eval( -17) },
+        EvalPair { mg: Eval(  -8), eg: Eval( -24) },
+    ],
+    [
+        EvalPair { mg: Eval( -19), eg: Eval(  -9) },
+        EvalPair { mg: Eval( -13), eg: Eval(   2) },
+        EvalPair { mg: Eval(   1), eg: Eval(   3) },
+        EvalPair { mg: Eval(  17), eg: Eval(  -1) },
+        EvalPair { mg: Eval(  16), eg: Eval(  -5) },
+        EvalPair { mg: Eval(   7), eg: Eval( -13) },
+        EvalPair { mg: Eval( -37), eg: Eval(   4) },
+        EvalPair { mg: Eval( -26), eg: Eval( -20) },
+        EvalPair { mg: Eval( -44), eg: Eval(  -6) },
+        EvalPair { mg: Eval( -16), eg: Eval(  -6) },
+        EvalPair { mg: Eval( -20), eg: Eval(   0) },
+        EvalPair { mg: Eval(  -9), eg: Eval(   2) },
+        EvalPair { mg: Eval(  -1), eg: Eval(  -9) },
+        EvalPair { mg: Eval(  11), eg: Eval(  -9) },
+        EvalPair { mg: Eval(  -6), eg: Eval( -11) },
+        EvalPair { mg: Eval( -71), eg: Eval(  -3) },
+        EvalPair { mg: Eval( -45), eg: Eval(  -4) },
+        EvalPair { mg: Eval( -25), eg: Eval(   0) },
+        EvalPair { mg: Eval( -16), eg: Eval(  -5) },
+        EvalPair { mg: Eval( -17), eg: Eval(  -1) },
+        EvalPair { mg: Eval(   3), eg: Eval(  -7) },
+        EvalPair { mg: Eval(   0), eg: Eval( -12) },
+        EvalPair { mg: Eval(  -5), eg: Eval(  -8) },
+        EvalPair { mg: Eval( -33), eg: Eval( -16) },
+        EvalPair { mg: Eval( -36), eg: Eval(   3) },
+        EvalPair { mg: Eval( -26), eg: Eval(   5) },
+        EvalPair { mg: Eval( -12), eg: Eval(   8) },
+        EvalPair { mg: Eval(  -1), eg: Eval(   4) },
+        EvalPair { mg: Eval(   9), eg: Eval(  -5) },
+        EvalPair { mg: Eval(  -7), eg: Eval(  -6) },
+        EvalPair { mg: Eval(   6), eg: Eval(  -8) },
+        EvalPair { mg: Eval( -23), eg: Eval( -11) },
+        EvalPair { mg: Eval( -24), eg: Eval(   4) },
+        EvalPair { mg: Eval( -11), eg: Eval(   3) },
+        EvalPair { mg: Eval(   7), eg: Eval(  13) },
+        EvalPair { mg: Eval(  26), eg: Eval(   1) },
+        EvalPair { mg: Eval(  24), eg: Eval(   2) },
+        EvalPair { mg: Eval(  35), eg: Eval(   1) },
+        EvalPair { mg: Eval(  -8), eg: Eval(  -1) },
+        EvalPair { mg: Eval( -20), eg: Eval(   2) },
+        EvalPair { mg: Eval(  -5), eg: Eval(   7) },
+        EvalPair { mg: Eval(  19), eg: Eval(   7) },
+        EvalPair { mg: Eval(  26), eg: Eval(   7) },
+        EvalPair { mg: Eval(  36), eg: Eval(   5) },
+        EvalPair { mg: Eval(  17), eg: Eval(   4) },
+        EvalPair { mg: Eval(  45), eg: Eval(  -3) },
+        EvalPair { mg: Eval(  61), eg: Eval(  -5) },
+        EvalPair { mg: Eval(  16), eg: Eval(  -3) },
+        EvalPair { mg: Eval(  27), eg: Eval(  11) },
+        EvalPair { mg: Eval(  32), eg: Eval(  13) },
+        EvalPair { mg: Eval(  58), eg: Eval(  13) },
+        EvalPair { mg: Eval(  62), eg: Eval(  11) },
+        EvalPair { mg: Eval(  80), eg: Eval(  -3) },
+        EvalPair { mg: Eval(  67), eg: Eval(   3) },
+        EvalPair { mg: Eval(  26), eg: Eval(   8) },
+        EvalPair { mg: Eval(  44), eg: Eval(   3) },
+        EvalPair { mg: Eval(  32), eg: Eval(  13) },
+        EvalPair { mg: Eval(  42), eg: Eval(  10) },
+        EvalPair { mg: Eval(  32), eg: Eval(  18) },
+        EvalPair { mg: Eval(  51), eg: Eval(  15) },
+        EvalPair { mg: Eval(  63), eg: Eval(  12) },
+        EvalPair { mg: Eval(   9), eg: Eval(  12) },
+        EvalPair { mg: Eval(  31), eg: Eval(   8) },
+        EvalPair { mg: Eval(  43), eg: Eval(   5) },
+    ],
+    [
+        EvalPair { mg: Eval(  -1), eg: Eval( -33) },
+        EvalPair { mg: Eval( -18), eg: Eval( -28) },
+        EvalPair { mg: Eval(  -9), eg: Eval( -22) },
+        EvalPair { mg: Eval(  10), eg: Eval( -43) },
+        EvalPair { mg: Eval( -15), eg: Eval(  -5) },
+        EvalPair { mg: Eval( -25), eg: Eval( -32) },
+        EvalPair { mg: Eval( -31), eg: Eval( -20) },
+        EvalPair { mg: Eval( -50), eg: Eval( -41) },
+        EvalPair { mg: Eval( -35), eg: Eval( -22) },
+        EvalPair { mg: Eval(  -8), eg: Eval( -23) },
+        EvalPair { mg: Eval(  11), eg: Eval( -30) },
+        EvalPair { mg: Eval(   2), eg: Eval( -16) },
+        EvalPair { mg: Eval(   8), eg: Eval( -16) },
+        EvalPair { mg: Eval(  15), eg: Eval( -23) },
+        EvalPair { mg: Eval(  -3), eg: Eval( -36) },
+        EvalPair { mg: Eval(   1), eg: Eval( -32) },
+        EvalPair { mg: Eval( -14), eg: Eval( -16) },
+        EvalPair { mg: Eval(   2), eg: Eval( -27) },
+        EvalPair { mg: Eval( -11), eg: Eval(  15) },
+        EvalPair { mg: Eval(  -2), eg: Eval(   6) },
+        EvalPair { mg: Eval(  -5), eg: Eval(   9) },
+        EvalPair { mg: Eval(   2), eg: Eval(  17) },
+        EvalPair { mg: Eval(  14), eg: Eval(  10) },
+        EvalPair { mg: Eval(   5), eg: Eval(   5) },
+        EvalPair { mg: Eval(  -9), eg: Eval( -18) },
+        EvalPair { mg: Eval( -26), eg: Eval(  28) },
+        EvalPair { mg: Eval(  -9), eg: Eval(  19) },
+        EvalPair { mg: Eval( -10), eg: Eval(  47) },
+        EvalPair { mg: Eval(  -2), eg: Eval(  31) },
+        EvalPair { mg: Eval(  -4), eg: Eval(  34) },
+        EvalPair { mg: Eval(   3), eg: Eval(  39) },
+        EvalPair { mg: Eval(  -3), eg: Eval(  23) },
+        EvalPair { mg: Eval( -27), eg: Eval(   3) },
+        EvalPair { mg: Eval( -27), eg: Eval(  22) },
+        EvalPair { mg: Eval( -16), eg: Eval(  24) },
+        EvalPair { mg: Eval( -16), eg: Eval(  45) },
+        EvalPair { mg: Eval(  -1), eg: Eval(  57) },
+        EvalPair { mg: Eval(  17), eg: Eval(  40) },
+        EvalPair { mg: Eval(  -2), eg: Eval(  57) },
+        EvalPair { mg: Eval(   1), eg: Eval(  36) },
+        EvalPair { mg: Eval( -13), eg: Eval( -20) },
+        EvalPair { mg: Eval( -17), eg: Eval(   6) },
+        EvalPair { mg: Eval(   7), eg: Eval(   9) },
+        EvalPair { mg: Eval(   8), eg: Eval(  49) },
+        EvalPair { mg: Eval(  29), eg: Eval(  47) },
+        EvalPair { mg: Eval(  56), eg: Eval(  35) },
+        EvalPair { mg: Eval(  47), eg: Eval(  19) },
+        EvalPair { mg: Eval(  57), eg: Eval(   9) },
+        EvalPair { mg: Eval( -24), eg: Eval( -17) },
+        EvalPair { mg: Eval( -39), eg: Eval(  20) },
+        EvalPair { mg: Eval(  -5), eg: Eval(  32) },
+        EvalPair { mg: Eval(   1), eg: Eval(  41) },
+        EvalPair { mg: Eval( -16), eg: Eval(  58) },
+        EvalPair { mg: Eval(  57), eg: Eval(  25) },
+        EvalPair { mg: Eval(  28), eg: Eval(  30) },
+        EvalPair { mg: Eval(  54), eg: Eval(   0) },
+        EvalPair { mg: Eval( -28), eg: Eval(  -9) },
+        EvalPair { mg: Eval(   0), eg: Eval(  22) },
+        EvalPair { mg: Eval(  29), eg: Eval(  22) },
+        EvalPair { mg: Eval(  12), eg: Eval(  27) },
+        EvalPair { mg: Eval(  59), eg: Eval(  27) },
+        EvalPair { mg: Eval(  44), eg: Eval(  19) },
+        EvalPair { mg: Eval(  43), eg: Eval(  10) },
+        EvalPair { mg: Eval(  45), eg: Eval(  20) },
+    ],
+    [
+        EvalPair { mg: Eval( -15), eg: Eval( -53) },
+        EvalPair { mg: Eval(  36), eg: Eval( -34) },
+        EvalPair { mg: Eval(  12), eg: Eval( -21) },
+        EvalPair { mg: Eval( -54), eg: Eval( -11) },
+        EvalPair { mg: Eval(   8), eg: Eval( -28) },
+        EvalPair { mg: Eval( -28), eg: Eval( -14) },
+        EvalPair { mg: Eval(  24), eg: Eval( -24) },
+        EvalPair { mg: Eval(  14), eg: Eval( -43) },
+        EvalPair { mg: Eval(   1), eg: Eval( -27) },
+        EvalPair { mg: Eval(   7), eg: Eval( -11) },
+        EvalPair { mg: Eval(  -8), eg: Eval(   4) },
+        EvalPair { mg: Eval( -64), eg: Eval(  13) },
+        EvalPair { mg: Eval( -43), eg: Eval(  14) },
+        EvalPair { mg: Eval( -16), eg: Eval(   4) },
+        EvalPair { mg: Eval(   9), eg: Eval(  -5) },
+        EvalPair { mg: Eval(   8), eg: Eval( -17) },
+        EvalPair { mg: Eval( -14), eg: Eval( -19) },
+        EvalPair { mg: Eval( -14), eg: Eval(  -3) },
+        EvalPair { mg: Eval( -22), eg: Eval(  11) },
+        EvalPair { mg: Eval( -46), eg: Eval(  21) },
+        EvalPair { mg: Eval( -44), eg: Eval(  23) },
+        EvalPair { mg: Eval( -30), eg: Eval(  16) },
+        EvalPair { mg: Eval( -15), eg: Eval(   7) },
+        EvalPair { mg: Eval( -27), eg: Eval(  -9) },
+        EvalPair { mg: Eval( -49), eg: Eval( -18) },
+        EvalPair { mg: Eval(  -1), eg: Eval(  -4) },
+        EvalPair { mg: Eval( -27), eg: Eval(  21) },
+        EvalPair { mg: Eval( -39), eg: Eval(  24) },
+        EvalPair { mg: Eval( -46), eg: Eval(  27) },
+        EvalPair { mg: Eval( -44), eg: Eval(  23) },
+        EvalPair { mg: Eval( -33), eg: Eval(   9) },
+        EvalPair { mg: Eval( -51), eg: Eval( -11) },
+        EvalPair { mg: Eval( -17), eg: Eval(  -8) },
+        EvalPair { mg: Eval( -20), eg: Eval(  22) },
+        EvalPair { mg: Eval( -12), eg: Eval(  24) },
+        EvalPair { mg: Eval( -27), eg: Eval(  27) },
+        EvalPair { mg: Eval( -30), eg: Eval(  26) },
+        EvalPair { mg: Eval( -25), eg: Eval(  33) },
+        EvalPair { mg: Eval( -14), eg: Eval(  26) },
+        EvalPair { mg: Eval( -36), eg: Eval(   3) },
+        EvalPair { mg: Eval(  -9), eg: Eval(  10) },
+        EvalPair { mg: Eval(  24), eg: Eval(  17) },
+        EvalPair { mg: Eval(   2), eg: Eval(  23) },
+        EvalPair { mg: Eval( -16), eg: Eval(  15) },
+        EvalPair { mg: Eval( -20), eg: Eval(  20) },
+        EvalPair { mg: Eval(   6), eg: Eval(  45) },
+        EvalPair { mg: Eval(  22), eg: Eval(  44) },
+        EvalPair { mg: Eval( -22), eg: Eval(  13) },
+        EvalPair { mg: Eval(  29), eg: Eval( -12) },
+        EvalPair { mg: Eval(  -1), eg: Eval(  17) },
+        EvalPair { mg: Eval( -20), eg: Eval(  14) },
+        EvalPair { mg: Eval(  -7), eg: Eval(  17) },
+        EvalPair { mg: Eval(  -8), eg: Eval(  17) },
+        EvalPair { mg: Eval(  -4), eg: Eval(  38) },
+        EvalPair { mg: Eval( -38), eg: Eval(  23) },
+        EvalPair { mg: Eval( -29), eg: Eval(  11) },
+        EvalPair { mg: Eval( -65), eg: Eval( -74) },
+        EvalPair { mg: Eval(  23), eg: Eval( -35) },
+        EvalPair { mg: Eval(  16), eg: Eval( -18) },
+        EvalPair { mg: Eval( -15), eg: Eval( -18) },
+        EvalPair { mg: Eval( -56), eg: Eval( -11) },
+        EvalPair { mg: Eval( -34), eg: Eval(  15) },
+        EvalPair { mg: Eval(   2), eg: Eval(   4) },
+        EvalPair { mg: Eval(  13), eg: Eval( -17) },
+    ],
+];
+
 static mut PIECE_SQUARE_TABLES: [[EvalPair; Square::COUNT]; Piece::COUNT] =
     [[EvalPair { mg: Eval(0), eg: Eval(0) }; Square::COUNT]; Piece::COUNT];
 
 /// Initialize the evaluation module
 pub fn initialize() {
-    initialize_pieces_game_phase();
-    initialize_pieces_values();
     initialize_piece_square_tables();
-}
-
-/// Initializes the game phase values for all chess pieces.
-///
-/// # Purpose
-/// Sets up the game phase values for each piece based on the configuration settings. These values are used to determine
-/// the current phase of the game (middlegame/endgame) which affects the evaluation.
-fn initialize_pieces_game_phase() {
-    let config = get_config();
-
-    for piece in Piece::ALL {
-        let piece_type_index = usize::from(piece.piece_type());
-        unsafe {
-            PIECES_GAME_PHASE[usize::from(piece)] = config.eval.piece_type_game_phase[piece_type_index];
-        }
-    }
-
-    unsafe {
-        MAX_GAME_PHASE = config.eval.piece_type_game_phase[usize::from(PieceType::Pawn)] * 16
-            + config.eval.piece_type_game_phase[usize::from(PieceType::Knight)] * 4
-            + config.eval.piece_type_game_phase[usize::from(PieceType::Bishop)] * 4
-            + config.eval.piece_type_game_phase[usize::from(PieceType::Rook)] * 4
-            + config.eval.piece_type_game_phase[usize::from(PieceType::Queen)] * 2
-            + config.eval.piece_type_game_phase[usize::from(PieceType::King)] * 2
-    };
-}
-
-/// Initializes the evaluation values for all chess pieces.
-///
-/// # Purpose
-/// Sets up the material evaluation values for each piece based on the configuration settings. These values are used in
-/// position evaluation to calculate material balance.
-fn initialize_pieces_values() {
-    let config = get_config();
-
-    for piece in Piece::ALL {
-        let sign = match piece.color() {
-            Color::White => 1,
-            Color::Black => -1,
-        };
-
-        let piece_type_index = usize::from(piece.piece_type());
-        let mg = Eval(sign * config.eval.mg_piece_values[piece_type_index]);
-        let eg = Eval(sign * config.eval.eg_piece_values[piece_type_index]);
-        unsafe {
-            PIECES_VALUES[usize::from(piece)] = EvalPair::new(mg, eg);
-        }
-    }
 }
 
 /// Initializes the piece-square tables for position evaluation.
@@ -280,31 +638,18 @@ fn initialize_pieces_values() {
 /// Sets up the position-dependent values for each piece type on each square of the board. These tables are used to
 /// evaluate piece positioning during different game phases.
 fn initialize_piece_square_tables() {
-    let config = get_config();
-    let pieces = [
-        (PieceType::Pawn, &config.eval.mg_pawn_table, &config.eval.eg_pawn_table),
-        (PieceType::Knight, &config.eval.mg_knight_table, &config.eval.eg_knight_table),
-        (PieceType::Bishop, &config.eval.mg_bishop_table, &config.eval.eg_bishop_table),
-        (PieceType::Rook, &config.eval.mg_rook_table, &config.eval.eg_rook_table),
-        (PieceType::Queen, &config.eval.mg_queen_table, &config.eval.eg_queen_table),
-        (PieceType::King, &config.eval.mg_king_table, &config.eval.eg_king_table),
-    ];
-
-    for (piece_type, mg_table, eg_table) in &pieces {
+    for piece_type in PieceType::ALL {
         for square in Square::ALL {
-            let sq_index: usize = square.into();
-            let mg = Eval(mg_table[sq_index]);
-            let eg = Eval(eg_table[sq_index]);
-            let eval_pair = EvalPair::new(mg, eg);
+            let mirrored_square = square.mirror();
+            let white_piece = Piece::new(Color::White, piece_type);
+            let black_piece = Piece::new(Color::Black, piece_type);
+            let eval = PIECE_TYPE_SQUARE_TABLES[usize::from(piece_type)][usize::from(square)]
+                + PIECE_TYPE_VALUES[usize::from(piece_type)];
             unsafe {
-                let white_piece_index: usize = Piece::new(Color::White, *piece_type).into();
-                let piece_value = PIECES_VALUES[white_piece_index];
-                PIECE_SQUARE_TABLES[white_piece_index][sq_index] = eval_pair + piece_value;
+                PIECE_SQUARE_TABLES[usize::from(white_piece)][usize::from(square)] = eval;
 
-                let black_piece_index: usize = Piece::new(Color::Black, *piece_type).into();
-                PIECE_SQUARE_TABLES[black_piece_index][usize::from(square.relative_to_color(Color::Black))] =
-                    -(eval_pair + piece_value);
-            }
+                PIECE_SQUARE_TABLES[usize::from(black_piece)][usize::from(mirrored_square)] = -eval;
+            };
         }
     }
 }
@@ -326,7 +671,7 @@ fn initialize_piece_square_tables() {
 /// - These values are typically used in tapered evaluation to determine the balance between middlegame and endgame
 ///   evaluation
 pub fn get_piece_type_game_phase(piece: Piece) -> u8 {
-    unsafe { PIECES_GAME_PHASE[usize::from(piece)] }
+    PIECES_GAME_PHASE[usize::from(piece)]
 }
 
 /// Returns the piece-square table value for a given piece on a given square.
@@ -367,13 +712,13 @@ pub fn get_piece_square_value(piece: Piece, square: Square) -> EvalPair {
 /// - The blending is determined by comparing the current game phase to MAX_GAME_PHASE
 /// - The returned value is normalized by dividing by MAX_GAME_PHASE
 pub fn evaluate(position: &Position) -> Eval {
-    let mg_phase: i32 = min(position.game_phase(), unsafe { MAX_GAME_PHASE }) as i32;
-    let eg_phase: i32 = unsafe { MAX_GAME_PHASE as i32 } - mg_phase;
+    let mg_phase: i32 = min(position.game_phase(), MAX_GAME_PHASE) as i32;
+    let eg_phase: i32 = MAX_GAME_PHASE as i32 - mg_phase;
 
     let incremental_eval = position.incremental_eval();
     Eval::from(
         (mg_phase * i32::from(incremental_eval.mg) + eg_phase * i32::from(incremental_eval.eg))
-            / unsafe { MAX_GAME_PHASE as i32 },
+            / (MAX_GAME_PHASE as i32),
     )
 }
 

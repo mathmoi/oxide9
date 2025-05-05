@@ -180,6 +180,9 @@ pub struct TranspositionTable {
 unsafe impl Sync for TranspositionTable {}
 
 impl TranspositionTable {
+    /// Default size of the transposition table in megabytes.
+    pub const DEFAULT_MB_SIZE: usize = 128;
+
     /// Creates a new transposition table with the specified size.
     ///
     /// Note that the size must be at least 1024 and a power of 2. If the size is not a power of 2, it will be rounded down to the next power of 2.

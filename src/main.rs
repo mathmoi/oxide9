@@ -26,24 +26,16 @@ mod arguments {
     pub struct Oxide9Args {
         #[command(subcommand)]
         pub command: Option<Commands>,
-
-        /// Indicate if output number should be precise instead of human-readable
-        #[arg(short, long)]
-        pub precise: bool,
-
-        /// The number of threads to use for the perft calculation
-        #[arg(short, long)]
-        pub threads: Option<u32>,
-
-        /// The size of the transposition table in megabytes (this must be a power of 2)
-        #[arg(long)]
-        pub tt_size: Option<u32>,
     }
 
     #[derive(Debug, Clone, Subcommand)]
     pub enum Commands {
         /// Start the UCI protocol (default commnand)
-        Uci,
+        Uci {
+            /// The size of the transposition table in megabytes (this must be a power of 2)
+            #[arg(long, default_value = "128")]
+            tt_size: usize,
+        },
 
         /// Calculate the perft of a position
         Perft {
@@ -54,6 +46,10 @@ mod arguments {
             /// FEN string representing the position to calculate the perft
             #[arg(short, long, default_value = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")]
             fen: String,
+
+            /// The number of threads to use for the perft calculation
+            #[arg(short, long, default_value = "1")]
+            threads: usize,
         },
 
         /// Analyze a position
@@ -63,8 +59,12 @@ mod arguments {
             fen: String,
 
             /// The depth to analyze the position to
-            #[arg(short, long)]
+            #[arg(short, long, default_value = "100")]
             depth: u16,
+
+            /// The size of the transposition table in megabytes (this must be a power of 2)
+            #[arg(long, default_value = "128")]
+            tt_size: usize,
         },
 
         /// Run a benchmark
@@ -73,25 +73,32 @@ mod arguments {
 }
 
 fn run() -> Result<(), Oxide9Error> {
-    // Parse command line arguments
-    let args = arguments::Oxide9Args::parse();
-
     // Initialize the engine
-    oxide9::initialize_with_args(args.threads, args.tt_size, args.precise);
+    oxide9::initialize();
+
+    // Check if the command is ommitted. If so we run the UCI command by default.
+    let mut args: Vec<String> = std::env::args().collect();
+    if args.len() <= 1 || args[1].starts_with('-') {
+        args.insert(1, "uci".to_string());
+    }
+    let cli_args = arguments::Oxide9Args::parse_from(args);
 
     // Run the command
-    match args.command.unwrap_or(arguments::Commands::Uci) {
-        arguments::Commands::Uci => {
-            run_uci();
+    match cli_args.command {
+        Some(arguments::Commands::Uci { tt_size }) => {
+            run_uci(tt_size);
         }
-        arguments::Commands::Perft { depth, fen } => {
-            perft(&fen, depth)?;
+        Some(arguments::Commands::Perft { depth, fen, threads }) => {
+            perft(&fen, depth, threads)?;
         }
-        arguments::Commands::Analyze { fen, depth } => {
-            analyze(&fen, depth)?;
+        Some(arguments::Commands::Analyze { fen, depth, tt_size }) => {
+            analyze(&fen, depth, tt_size)?;
         }
-        arguments::Commands::Bench => {
+        Some(arguments::Commands::Bench) => {
             bench();
+        }
+        None => {
+            unreachable!("This case should never happen because we check for it at the beginning of the function");
         }
     }
 

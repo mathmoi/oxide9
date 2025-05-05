@@ -11,7 +11,6 @@ use terminal_size::{terminal_size, Height, Width};
 use thiserror::Error;
 
 use crate::{
-    config::get_config,
     position::{FenError, Position},
     r#move::Move,
     search::{ProgressType, Search, SearchStats},
@@ -42,6 +41,7 @@ pub enum AnalyzeError {
 /// # Parameters
 /// * `fen` - A chess position in Forsyth-Edwards Notation (FEN)
 /// * `depth` - The depth to search, measured in plies (half-moves)
+/// * `tt_size` - The size of the transposition table in megabytes (must be a power of 2)
 ///
 /// # Returns
 /// * `Ok(())` - If analysis completes successfully
@@ -49,14 +49,13 @@ pub enum AnalyzeError {
 ///
 /// # Side Effects
 /// Prints analysis results to standard output.
-pub fn analyze(fen: &str, depth: u16) -> Result<(), AnalyzeError> {
+pub fn analyze(fen: &str, depth: u16, tt_size: usize) -> Result<(), AnalyzeError> {
     let position = Position::new_from_fen(fen).map_err(|e| AnalyzeError::InvalidFen(fen.to_string(), e))?;
 
     println!("Analyzing position:\n\n{}\n\n{}\n", position, fen);
     print_header();
 
-    let config = get_config();
-    let tt = Arc::new(TranspositionTable::new(config.tt_size as usize * 1024 * 1024));
+    let tt = Arc::new(TranspositionTable::new(tt_size * 1024 * 1024));
 
     let cancellation_token = Arc::new(AtomicBool::new(false));
     let handle = Search::new(
@@ -281,36 +280,19 @@ fn print_stats(elapsed: Duration, stats: &SearchStats) {
         "", "", "", "", ""
     );
 
-    let config = get_config();
-    let stats_line = if config.precise {
-        format!(
-            "time={} nodes={} qnodes={} nps={} tt_probes={} tt_hit={}({:.3}%) tt_cut={}({:.3}%) tt_load={:.3}%",
-            elapsed.as_secs_f64(),
-            stats.nodes,
-            stats.total_nodes - stats.nodes,
-            stats.total_nodes as f64 / elapsed.as_secs_f64(),
-            stats.tt_probes,
-            stats.tt_probes_hit,
-            stats.tt_probes_hit as f64 / stats.tt_probes as f64 * 100.0,
-            stats.tt_cuts,
-            stats.tt_cuts as f64 / stats.tt_probes as f64 * 100.0,
-            stats.tt_load_factor * 100.0,
-        )
-    } else {
-        format!(
-            "time={} nodes={} qnodes={} nps={} tt_probes={} tt_hit={}({:.0}%) tt_cut={}({:.0}%) tt_load={:.0}%",
-            elapsed.human_duration(),
-            stats.nodes.human_count_bare(),
-            (stats.total_nodes - stats.nodes).human_count_bare(),
-            (stats.total_nodes as f64 / elapsed.as_secs_f64()).human_count_bare(),
-            stats.tt_probes.human_count_bare(),
-            stats.tt_probes_hit.human_count_bare(),
-            stats.tt_probes_hit as f64 / stats.tt_probes as f64 * 100.0,
-            stats.tt_cuts.human_count_bare(),
-            stats.tt_cuts as f64 / stats.tt_probes as f64 * 100.0,
-            stats.tt_load_factor * 100.0,
-        )
-    };
+    let stats_line = format!(
+        "time={} nodes={} qnodes={} nps={} tt_probes={} tt_hit={}({:.0}%) tt_cut={}({:.0}%) tt_load={:.0}%",
+        elapsed.human_duration(),
+        stats.nodes.human_count_bare(),
+        (stats.total_nodes - stats.nodes).human_count_bare(),
+        (stats.total_nodes as f64 / elapsed.as_secs_f64()).human_count_bare(),
+        stats.tt_probes.human_count_bare(),
+        stats.tt_probes_hit.human_count_bare(),
+        stats.tt_probes_hit as f64 / stats.tt_probes as f64 * 100.0,
+        stats.tt_cuts.human_count_bare(),
+        stats.tt_cuts as f64 / stats.tt_probes as f64 * 100.0,
+        stats.tt_load_factor * 100.0,
+    );
 
     for line in split_by_width(&stats_line, get_terminal_width() - 4) {
         println!("│ {:<width$} │", line, width = get_terminal_width() - 4);

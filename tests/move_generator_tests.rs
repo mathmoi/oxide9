@@ -92,16 +92,13 @@ enum TestFailureError {
 #[derive(Error, Debug)]
 enum MoveGeneratorTestError {
     #[error("Test harness error: {}", .0)]
-    TestHarnessError(#[from] TestHarnessError),
+    HarnessError(#[from] TestHarnessError),
 
     #[error("Test data parsing error: {}", .0)]
-    TestDataParsingError(#[from] TestDataError),
+    DataParsingError(#[from] TestDataError),
 
     #[error("---- {} ----\n{}", .test_name, .test_failure_error)]
     TestFailed { test_name: String, test_failure_error: TestFailureError },
-
-    #[error("Error reading the configuration file: {0}")]
-    ConfigError(#[from] oxide9::config::ConfigError),
 }
 
 //======================================================================================================================

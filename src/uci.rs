@@ -8,7 +8,6 @@ use regex::Regex;
 use thiserror::Error;
 
 use crate::{
-    config::get_config,
     notation::parse_coordinate_notation,
     piece::Color,
     position::Position,
@@ -23,8 +22,11 @@ use crate::{
 /// handler which will process commands from the GUI and respond appropriately.
 ///
 /// The function will continue running until it receives a "quit" command from the GUI.
-pub fn run_uci() {
-    let engine = UciEngine::new();
+///
+/// # Parameters
+/// * `tt_size` - Size of the transposition table in megabytes. This must be a power of 2.
+pub fn run_uci(tt_size: usize) {
+    let engine = UciEngine::new(tt_size);
     let uci = Uci::new(engine);
     uci.run();
 }
@@ -728,11 +730,13 @@ impl UciEngine {
     /// Initializes the engine with a standard starting position and no active search. The engine is ready to receive
     /// UCI commands after creation.
     ///
+    /// # Parameters
+    /// * `tt_size` - The size of the transposition table in MB (must be a power of 2)
+    ///
     /// # Returns
     /// A new `UciEngine` instance with the default chess starting position.
-    fn new() -> Self {
-        let config = get_config();
-        let transposition_table = Arc::new(TranspositionTable::new(config.tt_size as usize * 1024 * 1024));
+    fn new(tt_size: usize) -> Self {
+        let transposition_table = Arc::new(TranspositionTable::new(tt_size * 1024 * 1024));
         UciEngine { position: Position::new(), search: None, transposition_table }
     }
 
@@ -797,11 +801,13 @@ impl UciEngine {
     /// # Returns
     /// `Result<(), UciError>` - Ok if the command was processed successfully.
     fn handle_uci(&self) -> Result<(), UciError> {
-        let config = get_config();
-        Uci::send_id("name", &config.name);
+        Uci::send_id("name", "Oxide9");
         Uci::send_id("author", "Mathieu Pagé <m@mathieupage.com>");
         Uci::send_option("Threads", UciOptionType::Spin { default: 1, min: 1, max: 1 });
-        Uci::send_option("Hash", UciOptionType::Spin { default: config.tt_size as u64, min: 1, max: 1024 * 1024 });
+        Uci::send_option(
+            "Hash",
+            UciOptionType::Spin { default: TranspositionTable::DEFAULT_MB_SIZE as u64, min: 1, max: 1024 * 1024 },
+        );
         Uci::send_uciok();
         Ok(())
     }

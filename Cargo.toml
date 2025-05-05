@@ -16,7 +16,6 @@ harness = false
 [dependencies]
 bitflags = "2.8.0"
 clap = { version = "4.5.32", features = ["derive"] }
-config = "0.15.11"
 thiserror = "2.0.11"
 serde = { version = "1.0.218", features = ["derive"] }
 human-repr = "1.1.0"
@@ -32,6 +31,7 @@ ctor = "0.4.1"
 
 [profile.release]
 lto = true               # Enable link-time optimization
+debug = false
 codegen-units = 1        # Maximize optimizations, slower compilation
 
 [profile.flamegraph]

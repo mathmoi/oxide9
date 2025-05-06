@@ -26,10 +26,18 @@ cargo run --release -- help
 ```
 
 ### Running the Binary
-If you want to run the binary directly (for example, when connecting to a chess GUI):
+If you want to run the binary directly (for example, when connecting to a chess GUI), simply copy the binary from `target/release/oxide9` to your desired location.
 
-1. Copy the binary from `target/release/oxide9` to your desired location
-2. Make sure to also copy the [oxide9.toml](assets/config/oxide9.toml) configuration file to the same directory as the binary
+
+### Building the Docker image to play on Lichess
+You first need to add your OAuth token in the [config.yml](lichess-bot/config.yml) file. Then, from the root of the repository, run the following command:
+
+```bash
+docker build -t oxide9-lichess -f lichess-bot/Dockerfile .
+```
+
+## Play online
+If you want to play against Oxide9, but don't want to install it on your computer, you can usually find it on Lichess under the name [Oxide9](https://lichess.org/@/oxide9).
 
 ## Change log
 

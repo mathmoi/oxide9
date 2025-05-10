@@ -102,6 +102,7 @@ impl TimeManager {
     const SAFETY_MARGIN: Duration = Duration::from_millis(30);
     const MOVES_TO_GO_ESTIMATE: u32 = 35;
     const MAX_TIME_RATIO_PER_MOVE: f32 = 0.8;
+    const MAX_OVER_TARGET_FACTOR: u32 = 5;
     const MIN_ITERATIONS: u16 = 2;
     const MIN_DURATION_BETWEEN_CHECKS: Duration = Duration::from_millis(10);
     const MAX_DURATION_BETWEEN_CHECKS: Duration = Duration::from_millis(250);
@@ -125,8 +126,8 @@ impl TimeManager {
                 (Duration::ZERO, max, target)
             }
             TimeControl::Incremental { time, increment } => {
-                let max = time.mul_f32(Self::MAX_TIME_RATIO_PER_MOVE);
-                let target = min(time / Self::MOVES_TO_GO_ESTIMATE + increment, max);
+                let target = (time + (Self::MOVES_TO_GO_ESTIMATE - 1) * increment) / Self::MOVES_TO_GO_ESTIMATE;
+                let max = min(target * Self::MAX_OVER_TARGET_FACTOR, time.mul_f32(Self::MAX_TIME_RATIO_PER_MOVE));
                 (Duration::ZERO, max, target)
             }
             TimeControl::SuddenDeath { time } => {

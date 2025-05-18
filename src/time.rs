@@ -3,6 +3,8 @@ use std::{
     time::{Duration, Instant},
 };
 
+use crate::options::{Options, ReadOnlyOptions};
+
 /// Represents different chess time control formats.
 ///
 /// Chess games can be played with various time control systems that determine how much time each player has for their
@@ -100,9 +102,6 @@ pub struct TimeManager {
 
 impl TimeManager {
     const SAFETY_MARGIN: Duration = Duration::from_millis(30);
-    const MOVES_TO_GO_ESTIMATE: u32 = 35;
-    const MAX_TIME_RATIO_PER_MOVE: f32 = 0.8;
-    const MAX_OVER_TARGET_FACTOR: u32 = 5;
     const MIN_ITERATIONS: u16 = 2;
     const MIN_DURATION_BETWEEN_CHECKS: Duration = Duration::from_millis(10);
     const MAX_DURATION_BETWEEN_CHECKS: Duration = Duration::from_millis(250);
@@ -116,23 +115,28 @@ impl TimeManager {
     /// # Returns
     /// A new TimeManager instance configured with the provided time control.
     pub fn new(time_control: TimeControl) -> Self {
+        let options = Options::get();
+
         let (min, max, target) = match time_control {
             TimeControl::MoveTime(time) => {
                 (time - Self::SAFETY_MARGIN, time - Self::SAFETY_MARGIN, time - Self::SAFETY_MARGIN)
             }
             TimeControl::Conventional { time, moves_to_go } => {
-                let max = time.mul_f32(Self::MAX_TIME_RATIO_PER_MOVE);
+                let max = time.mul_f32(options.max_time_ratio_per_move());
                 let target = min(time / moves_to_go as u32, max);
                 (Duration::ZERO, max, target)
             }
             TimeControl::Incremental { time, increment } => {
-                let target = (time + (Self::MOVES_TO_GO_ESTIMATE - 1) * increment) / Self::MOVES_TO_GO_ESTIMATE;
-                let max = min(target * Self::MAX_OVER_TARGET_FACTOR, time.mul_f32(Self::MAX_TIME_RATIO_PER_MOVE));
+                let target = (time + (options.moves_to_go_estimate() - 1) * increment) / options.moves_to_go_estimate();
+                let max = min(
+                    target.mul_f32(options.max_over_target_factor()),
+                    time.mul_f32(options.max_time_ratio_per_move()),
+                );
                 (Duration::ZERO, max, target)
             }
             TimeControl::SuddenDeath { time } => {
-                let max = time.mul_f32(Self::MAX_TIME_RATIO_PER_MOVE);
-                let target = min(time / Self::MOVES_TO_GO_ESTIMATE, max);
+                let max = time.mul_f32(options.max_time_ratio_per_move());
+                let target = min(time / options.moves_to_go_estimate(), max);
                 (Duration::ZERO, max, target)
             }
             TimeControl::Infinite => (Duration::MAX, Duration::MAX, Duration::MAX),

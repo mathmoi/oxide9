@@ -8,6 +8,7 @@ pub mod eval;
 pub mod r#move;
 pub mod move_gen;
 pub mod notation;
+pub mod options;
 pub mod perft;
 pub mod piece;
 pub mod position;

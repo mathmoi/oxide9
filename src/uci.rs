@@ -9,6 +9,7 @@ use thiserror::Error;
 
 use crate::{
     notation::parse_coordinate_notation,
+    options::{Options, ReadOnlyOptions},
     piece::Color,
     position::Position,
     search::{ProgressType, Search},
@@ -53,6 +54,10 @@ enum UciError {
     /// Returned when the size of the hash table is invalid or not supported.
     #[error("Invalid hash size: {0}")]
     InvalidHashSize(String),
+
+    /// Returned when an invalid value is provided for a UCI option.
+    #[error("Invalid option value for {option_name}: {value}")]
+    InvalidOptionValue { option_name: String, value: String },
 
     /// Returned when an unexpected token is encountered during command parsing. Includes the received token and what
     /// was expected instead.
@@ -206,7 +211,7 @@ impl Uci {
             next_token_index += 1;
         }
 
-        self.engine.handle_setoption(name, value)
+        self.engine.handle_setoption(&name, &value)
     }
 
     /// Processes the "isready" command from the GUI.
@@ -801,6 +806,8 @@ impl UciEngine {
     /// # Returns
     /// `Result<(), UciError>` - Ok if the command was processed successfully.
     fn handle_uci(&self) -> Result<(), UciError> {
+        let options = Options::get();
+
         Uci::send_id("name", "Oxide9");
         Uci::send_id("author", "Mathieu Pagé <m@mathieupage.com>");
         Uci::send_option("Threads", UciOptionType::Spin { default: 1, min: 1, max: 1 });
@@ -808,7 +815,29 @@ impl UciEngine {
             "Hash",
             UciOptionType::Spin { default: TranspositionTable::DEFAULT_MB_SIZE as u64, min: 1, max: 1024 * 1024 },
         );
+        Uci::send_option(
+            "moves_to_go_estimate",
+            UciOptionType::Spin { default: options.moves_to_go_estimate() as u64, min: 5, max: 50 },
+        );
+        Uci::send_option(
+            "max_time_ratio_per_move",
+            UciOptionType::String(options.max_time_ratio_per_move().to_string()),
+        );
+        Uci::send_option("max_over_target_factor", UciOptionType::String(options.max_over_target_factor().to_string()));
         Uci::send_uciok();
+        Ok(())
+    }
+
+    /// Generic method used by handle_setoption to parse and set an option value.
+    fn set_option<T, F>(name: &str, text: &str, closure: F) -> Result<(), UciError>
+    where
+        T: std::str::FromStr,
+        F: FnOnce(&mut Options, T),
+    {
+        let value = text
+            .parse::<T>()
+            .map_err(|_| UciError::InvalidOptionValue { option_name: name.to_string(), value: text.to_string() })?;
+        Options::modify(|options| closure(options, value));
         Ok(())
     }
 
@@ -826,11 +855,30 @@ impl UciEngine {
     /// # Returns
     /// * `Ok(())` if the option was set successfully
     /// * `Err(UciError::InvalidHashSize)` if the Hash value couldn't be parsed to a valid number
-    fn handle_setoption(&mut self, name: String, value: String) -> Result<(), UciError> {
-        if name == "Hash" {
-            let size = value.parse::<usize>().map_err(|_| UciError::InvalidHashSize(value))?;
-            self.transposition_table = Arc::new(TranspositionTable::new(size * 1024 * 1024));
+    fn handle_setoption(&mut self, name: &str, text: &str) -> Result<(), UciError> {
+        match name {
+            "Hash" => {
+                let size = text.parse::<usize>().map_err(|_| UciError::InvalidHashSize(text.to_string()))?;
+                self.transposition_table = Arc::new(TranspositionTable::new(size * 1024 * 1024));
+            }
+            "moves_to_go_estimate" => {
+                Self::set_option::<u32, _>(name, text, |options, value| {
+                    options.set_moves_to_go_estimate(value);
+                })?;
+            }
+            "max_time_ratio_per_move" => {
+                Self::set_option::<f32, _>(name, text, |options, value| {
+                    options.set_max_time_ratio_per_move(value);
+                })?;
+            }
+            "max_over_target_factor" => {
+                Self::set_option::<f32, _>(name, text, |options, value| {
+                    options.set_max_over_target_factor(value);
+                })?;
+            }
+            _ => {}
         }
+
         Ok(())
     }
 

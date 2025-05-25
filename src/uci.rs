@@ -843,7 +843,7 @@ impl UciEngine {
 
     /// Handles the UCI 'setoption' command from the GUI by applying the requested option change.
     ///
-    /// This function processes a parsed name-value pair from a UCI setoption command and updates the corresponding
+    /// This function processes a tparsed name-value pair from a UCI setoption command and updates the corresponding
     /// engine setting. Currently supported options include:
     ///
     /// - "Hash": Sets the transposition table size in MB

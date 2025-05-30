@@ -468,7 +468,7 @@ where
                 let eval = if self.position.is_draw() {
                     Eval::DRAW
                 } else if depth == 1 {
-                    -self.qsearch(-beta, -alpha)
+                    -self.qsearch(-beta, -alpha, ply + 1)
                 } else {
                     -self.search(depth - 1, ply + 1, -beta, -alpha, &mut local_pv)
                 };
@@ -537,31 +537,37 @@ where
     /// # Parameters
     /// * `alpha` - Lower bound of the search window
     /// * `beta` - Upper bound of the search window
+    /// * `ply` - Current search depth in half-moves
     ///
     /// # Returns
     /// An evaluation score within the bounds of alpha and beta. A higher positive value indicates a better position for
     /// the side to move.
-    fn qsearch(&mut self, alpha: Eval, beta: Eval) -> Eval {
+    fn qsearch(&mut self, alpha: Eval, beta: Eval, ply: u16) -> Eval {
         let mut alpha = alpha; // Make alpha mutable locally
         self.stats.total_nodes += 1;
 
         // In the qsearch we evaluate the stand pat (stop capturing) option. If the stand pat is better than beta, we
         // stop the search and return beta (beta cut-off). If the stand pat is better than alpha, we update alpha with the
         // stand pat value.
-        let stand_pat = evaluate(&self.position);
-        if stand_pat >= beta {
-            return beta;
-        }
-        if stand_pat > alpha {
-            alpha = stand_pat;
+        let is_check = self.position.is_check();
+        if !is_check {
+            let stand_pat = evaluate(&self.position);
+            if stand_pat >= beta {
+                return beta;
+            }
+            if stand_pat > alpha {
+                alpha = stand_pat;
+            }
         }
 
-        // TODO : If we are in check we should probably search all moves? How to prevent perpetual check?
+        let mut has_legal_move = false;
         let move_generator = MoveGenerator::new(&self.position, None, true);
         for mv in move_generator {
             if self.position.is_legal(mv) {
+                has_legal_move = true;
+
                 self.position.make(Some(mv));
-                let eval = -self.qsearch(-beta, -alpha);
+                let eval = -self.qsearch(-beta, -alpha, ply + 1);
                 self.position.unmake();
 
                 if eval >= beta {
@@ -572,6 +578,11 @@ where
                     alpha = eval;
                 }
             }
+        }
+
+        // Check for checkmate or stalemate
+        if is_check && !has_legal_move {
+            return -Eval::new_mat(ply);
         }
 
         alpha

@@ -32,7 +32,7 @@ static OPTIONS: LazyLock<RwLock<Options>> = LazyLock::new(|| RwLock::new(Options
 impl Default for Options {
     /// Provides default values for engine options.
     fn default() -> Self {
-        Self { moves_to_go_estimate: 35, max_time_ratio_per_move: 0.8, max_over_target_factor: 5.0 }
+        Self { moves_to_go_estimate: 45, max_time_ratio_per_move: 0.8, max_over_target_factor: 5.0 }
     }
 }
 

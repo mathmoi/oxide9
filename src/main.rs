@@ -1,5 +1,5 @@
 use clap::Parser;
-use oxide9::{analyze::analyze, bench::bench, perft::perft, uci::run_uci};
+use oxide9::{analyze::analyze, bench::bench, depth::Depth, perft::perft, uci::run_uci};
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -92,7 +92,7 @@ fn run() -> Result<(), Oxide9Error> {
             perft(&fen, depth, threads)?;
         }
         Some(arguments::Commands::Analyze { fen, depth, tt_size }) => {
-            analyze(&fen, depth, tt_size)?;
+            analyze(&fen, Depth::from_plies(depth as i16), tt_size)?;
         }
         Some(arguments::Commands::Bench) => {
             bench();

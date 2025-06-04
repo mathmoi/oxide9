@@ -8,6 +8,7 @@ use std::{
 };
 
 use crate::{
+    depth::Depth,
     eval::{evaluate, Eval},
     move_gen::{move_generator::MoveGenerator, move_list::MoveList},
     position::Position,
@@ -68,9 +69,9 @@ pub struct SearchStats {
 ///   - `mv`: The move currently being searched
 #[derive(Debug)]
 pub enum ProgressType {
-    Iteration { depth: u16, elapsed: Duration, score: Eval, nodes: u64, pv: Vec<Move> },
-    NewBestMove { depth: u16, elapsed: Duration, score: Eval, nodes: u64, pv: Vec<Move> },
-    NewMoveAtRoot { depth: u16, elapsed: Duration, nodes: u64, move_number: usize, move_count: u64, mv: Move },
+    Iteration { depth: Depth, elapsed: Duration, score: Eval, nodes: u64, pv: Vec<Move> },
+    NewBestMove { depth: Depth, elapsed: Duration, score: Eval, nodes: u64, pv: Vec<Move> },
+    NewMoveAtRoot { depth: Depth, elapsed: Duration, nodes: u64, move_number: usize, move_count: u64, mv: Move },
     SearchFinished { mv: Move, elapsed: Duration, stats: SearchStats },
 }
 
@@ -106,7 +107,7 @@ impl Search {
     /// A `Search` instance that allows monitoring and controlling the background search operation
     pub fn new<F>(
         position: Position,
-        max_depth: u16,
+        max_depth: Depth,
         time_manager: TimeManager,
         progress: Arc<F>,
         transposition_table: Arc<TranspositionTable>,
@@ -170,7 +171,7 @@ struct SearchThread<F> {
     stats: SearchStats,
 
     /// Maximum depth to search
-    max_depth: u16,
+    max_depth: Depth,
 
     /// Callback for reporting search progress
     progress: Arc<F>,
@@ -216,7 +217,7 @@ where
     /// A configured `SearchThread` instance ready to execute the search
     pub fn new(
         position: Position,
-        max_depth: u16,
+        max_depth: Depth,
         time_manager: TimeManager,
         progress: Arc<F>,
         cancelation_token: Arc<AtomicBool>,
@@ -276,7 +277,8 @@ where
     /// * The principal variation (PV) representing the best sequence of moves found during the search
     fn iterative_deepening(&mut self) -> Vec<Move> {
         let mut pv = Vec::new();
-        for depth in 2..=self.max_depth {
+        let mut depth = Depth::from_plies(2);
+        while depth <= self.max_depth {
             if !self.time_manager.can_start_iteration() {
                 break;
             }
@@ -309,6 +311,8 @@ where
             }
 
             self.time_manager.iteration_finished();
+
+            depth += Depth::ONE_PLY;
         }
         pv
     }
@@ -323,7 +327,7 @@ where
     ///
     /// # Returns
     /// The evaluation score of the best move found. Higher positive values indicate an advantage for the side to move.
-    fn search_root(&mut self, depth: u16, pv: &mut Vec<Move>) -> Eval {
+    fn search_root(&mut self, depth: Depth, pv: &mut Vec<Move>) -> Eval {
         let mut alpha = Eval::MIN;
 
         for (move_searched, mv) in self.moves_at_root.clone().iter().enumerate() {
@@ -339,7 +343,7 @@ where
 
             self.position.make(Some(mv));
             let mut local_pv = Vec::new();
-            let eval = -self.search(depth - 1, 1, Eval::MIN, -alpha, &mut local_pv);
+            let eval = -self.search(depth - Depth::ONE_PLY, 1, Eval::MIN, -alpha, &mut local_pv);
             self.position.unmake();
 
             // If we are aborting the search we return immediately
@@ -385,7 +389,7 @@ where
     ///
     /// # Note
     /// This is an internal recursive method used by the `start` method.
-    fn search(&mut self, depth: u16, ply: u16, mut alpha: Eval, beta: Eval, pv: &mut Vec<Move>) -> Eval {
+    fn search(&mut self, depth: Depth, ply: u16, mut alpha: Eval, beta: Eval, pv: &mut Vec<Move>) -> Eval {
         // TODO : Is Vec really performant for pv structure?
         // TODO : Should we use a stack to store the PV and others things?
 
@@ -436,10 +440,10 @@ where
         };
 
         // Null move pruning
-        const NULL_MOVE_R: u16 = 3;
+        const NULL_MOVE_R: Depth = Depth::from_plies(3);
         let is_check = self.position.is_check();
         let current_eval = evaluate(&self.position);
-        if depth > NULL_MOVE_R + 1
+        if depth > NULL_MOVE_R + Depth::ONE_PLY
             && !is_check
             && current_eval > beta
             && self.position.last_move().is_some()
@@ -467,10 +471,10 @@ where
                 let mut local_pv = Vec::new();
                 let eval = if self.position.is_draw() {
                     Eval::DRAW
-                } else if depth == 1 {
+                } else if depth <= Depth::ONE_PLY {
                     -self.qsearch(-beta, -alpha, ply + 1)
                 } else {
-                    -self.search(depth - 1, ply + 1, -beta, -alpha, &mut local_pv)
+                    -self.search(depth - Depth::ONE_PLY, ply + 1, -beta, -alpha, &mut local_pv)
                 };
 
                 self.position.unmake();

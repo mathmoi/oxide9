@@ -5,7 +5,7 @@ use std::{
     sync::atomic::{AtomicU8, Ordering},
 };
 
-use crate::{eval::Eval, r#move::Move, zobrist::Zobrist};
+use crate::{depth::Depth, eval::Eval, r#move::Move, zobrist::Zobrist};
 
 pub type Generation = u8;
 
@@ -52,7 +52,8 @@ impl Entry {
     /// * `mv` - Best move found for this position
     /// * `generation` - Current search generation to track entry age/freshness
     /// * `entry_type` - Type of search result (exact, alpha, beta)
-    /// * `depth` - Search depth at which this position was evaluated
+    /// * `depth` - Search depth at which this position was evaluated. The depth must be non-negative and less than 1024
+    ///   plies.
     /// * `ply` - Current search ply (used for mate score adjustments)
     /// * `eval` - Evaluation score for this position
     ///
@@ -63,19 +64,20 @@ impl Entry {
         mv: Option<Move>,
         generation: Generation,
         entry_type: EntryType,
-        depth: u16,
+        depth: Depth,
         ply: u16,
         eval: Eval,
     ) -> Self {
         debug_assert!(Move::pack(mv) < (1u32 << Self::MOVE_SIZE));
         debug_assert!((generation as u64) < (1u64 << Self::GENERATION_SIZE));
         debug_assert!((entry_type as u8) < (1 << Self::ENTRY_TYPE_SIZE));
-        debug_assert!(depth < (1 << Self::DEPTH_SIZE));
+        debug_assert!(depth.as_plies() >= 0);
+        debug_assert!(depth.as_plies() < (1 << Self::DEPTH_SIZE));
 
         let data = (Move::pack(mv) as u64) << Self::MOVE_OFFSET
             | (generation as u64) << Self::GENERATION_OFFSET
             | (entry_type as u8 as u64) << Self::ENTRY_TYPE_OFFSET
-            | (depth as u64) << Self::DEPTH_OFFSET
+            | (depth.as_plies() as u64) << Self::DEPTH_OFFSET
             | (i16::from(eval.remove_ply_from_mat(ply)) as u16 as u64) << Self::EVAL_OFFSET;
 
         Entry { key, data }
@@ -104,8 +106,8 @@ impl Entry {
     }
 
     /// Returns the search depth of the entry.
-    pub fn depth(&self) -> u16 {
-        (self.data >> Self::DEPTH_OFFSET & ((1u64 << Self::DEPTH_SIZE) - 1)) as u16
+    pub fn depth(&self) -> Depth {
+        Depth::from_plies((self.data >> Self::DEPTH_OFFSET & ((1u64 << Self::DEPTH_SIZE) - 1)) as i16)
     }
 
     /// Returns the evaluation score of the entry, adjusted for the current ply.
@@ -153,7 +155,7 @@ impl TTRef {
         mv: Option<Move>,
         generation: Generation,
         entry_type: EntryType,
-        depth: u16,
+        depth: Depth,
         ply: u16,
         eval: Eval,
     ) {
@@ -296,7 +298,7 @@ mod tests {
             );
             let generation = 42;
             let entry_type = EntryType::Exact;
-            let depth = 8;
+            let depth = Depth::from_plies(8);
             let ply = 4;
             let eval = Eval::new_mat(12);
 
@@ -336,7 +338,7 @@ mod tests {
             );
             let generation = 42;
             let entry_type = EntryType::Exact;
-            let depth = 8;
+            let depth = Depth::from_plies(8);
             let ply = 4;
             let eval = Eval::new_mat(12);
 

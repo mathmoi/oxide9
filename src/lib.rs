@@ -4,6 +4,7 @@ pub mod analyze;
 pub mod bench;
 pub mod bitboard;
 pub mod coordinates;
+pub mod depth;
 pub mod eval;
 pub mod r#move;
 pub mod move_gen;

@@ -11,6 +11,7 @@ use terminal_size::{terminal_size, Height, Width};
 use thiserror::Error;
 
 use crate::{
+    depth::Depth,
     position::{FenError, Position},
     r#move::Move,
     search::{ProgressType, Search, SearchStats},
@@ -49,7 +50,7 @@ pub enum AnalyzeError {
 ///
 /// # Side Effects
 /// Prints analysis results to standard output.
-pub fn analyze(fen: &str, depth: u16, tt_size: usize) -> Result<(), AnalyzeError> {
+pub fn analyze(fen: &str, depth: Depth, tt_size: usize) -> Result<(), AnalyzeError> {
     let position = Position::new_from_fen(fen).map_err(|e| AnalyzeError::InvalidFen(fen.to_string(), e))?;
 
     println!("Analyzing position:\n\n{}\n\n{}\n", position, fen);
@@ -231,7 +232,7 @@ fn report_progress(progress_type: ProgressType) {
     // Print the progress information
     print!(
         "│ {:>DEPTH_COLUMN_WIDTH$} │ {:>TIME_COLUMN_WIDTH$} │ {:>SCORE_COLUMN_WIDTH$} │ {:>NODES_COLUMN_WIDTH$} │ {:<pv_column_width$} │",
-        depth.to_string() + depth_suffix,
+        depth.as_plies().to_string() + depth_suffix,
         elapsed.human_duration().to_string(),
         score.to_string(),
         nodes.human_count_bare().to_string(),

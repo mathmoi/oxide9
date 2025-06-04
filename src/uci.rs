@@ -8,6 +8,7 @@ use regex::Regex;
 use thiserror::Error;
 
 use crate::{
+    depth::Depth,
     notation::parse_coordinate_notation,
     options::{Options, ReadOnlyOptions},
     piece::Color,
@@ -615,7 +616,7 @@ impl Uci {
         cmd.push_str("info");
 
         if let Some(depth) = options.depth {
-            cmd.push_str(&format!(" depth {}", depth));
+            cmd.push_str(&format!(" depth {}", depth.as_plies()));
         }
         if let Some(sel_depth) = options.sel_depth {
             cmd.push_str(&format!(" seldepth {}", sel_depth));
@@ -672,7 +673,7 @@ impl Uci {
 #[derive(Default)]
 pub struct SendInfoOptions {
     // Current search depth in plies
-    depth: Option<u16>,
+    depth: Option<Depth>,
 
     /// Selective search depth - the deepest leaf nodes examined
     sel_depth: Option<u16>,
@@ -966,7 +967,7 @@ impl UciEngine {
 
         self.search = Some(Search::new(
             self.position.clone(),
-            100,
+            Depth::from_plies(100),
             time_manager,
             Arc::new(move |progress: ProgressType| Self::report_progress(progress)),
             self.transposition_table.clone(),

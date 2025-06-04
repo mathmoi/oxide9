@@ -10,6 +10,9 @@ pub trait ReadOnlyOptions {
 
     /// Returns the maximum over target factor.
     fn max_over_target_factor(&self) -> f32;
+
+    /// Returns the size of check extension in sixteenths of a ply.
+    fn check_extension_sixteenths(&self) -> i16;
 }
 
 /// Configuration options for the chess engine
@@ -25,6 +28,9 @@ pub struct Options {
     /// Factor determining how much over the target time the engine is allowed to go. Higher values give the engine more
     /// flexibility to finish critical calculations even if slightly exceeding the allocated time.
     max_over_target_factor: f32,
+
+    /// The size of check extension in sixteenths of a ply.
+    check_extension_sixteenths: i16,
 }
 
 static OPTIONS: LazyLock<RwLock<Options>> = LazyLock::new(|| RwLock::new(Options::default()));
@@ -32,7 +38,12 @@ static OPTIONS: LazyLock<RwLock<Options>> = LazyLock::new(|| RwLock::new(Options
 impl Default for Options {
     /// Provides default values for engine options.
     fn default() -> Self {
-        Self { moves_to_go_estimate: 45, max_time_ratio_per_move: 0.8, max_over_target_factor: 5.0 }
+        Self {
+            moves_to_go_estimate: 45,
+            max_time_ratio_per_move: 0.8,
+            max_over_target_factor: 5.0,
+            check_extension_sixteenths: 9,
+        }
     }
 }
 
@@ -51,6 +62,11 @@ impl ReadOnlyOptions for Options {
     /// Returns the factor determining how much over the target time the engine is allowed to go.
     fn max_over_target_factor(&self) -> f32 {
         self.max_over_target_factor
+    }
+
+    /// Returns the size of check extension in sixteenths of a ply.
+    fn check_extension_sixteenths(&self) -> i16 {
+        self.check_extension_sixteenths
     }
 }
 

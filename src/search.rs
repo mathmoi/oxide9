@@ -11,11 +11,24 @@ use crate::{
     depth::Depth,
     eval::{evaluate, Eval},
     move_gen::{move_generator::MoveGenerator, move_list::MoveList},
+    options::{Options, ReadOnlyOptions},
     position::Position,
     r#move::Move,
     time::TimeManager,
     tt::{EntryType, TranspositionTable},
 };
+
+struct SearchOptions {
+    /// The depth to extend when the size to move is checked.
+    check_extension: Depth,
+}
+
+impl Default for SearchOptions {
+    fn default() -> Self {
+        let options = Options::get();
+        Self { check_extension: Depth::from_sixteenths(options.check_extension_sixteenths()) }
+    }
+}
 
 /// The SearchStats struct holds statistics about the search process.
 #[derive(Debug, Default, Clone)]
@@ -125,6 +138,7 @@ impl Search {
             progress,
             cancelation_token.clone(),
             transposition_table,
+            SearchOptions::default(),
         );
 
         let join_handle = thread::spawn(move || {
@@ -194,6 +208,9 @@ struct SearchThread<F> {
 
     /// Transposition table used for storing and retrieving previously evaluated positions.
     transposition_table: Arc<TranspositionTable>,
+
+    /// Options for the search.
+    options: SearchOptions,
 }
 
 impl<F> SearchThread<F>
@@ -222,6 +239,7 @@ where
         progress: Arc<F>,
         cancelation_token: Arc<AtomicBool>,
         transposition_table: Arc<TranspositionTable>,
+        search_options: SearchOptions,
     ) -> Self
     where
         F: Fn(ProgressType) + Send + Sync + 'static,
@@ -239,6 +257,7 @@ where
             cancelation_token,
             stopping: false,
             transposition_table,
+            options: search_options,
         }
     }
 
@@ -456,6 +475,12 @@ where
             if null_eval >= beta {
                 return beta;
             }
+        }
+
+        // Check extension
+        let mut depth = depth;
+        if is_check {
+            depth += self.options.check_extension;
         }
 
         // Moves loop

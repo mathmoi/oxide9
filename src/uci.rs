@@ -76,7 +76,7 @@ enum UciOptionType {
     Check(bool),
 
     /// A numeric option with constraints Contains default value and allowed range (min/max)
-    Spin { default: u64, min: u64, max: u64 },
+    Spin { default: i64, min: i64, max: i64 },
 
     /// A selection from a predefined list of string values Contains the default value and all possible choices
     Combo { default: String, values: Vec<String> },
@@ -814,17 +814,21 @@ impl UciEngine {
         Uci::send_option("Threads", UciOptionType::Spin { default: 1, min: 1, max: 1 });
         Uci::send_option(
             "Hash",
-            UciOptionType::Spin { default: TranspositionTable::DEFAULT_MB_SIZE as u64, min: 1, max: 1024 * 1024 },
+            UciOptionType::Spin { default: TranspositionTable::DEFAULT_MB_SIZE as i64, min: 1, max: 1024 * 1024 },
         );
         Uci::send_option(
             "moves_to_go_estimate",
-            UciOptionType::Spin { default: options.moves_to_go_estimate() as u64, min: 5, max: 50 },
+            UciOptionType::Spin { default: options.moves_to_go_estimate() as i64, min: 5, max: 50 },
         );
         Uci::send_option(
             "max_time_ratio_per_move",
             UciOptionType::String(options.max_time_ratio_per_move().to_string()),
         );
         Uci::send_option("max_over_target_factor", UciOptionType::String(options.max_over_target_factor().to_string()));
+        Uci::send_option(
+            "check_extension_sixteenths",
+            UciOptionType::Spin { default: options.check_extension_sixteenths() as i64, min: 0, max: 32 },
+        );
         Uci::send_uciok();
         Ok(())
     }
@@ -875,6 +879,11 @@ impl UciEngine {
             "max_over_target_factor" => {
                 Self::set_option::<f32, _>(name, text, |options, value| {
                     options.set_max_over_target_factor(value);
+                })?;
+            }
+            "check_extension_sixteenths" => {
+                Self::set_option::<i16, _>(name, text, |options, value| {
+                    options.set_check_extension_sixteenths(value);
                 })?;
             }
             _ => {}

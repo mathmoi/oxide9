@@ -110,4 +110,9 @@ impl Options {
     pub fn set_max_over_target_factor(&mut self, value: f32) {
         self.max_over_target_factor = value;
     }
+
+    /// Sets the size of check extension in sixteenths of a ply.
+    pub fn set_check_extension_sixteenths(&mut self, value: i16) {
+        self.check_extension_sixteenths = value;
+    }
 }

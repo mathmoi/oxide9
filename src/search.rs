@@ -386,8 +386,8 @@ where
     /// # Note
     /// This is an internal recursive method used by the `start` method.
     fn search(&mut self, depth: u16, ply: u16, mut alpha: Eval, beta: Eval, pv: &mut Vec<Move>) -> Eval {
-        // TODO : Is Vec really performant for pv structure?
-        // TODO : Should we use a stack to store the PV and others things?
+        // TODO: Is Vec really performant for pv structure?
+        // TODO: Should we use a stack to store the PV and others things?
 
         self.stats.total_nodes += 1;
         self.stats.nodes += 1;
@@ -516,7 +516,7 @@ where
             EntryType::UpperBound
         };
 
-        // TODO : When we have a multithreaded search, check if the read_generation cost is impacting the performance.
+        // TODO: When we have a multithreaded search, check if the read_generation cost is impacting the performance.
         tt_ref.store(key, best_move, self.transposition_table.read_generation(), entry_type, depth, ply, best_eval);
 
         best_eval

@@ -19,7 +19,7 @@ use super::{
 };
 
 /// Error type for parsing a FEN (Forsyth-Edwards Notation) string.
-#[derive(Debug)] // TODO : Should use thiserror
+#[derive(Debug)] // TODO: Should use thiserror
 pub enum FenError {
     InvalidPiecePlacement,
     InvalidActiveColor,
@@ -1116,7 +1116,7 @@ impl Position {
 
     /// Checks if the specified color has any pieces on the board. Pawns and kings are not considered.
     pub fn has_pieces(&self, color: Color) -> bool {
-        // TODO : Would it be better to cache this in the position state?
+        // TODO: Would it be better to cache this in the position state?
         (self.occupied(color) ^ self.occupied((color, PieceType::King)) ^ self.occupied((color, PieceType::Pawn)))
             .has_any()
     }

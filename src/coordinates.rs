@@ -64,7 +64,7 @@ impl File {
             min_file_value <= new_file_value && new_file_value <= max_file_value,
             "The new file value must be a valid value for a file"
         );
-        File::from((u8::from(self) as i8 + count) as u8)
+        std::mem::transmute((u8::from(self) as i8 + count) as u8)
     }
 
     /// Moves a file right by the specified number of files. Returns Ok(File) with the new file if the move is valid,
@@ -209,7 +209,7 @@ impl Rank {
             min_rank_value <= new_rank_value && new_rank_value <= max_rank_value,
             "The new rank value must be a valid value for a rank"
         );
-        Rank::from((u8::from(self) as i8 + count) as u8)
+        std::mem::transmute((u8::from(self) as i8 + count) as u8)
     }
 
     /// Moves a rank up by the specified number of ranks. Returns Ok(Rank) with the new rank if the move is valid,
@@ -258,8 +258,8 @@ impl From<u8> for Rank {
 
 impl From<Rank> for u8 {
     /// Converts a `Rank` to a `u8` value.
-    fn from(file: Rank) -> Self {
-        file as u8
+    fn from(rank: Rank) -> Self {
+        rank as u8
     }
 }
 
@@ -364,7 +364,7 @@ impl From<Diagonal> for usize {
 pub struct Antidiagonal(u8);
 
 impl Antidiagonal {
-    /// Returns the total number of diagonals on a chess board.
+    /// Returns the total number of anti     on a chess board.
     pub const COUNT: usize = 15;
 }
 
@@ -487,7 +487,7 @@ impl Square {
     pub fn relative_to_color(self, color: Color) -> Square {
         match color {
             Color::White => self,
-            Color::Black => Square((0b111000 - (self.0 & 0b111000)) | (0b111 & self.0)),
+            Color::Black => Square(self.0 ^ 0b111000),
         }
     }
 
@@ -601,7 +601,7 @@ impl Square {
         self.left(-count)
     }
 
-    /// Returns a new square that is the horizontal mirror image of the current square.
+    /// Returns a new square that is the mirror of the current square across the horizontal middle line of the board.
     pub fn mirror(self) -> Self {
         Square(self.0 ^ 0b111000)
     }
@@ -652,7 +652,7 @@ impl From<Square> for u8 {
 }
 
 impl From<Square> for usize {
-    /// Converts a `Square` to a `u8` value.
+    /// Converts a `Square` to a `usize` value.
     fn from(square: Square) -> Self {
         square.0 as usize
     }
